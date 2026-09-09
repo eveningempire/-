@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>现场排故工具</title>
+    <!-- 引入基础库 -->
+    <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/echarts-5.3.1/dist/echarts.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/core/dist/logic-flow.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Menu.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Group.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/DndPanel.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Snapshot.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/SelectionSelect.js"></script>
+    <!-- CSS样式 -->
+    <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/@logicflow/core/dist/style/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/@logicflow/extension/lib/style/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/msfgComponent/msfgCss/index.css">
+    <!-- 替换为新的模块化CSS引用 -->
+    <link rel="stylesheet" href="/static/jsscripts/ontime-test/styles/main.css">
+</head>
+
+<body>
+    <div id="result-display" class="tech-blue-theme">
+        <div class="page-container">
+            <!-- 左侧 - 现场排故工具 -->
+            <div class="section-container left-section">
+                <div class="section-header">
+                    <div class="title-container">
+                        <h2 class="section-title">现场排故工具 > {{obj.split("#")[0]}}产品故障诊断</h2>
+                    </div>
+                </div>
+                
+                <div class="section-content">
+                    <!-- 文件操作区 - 修改为文件选择和获取结果按钮在一行 -->
+                    <div class="operation-panel">
+                        <div class="file-operation-section inline-file-section">
+                            <div class="file-input-container">
+                                <label for="data-file">选择数据文件：</label>
+                                <input type="file" id="data-file" ref="dataFile" class="file-input" accept="application/.csv" @change="resetTestCount" />
+                                <el-button type="primary" size="medium" class="function-btn" @click="getResult">获取结果</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 结果展示区域 -->
+                    <div class="results-container">
+                        <!-- 故障率圆盘 -->
+                        <div class="dashboard-container">
+                            <el-progress type="dashboard" 
+                                      :percentage="Math.round((1-(state*(1-w_dd)+state_dd*w_dd))*10000)/100" 
+                                      :color="getItemColor(state*(1-w_dd)+state_dd*w_dd)" 
+                                      :format="getState"
+                                      :width="200">
+                            </el-progress>
+                        </div>
+                        
+                        <!-- 专家评估结果 -->
+                        <div class="info-item assessment-result">
+                            <div class="info-label">专家评估结果:</div>
+                            <el-tag size="medium" type="primary" effect="light" class="info-value result-value">{{ Math.round((1-actinstitm.state)*10000)/100 }}</el-tag>
+                            <el-tooltip content="专家评估结果 = (1-故障状态值) × 100，即完好率百分比" placement="top">
+                                <i class="el-icon-question help-icon"></i>
+                            </el-tooltip>
+                        </div>
+                        
+                        <!-- 分系统完好率显示 -->
+                        <div v-if="currentView === 'systemHealth'" class="system-health-container">
+                            <el-card class="system-health-card tech-card">
+                                <div slot="header" class="card-header">
+                                    <span>各分系统完好率</span>
+                                </div>
+                                <div class="system-list">
+                                    <el-row v-for="subsysInfo in systemData" :key="subsysInfo.name" class="system-item">
+                                        <el-col :span="8" class="system-name">
+                                            <el-tag type="info" effect="plain" size="medium">
+                                                {{ subsysInfo.name }}
+                                            </el-tag>
+                                        </el-col>
+                                        <el-col :span="16" class="system-progress">
+                                            <el-progress 
+                                                :percentage="Math.round((1-getSystemState(subsysInfo.name))*10000)/100" 
+                                                :stroke-width="16" 
+                                                :text-inside="true" 
+                                                :color="getItemColor(getSystemState(subsysInfo.name))" 
+                                                :format="getSubState('[专家规则判别]')">
+                                            </el-progress>
+                                        </el-col>
+                                    </el-row>
+                                </div>
+                            </el-card>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧 - 寿命预测与健康演化 -->
+            <div class="section-container right-section">
+                <div class="section-header">
+                    <div class="title-container">
+                        <h2 class="section-title">寿命预测系统 & 健康演化状态</h2>
+                    </div>
+                </div>
+                
+                <div class="section-content">
+                    <!-- 测试模型选择 -->
+                    <div class="model-selection-panel">
+                        <div class="panel-title">模型选择</div>
+                        <div class="selection-group">
+                            <div class="selection-item">
+                                <label>寿命预测模型：</label>
+                                <el-select v-model="selectedLifeModel" placeholder="请选择" size="medium">
+                                    <el-option v-for="item in lifeModels" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                                </el-select>
+                            </div>
+                            <div class="selection-item">
+                                <label>健康演化模型：</label>
+                                <el-select v-model="selectedEvolutionModel" placeholder="请选择" size="medium">
+                                    <el-option v-for="item in evolutionModels" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                        <el-button type="primary" size="medium" class="analyze-btn" @click="runLifePrediction">运行预测</el-button>
+                    </div>
+                    
+                    <!-- 结果显示区域 -->
+                    <div class="prediction-results">
+                        <div class="result-dashboard">
+                            <div class="result-item">
+                                <div class="result-title">寿命预测结果</div>
+                                <el-progress type="dashboard" 
+                                          :percentage="lifePredictionScore" 
+                                          :color="getItemColor(lifePredictionState)" 
+                                          :format="formatLifePrediction"
+                                          :width="180">
+                                </el-progress>
+                                <div class="result-detail">
+                                    <span class="detail-label">预计剩余寿命:</span>
+                                    <span class="detail-value">{{ remainingLife || '--' }} 小时</span>
+                                </div>
+                            </div>
+                            
+                            <div class="result-item">
+                                <div class="result-title">健康演化评估</div>
+                                <el-progress type="dashboard" 
+                                          :percentage="healthEvolutionScore" 
+                                          :color="getItemColor(healthEvolutionState)" 
+                                          :format="formatHealthEvolution"
+                                          :width="180">
+                                </el-progress>
+                                <div class="result-detail">
+                                    <span class="detail-label">健康演化指数:</span>
+                                    <span class="detail-value">{{ evolutionIndex || '--' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-if="showTrends" class="trend-visualization">
+                            <el-card class="trend-card tech-card">
+                                <div slot="header" class="card-header">
+                                    <span>健康状态演化趋势</span>
+                                </div>
+                                <div id="trend-chart" class="chart-container"></div>
+                            </el-card>
+                        </div>
+                        
+                        <!-- 占位区域，以确保内容总是填满可用空间 -->
+                        <div v-else class="trend-placeholder"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 详情抽屉 -->
+        <el-drawer :visible.sync="datadrivenDialog" :title="'判据['+(datadrivenClickItem.fname || datadrivenClickItem.name)+']详情信息'" :size="Math.round(windowLen*0.6)" v-if="datadrivenClickItem">
+            <el-card class="card" :style="{height: Math.round(allHeight+50)+'px', padding: '10px'}">
+                <el-row :style="{height: Math.round(allHeight*0.3)+'px', 'margin-top': '15px', 'margin-left': '15px', 'margin-right': '15px'}">
+                    <el-col :span="15">
+                        <el-descriptions size="mini" :column="1" border>
+                            <el-descriptions-item :label="datadrivenDescriptItem.name" v-for="datadrivenDescriptItem,k in datadrivenClickItem.descript" :key="k">
+                                <span v-text="datadrivenDescriptItem.value"></span>
+                            </el-descriptions-item>
+                        </el-descriptions>
+                    </el-col>
+                    <el-col :span="5" :offset="2" type="flex" align="middle">
+                        <el-progress type="dashboard" :percentage="Math.round((1-datadrivenClickItem.state)*10000)/100" :width="Math.min(windowLen*0.25, Math.round(allHeight*0.3))" :color="getItemColor(datadrivenClickItem.state)" :format="getItemState">
+                        </el-progress>
+                    </el-col>
+                </el-row>
+                <el-row :style="{height: Math.round(allHeight*0.2)+'px', 'margin-left': '5px', 'margin-right': '5px'}">
+                    <div :ref="'datadrivenItemArea'+ (datadrivenClickItem.fname || datadrivenClickItem.name)" :style="{height: Math.round(allHeight*0.2)+'px', width: Math.round(windowLen*0.5)+'px'}">
+                    </div>
+                </el-row>
+                <el-row :style="{height: Math.round(allHeight*0.5)+'px', 'margin-left': '5px', 'margin-right': '5px', 'overflow-y': 'auto'}">
+                    <div :ref="'datadrivenItemAreaBy'+pa" v-for="pa of (datadrivenClickItem.pnames || datadrivenClickItem.relatPara)" :key="pa" :style="{height: Math.round(allHeight*0.2)+'px', width: Math.round(windowLen*0.5)+'px'}">
+                    </div>
+                </el-row>
+            </el-card>
+        </el-drawer>
+    </div>
+    
+    <!-- 引入模块化文件 -->
+    <script type="module" src="/static/jsscripts/ontime-test/main-controller.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+strategy0(原始算法)：自编码器网络3sigma算法
+strategy1：变分生成网络四分位距算法
+strategy2：孤立森林聚合模型动态阈值算法
+strategy3：自组织映射网络马氏距离算法

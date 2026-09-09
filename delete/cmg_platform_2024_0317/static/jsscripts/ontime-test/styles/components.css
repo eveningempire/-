@@ -1,0 +1,144 @@
+/* 通用组件样式 */
+
+/* 操作区域 */
+.operation-panel {
+    background-color: var(--primary-light);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--secondary-light);
+    box-shadow: var(--card-shadow);
+}
+
+.file-operation-section {
+    margin-bottom: 15px;
+}
+
+/* 新增：内联文件选择区样式 */
+.inline-file-section {
+    margin-bottom: 0;
+}
+
+.inline-file-section .file-input-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+.inline-file-section .file-input {
+    flex: 1;
+}
+
+.inline-file-section .function-btn {
+    flex-shrink: 0;
+    margin-left: 10px;
+    min-width: 120px;
+}
+
+/* 其他文件输入相关样式 */
+.file-input-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.file-input-container label {
+    font-weight: 500;
+    min-width: 120px;
+    color: var(--text-secondary);
+}
+
+.file-input {
+    flex: 1;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--secondary-light);
+    border-radius: var(--border-radius);
+    background-color: white;
+    transition: var(--transition);
+}
+
+.file-input:hover, .file-input:focus {
+    border-color: var(--primary-medium);
+}
+
+/* 按钮行样式 */
+.buttons-row {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.function-btn {
+    min-width: 140px;
+    background-color: var(--primary-medium) !important;
+    border-color: var(--primary-medium) !important;
+}
+
+.function-btn:hover {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+/* 卡片样式 */
+.tech-card {
+    box-shadow: 0 4px 15px rgba(24, 144, 255, 0.1) !important;
+    border-radius: var(--border-radius);
+    background: linear-gradient(to bottom right, white, var(--primary-light));
+}
+
+.card-header {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-dark);
+    border-bottom: 1px solid var(--secondary-light);
+    background-color: var(--primary-light);
+}
+
+/* 专家评估结果 */
+.assessment-result {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary-light);
+    padding: 12px 15px;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--primary-medium);
+    margin-bottom: 20px;
+}
+
+.info-label {
+    font-weight: 500;
+    margin-right: 10px;
+    color: var(--text-secondary);
+    min-width: 100px;
+}
+
+.info-value {
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    background-color: white !important;
+    border-color: var(--primary-medium) !important;
+}
+
+.result-value {
+    font-weight: 600;
+    font-size: 18px !important;
+    color: var(--primary-medium) !important;
+}
+
+.help-icon {
+    margin-left: 8px;
+    color: var(--primary-medium);
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+.help-icon:hover {
+    color: var(--primary-dark);
+}

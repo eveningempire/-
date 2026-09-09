@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据可视化</title>
+    
+    <!-- 静态资源引用 -->
+    <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+    <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .content {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 150px);
+        }
+        .variable-list {
+            width: 220px;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .variable-item {
+            margin: 5px 0;
+            padding: 8px 12px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .variable-item:hover {
+            background-color: #f5f7fa;
+        }
+        .variable-item.active {
+            background-color: #ecf5ff;
+            color: #409EFF;
+            border-color: #c6e2ff;
+        }
+        .chart-container {
+            flex: 1;
+            padding: 15px;
+        }
+        #chart {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="data-view">
+        <div class="container">
+            <div class="header">
+                <h2>数据文件可视化: {{ fileName }}</h2>
+                <div class="controls">
+                    <div>
+                        <el-button @click="goBack" type="primary" plain>返回</el-button>
+                        <el-switch
+                            v-model="showFullData"
+                            active-text="完整数据"
+                            inactive-text="下采样数据"
+                            @change="toggleDataMode">
+                        </el-switch>
+                    </div>
+                    <div>
+                        <span>采样率：</span>
+                        <el-select v-model="samplingRate" placeholder="采样率" size="small" @change="updateChart">
+                            <el-option :value="10" label="1:10"></el-option>
+                            <el-option :value="50" label="1:50"></el-option>
+                            <el-option :value="100" label="1:100"></el-option>
+                            <el-option :value="200" label="1:200"></el-option>
+                            <el-option :value="500" label="1:500"></el-option>
+                        </el-select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="variable-list">
+                    <div 
+                        v-for="column in columns" 
+                        :key="column"
+                        :class="['variable-item', currentVariable === column ? 'active' : '']"
+                        @click="selectVariable(column)">
+                        {{ column }}
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div id="chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: "#data-view",
+            data() {
+                return {
+                    fileName: "",
+                    dataType: "",
+                    columns: [],
+                    timeData: [],
+                    fullTimeData: [],
+                    columnData: {},
+                    fullColumnData: {},
+                    chart: null,
+                    currentVariable: null,
+                    showFullData: false,
+                    samplingRate: 50,
+                    isLoading: false
+                };
+            },
+            mounted() {
+                // 从URL获取文件名和数据类型
+                const urlParams = new URLSearchParams(window.location.search);
+                this.fileName = urlParams.get('file_name');
+                this.dataType = urlParams.get('data_type');
+                
+                // 初始化echarts
+                this.chart = echarts.init(document.getElementById('chart'));
+                
+                // 加载数据
+                this.loadData();
+                
+                // 监听窗口大小变化
+                window.addEventListener('resize', this.handleResize);
+            },
+            beforeDestroy() {
+                // 移除事件监听器
+                window.removeEventListener('resize', this.handleResize);
+                // 销毁图表实例
+                if (this.chart) {
+                    this.chart.dispose();
+                }
+            },
+            methods: {
+                loadData() {
+                    this.isLoading = true;
+                    axios.get('/data-manage/get-file-data', {
+                        params: {
+                            file_name: this.fileName,
+                            data_type: this.dataType
+                        }
+                    })
+                    .then(response => {
+                        if (response.data.success) {
+                            // 保存完整数据
+                            this.fullTimeData = response.data.time_data;
+                            this.fullColumnData = response.data.data;
+                            
+                            // 获取列名（后端已经排除了标签/label列）
+                            this.columns = Object.keys(this.fullColumnData);
+                            
+                            // 下采样数据
+                            this.performSampling();
+                            
+                            // 默认选择第一个变量
+                            if (this.columns.length > 0) {
+                                this.currentVariable = this.columns[0];
+                                this.updateChart();
+                            }
+                        } else {
+                            this.$message.error('加载数据失败: ' + response.data.error);
+                            console.error('详细错误信息:', response.data.detail);
+                        }
+                        this.isLoading = false;
+                    })
+                    .catch(error => {
+                        this.$message.error('请求出错: ' + error.message);
+                        console.error('捕获到错误:', error);
+                        this.isLoading = false;
+                    });
+                },
+                performSampling() {
+                    const rate = this.samplingRate;
+                    
+                    // 对时间数据进行下采样
+                    this.timeData = this.fullTimeData.filter((_, index) => index % rate === 0);
+                    
+                    // 对每列数据进行下采样（已确保不包含label）
+                    this.columnData = {};
+                    this.columns.forEach(column => {
+                        this.columnData[column] = this.fullColumnData[column].filter((_, index) => index % rate === 0);
+                    });
+                },
+                selectVariable(column) {
+                    this.currentVariable = column;
+                    this.updateChart();
+                },
+                toggleDataMode(value) {
+                    if (value && this.fullTimeData.length > 10000) {
+                        this.$confirm('完整数据量较大，可能导致浏览器性能问题，是否继续?', '警告', {
+                            confirmButtonText: '继续',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            this.updateChart();
+                        }).catch(() => {
+                            this.showFullData = false;
+                            this.updateChart();
+                        });
+                    } else {
+                        this.updateChart();
+                    }
+                },
+                updateChart() {
+                    // 如果正在加载数据或无当前变量，不更新图表
+                    if (this.isLoading || !this.currentVariable) return;
+                    
+                    // 如果需要重新采样
+                    if (!this.showFullData) {
+                        this.performSampling();
+                    }
+                    
+                    // 选择要使用的数据集
+                    const useTimeData = this.showFullData ? this.fullTimeData : this.timeData;
+                    const useColumnData = this.showFullData ? this.fullColumnData : this.columnData;
+                    
+                    // 只显示当前选中的变量数据
+                    const option = {
+                        title: {
+                            text: this.currentVariable + ' 随时间变化图',
+                            left: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            formatter: '{b}: {c}'
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '10%',
+                            top: '15%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: useTimeData,
+                            name: '时间',
+                            nameLocation: 'middle',
+                            nameGap: 30,
+                            axisLabel: {
+                                rotate: 30,
+                                interval: Math.floor(useTimeData.length / 20) // 动态调整标签显示间隔
+                            }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            name: this.currentVariable,
+                            nameLocation: 'middle',
+                            nameGap: 50
+                        },
+                        dataZoom: [
+                            {
+                                type: 'inside',
+                                start: 0,
+                                end: 100
+                            },
+                            {
+                                type: 'slider',
+                                start: 0,
+                                end: 100
+                            }
+                        ],
+                        series: [{
+                            name: this.currentVariable,
+                            type: 'line',
+                            data: useColumnData[this.currentVariable],
+                            showSymbol: false,
+                            lineStyle: {
+                                width: 2
+                            }
+                        }]
+                    };
+                    
+                    this.chart.setOption(option, true);
+                },
+                handleResize() {
+                    if (this.chart) {
+                        this.chart.resize();
+                    }
+                },
+                goBack() {
+                    window.location.href = '/data-manage';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

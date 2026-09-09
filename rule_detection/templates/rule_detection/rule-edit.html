@@ -1,0 +1,684 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>规则编辑器</title>
+
+  <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/tabularcomp.js"></script>
+
+  <!-- 样式设置 -->
+  <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+    #rule-edit {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="rule-edit">
+    <div
+      style="display: flex; width: calc(100% - 2rem); flex-direction: row; justify-content: space-between; padding: 0.5rem 0;"
+    >
+      <el-button-group>
+        <el-button type="success" plain size="mini" @click="openDialog(pageSize - 2, 'create')">添加条目</el-button>
+        <el-button type="primary" plain size="mini" @click="checkAll" :disabled="checkPass">检查条目</el-button>
+        <el-button 
+          type="primary" 
+          plain 
+          size="mini" 
+          @click="configRule"
+          :disabled="isSaving"
+          :class="{ 'is-saving': isSaving }">
+          <span v-if="isSaving">保存中...</span>
+          <span v-else>配置规则</span>
+        </el-button>
+        <el-button type="warning" plain size="mini" @click="delPage">删除本页</el-button>
+        <el-button type="danger" plain size="mini" @click="clearAll">清空条目</el-button>
+      </el-button-group>
+    </div>
+
+    <!-- CMG模型选择和保存状态 -->
+    <div style="width: calc(100% - 2rem); padding: 0.5rem 0;">
+      <el-form :inline="true">
+        <el-form-item label="CMG模型:">
+          <el-select v-model="selectedCmgModel" placeholder="请选择CMG模型" @change="loadConfig">
+            <el-option
+              v-for="model in cmgModels"
+              :key="model.id"
+              :label="model.model_name"
+              :value="model.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="自动保存:">
+          <el-switch v-model="autoSaveEnabled" active-text="启用" inactive-text="禁用"></el-switch>
+        </el-form-item>
+      </el-form>
+      
+      <!-- 保存状态指示器 -->
+      <div style="margin-top: 0.5rem;" class="save-status-alert">
+        <el-alert
+          v-if="saveStatus === 'saving'"
+          title="正在保存规则..."
+          type="info"
+          :closable="false"
+          show-icon>
+          <template slot="default">
+            <i class="el-icon-loading"></i> 正在将规则保存到服务器...
+          </template>
+        </el-alert>
+        
+        <el-alert
+          v-if="saveStatus === 'success'"
+          title="保存成功"
+          type="success"
+          :closable="true"
+          @close="saveStatus = 'idle'"
+          show-icon>
+          <template slot="default">
+            规则已成功保存到服务器
+                         <span v-if="lastSaveTime" style="margin-left: 10px; font-size: 12px; color: #909399;">
+               最后保存时间: {% verbatim %}{{ formatTime(lastSaveTime) }}{% endverbatim %}
+             </span>
+          </template>
+        </el-alert>
+        
+        <el-alert
+          v-if="saveStatus === 'error'"
+          title="保存失败"
+          type="error"
+          :closable="true"
+          @close="saveStatus = 'idle'"
+          show-icon>
+          <template slot="default">
+            {% verbatim %}{{ saveError }}{% endverbatim %}
+            <el-button type="text" size="small" @click="retrySave" style="margin-left: 10px;">
+              重试保存
+            </el-button>
+          </template>
+        </el-alert>
+      </div>
+    </div>
+
+    <!-- 表格组件 -->
+    <div style="width: calc(100% - 2rem); flex-grow: 1;">
+      <el-table
+        :data="tableData"
+        style="width: 100%; height: 100%;"
+        :row-class-name="tableRowClassName"
+        size="mini"
+        class="rule-table"
+      >
+        <el-table-column prop="showId" label="规则ID" width="120"></el-table-column>
+        <el-table-column prop="ruleExpress" label="规则表达式" min-width="300"></el-table-column>
+        <el-table-column prop="faultName" label="故障名称" width="150"></el-table-column>
+        <el-table-column prop="faultLevel" label="故障等级" width="100"></el-table-column>
+        <el-table-column prop="component" label="涉及部件" width="120"></el-table-column>
+        <el-table-column prop="source" label="来源" width="120"></el-table-column>
+        <el-table-column prop="ruleOnline" label="在线" width="80">
+          <template slot-scope="scope">
+            <el-switch v-model="scope.row.ruleOnline"></el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" fixed="right">
+          <template slot-scope="scope">
+            <el-button @click="editRule(scope.$index)" type="text" size="small">编辑</el-button>
+            <el-button @click="deleteRule(scope.$index)" type="text" size="small">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <!-- 分页 -->
+    <div style="padding: 10px;">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[10, 20, 50, 100]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalItems">
+      </el-pagination>
+    </div>
+
+    <!-- 编辑对话框 -->
+    <el-dialog title="规则编辑" :visible.sync="dialogVisible" width="70%">
+      <el-form :model="currentRule" label-width="120px">
+        <el-form-item label="规则ID">
+          <el-input v-model="currentRule.showId"></el-input>
+        </el-form-item>
+        <el-form-item label="规则表达式">
+          <el-input type="textarea" v-model="currentRule.ruleExpress" :rows="4"></el-input>
+        </el-form-item>
+        <el-form-item label="故障名称">
+          <el-input v-model="currentRule.faultName"></el-input>
+        </el-form-item>
+        <el-form-item label="故障等级">
+          <el-input-number v-model="currentRule.faultLevel" :min="1" :max="5"></el-input-number>
+        </el-form-item>
+        <el-form-item label="涉及部件">
+          <el-input v-model="currentRule.component"></el-input>
+        </el-form-item>
+        <el-form-item label="来源">
+          <el-select v-model="currentRule.source">
+            <el-option label="专家意见" value="expert"></el-option>
+            <el-option label="数据驱动挖掘" value="data_driven"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="预案描述">
+          <el-input type="textarea" v-model="currentRule.planDescript" :rows="3"></el-input>
+        </el-form-item>
+        <el-form-item label="在线启用">
+          <el-switch v-model="currentRule.ruleOnline"></el-switch>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false" :disabled="isSaving">取消</el-button>
+        <el-button 
+          type="primary" 
+          @click="saveRule"
+          :disabled="isSaving"
+          :class="{ 'is-saving': isSaving }">
+          <span v-if="isSaving">保存中...</span>
+          <span v-else>保存</span>
+        </el-button>
+      </div>
+    </el-dialog>
+  </div>
+
+  <script>
+    // 从Django模板获取CSRF token
+    var csrfToken = '{{ csrf_token }}';
+    
+    // 配置axios默认CSRF token
+    axios.defaults.xsrfCookieName = 'csrftoken';
+    axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+    axios.defaults.withCredentials = true;
+    
+    // 设置请求拦截器，自动添加CSRF token
+    axios.interceptors.request.use(function (config) {
+      // 如果是POST请求，自动添加CSRF token
+      if (config.method === 'post' || config.method === 'put' || config.method === 'delete') {
+        config.headers['X-CSRFToken'] = csrfToken;
+        config.headers['X-Requested-With'] = 'XMLHttpRequest';
+      }
+      return config;
+    }, function (error) {
+      return Promise.reject(error);
+    });
+    
+    var vm = new Vue({
+      el: "#rule-edit",
+      data: {
+        cmgModels: [],
+        selectedCmgModel: null,
+        tableData: [],
+        dialogVisible: false,
+        currentRule: {},
+        currentIndex: -1,
+        currentPage: 1,
+        pageSize: 20,
+        totalItems: 0,
+        checkPass: true,
+        config: {
+          faultNames: {},
+          components: {},
+          pnames: {},
+          sources: {}
+        },
+        // 新增：保存状态管理
+        isSaving: false,
+        saveError: null,
+        lastSaveTime: null,
+        autoSaveEnabled: true,
+        saveStatus: 'idle', // idle, saving, success, error
+        // CSRF token
+        csrfToken: csrfToken
+      },
+      mounted() {
+        this.loadCmgModels();
+        
+        // 添加页面离开前的事件监听
+        window.addEventListener('beforeunload', this.beforeUnloadHandler);
+      },
+      
+      beforeDestroy() {
+        // 移除事件监听
+        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      },
+      computed: {
+        pagedData() {
+          const start = (this.currentPage - 1) * this.pageSize;
+          const end = start + this.pageSize;
+          return this.tableData.slice(start, end);
+        }
+      },
+      methods: {
+        // 获取CSRF token的全局方法
+        getCsrfToken() {
+          // 优先使用从Django模板获取的token
+          if (this.csrfToken) {
+            return this.csrfToken;
+          }
+          
+          // 备用方案：从cookie获取
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        },
+        
+        async loadCmgModels() {
+          try {
+            const response = await axios.get('/api/v1/data/cmg-models/');
+            this.cmgModels = response.data.results || response.data;
+          } catch (error) {
+            console.error('加载CMG模型失败:', error);
+            this.$message.error('加载CMG模型失败');
+          }
+        },
+        
+        async loadConfig() {
+          if (!this.selectedCmgModel) return;
+          
+          try {
+            const response = await axios.post('/api/v1/rules/editor/get-config/', {
+              cmg_model_id: this.selectedCmgModel
+            });
+            this.config = response.data;
+            await this.loadRules();
+          } catch (error) {
+            console.error('加载配置失败:', error);
+            this.$message.error('加载配置失败');
+          }
+        },
+        
+        async loadRules() {
+          if (!this.selectedCmgModel) return;
+          
+          try {
+            const response = await axios.post('/api/v1/rules/editor/init-all-rule/', {
+              cmg_model_id: this.selectedCmgModel
+            });
+            this.tableData = response.data || [];
+            this.totalItems = this.tableData.length;
+          } catch (error) {
+            console.error('加载规则失败:', error);
+            this.$message.error('加载规则失败');
+          }
+        },
+        
+        openDialog(index, action) {
+          this.currentIndex = index;
+          if (action === 'create') {
+            this.currentRule = {
+              showId: '',
+              ruleExpress: '',
+              faultName: '',
+              faultLevel: 1,
+              component: '',
+              source: 'expert',
+              planDescript: '',
+              ruleOnline: true,
+              isNew: true,
+              editable: true
+            };
+          } else {
+            this.currentRule = { ...this.tableData[index] };
+          }
+          this.dialogVisible = true;
+        },
+        
+        editRule(index) {
+          this.openDialog(index, 'edit');
+        },
+        
+        async deleteRule(index) {
+          try {
+            // 检查是否是最后一条规则
+            const isLastRule = this.tableData.length === 1;
+            const confirmMessage = isLastRule 
+              ? '这是最后一条规则，删除后该型号将没有任何规则配置。确定删除吗?' 
+              : '确定删除此规则吗?';
+            
+            await this.$confirm(confirmMessage, '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            });
+            
+            this.tableData.splice(index, 1);
+            this.totalItems = this.tableData.length;
+            
+            // 根据是否删除了所有规则显示不同的消息
+            if (this.tableData.length === 0) {
+              this.$message.success('已删除所有规则，该型号现在没有规则配置');
+            } else {
+              this.$message.success('删除成功');
+            }
+            
+            // 如果启用自动保存，则自动保存到后端
+            if (this.autoSaveEnabled) {
+              await this.autoSaveToServer();
+            }
+          } catch (error) {
+            // 用户取消删除或保存失败
+            if (error.message && !error.message.includes('cancel')) {
+              console.error('删除规则失败:', error);
+              this.$message.error('删除失败: ' + error.message);
+            }
+          }
+        },
+        
+        async saveRule() {
+          // 验证必填字段
+          if (!this.currentRule.showId || !this.currentRule.ruleExpress || !this.currentRule.faultName) {
+            this.$message.error('请填写规则ID、规则表达式和故障名称');
+            return;
+          }
+          
+          // 保存到本地
+          if (this.currentIndex === -1) {
+            // 新增
+            this.tableData.push({ ...this.currentRule });
+          } else {
+            // 编辑
+            this.$set(this.tableData, this.currentIndex, { ...this.currentRule });
+          }
+          this.totalItems = this.tableData.length;
+          this.dialogVisible = false;
+          
+          // 显示本地保存成功
+          this.$message.success('规则已保存到本地');
+          
+          // 如果启用自动保存，则自动保存到后端
+          if (this.autoSaveEnabled) {
+            await this.autoSaveToServer();
+          }
+        },
+        
+        async autoSaveToServer() {
+          if (!this.selectedCmgModel) {
+            this.$message.warning('请先选择CMG模型');
+            return;
+          }
+          
+          this.saveStatus = 'saving';
+          this.isSaving = true;
+          this.saveError = null;
+          
+          try {
+            await this.configRule();
+            this.saveStatus = 'success';
+            this.lastSaveTime = new Date();
+            this.isSaving = false;
+            
+            // 3秒后自动隐藏成功消息
+            setTimeout(() => {
+              if (this.saveStatus === 'success') {
+                this.saveStatus = 'idle';
+              }
+            }, 3000);
+            
+          } catch (error) {
+            this.saveStatus = 'error';
+            this.saveError = error.response?.data?.error || error.message || '保存失败';
+            this.isSaving = false;
+            console.error('自动保存失败:', error);
+          }
+        },
+        
+        async retrySave() {
+          await this.autoSaveToServer();
+        },
+        
+        async configRule() {
+          if (!this.selectedCmgModel) {
+            this.$message.warning('请先选择CMG模型');
+            throw new Error('未选择CMG模型');
+          }
+          
+          // 允许空规则列表（删除所有规则的情况）
+          if (!this.tableData) {
+            this.tableData = [];
+          }
+          
+          try {
+            const response = await axios.post('/api/v1/rules/editor/config-rule/', {
+              cmg_model_id: this.selectedCmgModel,
+              tableData: JSON.stringify(this.tableData)
+            }, { 
+              timeout: 30000 // 30秒超时
+            });
+            
+            if (response.data && response.data.status === 'success') {
+              return response.data;
+            } else {
+              throw new Error('服务器返回错误状态');
+            }
+          } catch (error) {
+            console.error('保存规则失败:', error);
+            
+            // 处理验证错误
+            if (error.response?.data?.validation_errors) {
+              const validationErrors = error.response.data.validation_errors;
+              let errorMessage = '规则验证失败:\n';
+              
+              validationErrors.forEach((error, index) => {
+                errorMessage += `${index + 1}. 规则 ${error.rule_id} (${error.fault_name}):\n`;
+                error.errors.forEach(err => {
+                  errorMessage += `   - ${err}\n`;
+                });
+              });
+              
+              // 使用 Element UI 的 MessageBox 显示详细错误信息
+              this.$alert(errorMessage, '规则验证失败', {
+                confirmButtonText: '确定',
+                type: 'error',
+                dangerouslyUseHTMLString: false,
+                customClass: 'error-message-box'
+              });
+            } else if (error.code === 'ECONNABORTED') {
+              throw new Error('保存超时，请检查网络连接');
+            } else {
+              // 普通错误
+              const errorMsg = error.response?.data?.error || error.message || '未知错误';
+              throw new Error('保存规则失败: ' + errorMsg);
+            }
+            
+            throw error;
+          }
+        },
+        
+        checkAll() {
+          // TODO: 实现规则检查逻辑
+          this.$message.info('规则检查功能待实现');
+        },
+        
+        importData() {
+          // TODO: 实现导入功能
+          this.$message.info('导入功能待实现');
+        },
+        
+        exportData() {
+          // TODO: 实现导出功能
+          this.$message.info('导出功能待实现');
+        },
+        
+        async delPage() {
+          try {
+            await this.$confirm('确定删除当前页的所有规则吗?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            });
+            
+            const start = (this.currentPage - 1) * this.pageSize;
+            const end = start + this.pageSize;
+            this.tableData.splice(start, end - start);
+            this.totalItems = this.tableData.length;
+            this.$message.success('删除成功');
+            
+            // 如果启用自动保存，则自动保存到后端
+            if (this.autoSaveEnabled) {
+              await this.autoSaveToServer();
+            }
+          } catch (error) {
+            // 用户取消删除
+          }
+        },
+        
+        async clearAll() {
+          try {
+            await this.$confirm('确定清空所有规则吗?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            });
+            
+            this.tableData = [];
+            this.totalItems = 0;
+            this.$message.success('清空成功');
+            
+            // 如果启用自动保存，则自动保存到后端
+            if (this.autoSaveEnabled) {
+              await this.autoSaveToServer();
+            }
+          } catch (error) {
+            // 用户取消删除
+          }
+        },
+        
+        handleSizeChange(val) {
+          this.pageSize = val;
+        },
+        
+        handleCurrentChange(val) {
+          this.currentPage = val;
+        },
+        
+        tableRowClassName({ row, rowIndex }) {
+          if (row.isNew) {
+            return 'new-rule-row';
+          }
+          return '';
+        },
+        
+        formatTime(date) {
+          if (!date) return '';
+          const d = new Date(date);
+          return d.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+        },
+        
+        // 页面离开前提醒保存
+        beforeUnloadHandler(e) {
+          if (this.isSaving) {
+            e.preventDefault();
+            e.returnValue = '正在保存规则，请稍候...';
+            return '正在保存规则，请稍候...';
+          }
+        }
+      }
+    });
+  </script>
+
+  <style>
+    .new-rule-row {
+      background: #f0f9ff;
+    }
+    
+    .error-message-box {
+      max-width: 600px;
+    }
+    
+    .error-message-box .el-message-box__content {
+      white-space: pre-line;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    /* 保存状态样式 */
+    .save-status-alert {
+      margin-bottom: 10px;
+    }
+    
+    .save-status-alert .el-alert__content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    /* 加载动画 */
+    .el-icon-loading {
+      animation: rotating 2s linear infinite;
+    }
+    
+    @keyframes rotating {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* 表格行状态 */
+    .rule-table .el-table__row.new-rule-row {
+      background-color: #f0f9ff;
+    }
+    
+    .rule-table .el-table__row.new-rule-row:hover {
+      background-color: #e6f3ff;
+    }
+    
+    /* 按钮状态 */
+    .el-button.is-saving {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    /* 表单验证样式 */
+    .el-form-item.is-error .el-input__inner {
+      border-color: #f56c6c;
+    }
+    
+    .el-form-item.is-error .el-textarea__inner {
+      border-color: #f56c6c;
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,190 @@
+"""
+SimpleGCNModel implementation matching the actual saved model structure.
+
+Based on the error logs, the actual model contains:
+- edge_weights
+- gcn1.conv (with bias and lin.weight)
+- gcn2.conv (with bias and lin.weight)
+- reg_head.linear (with weight and bias)
+"""
+
+import torch
+import torch.nn as nn
+import pickle
+from torch_geometric.nn import GCNConv
+
+
+class GCNLayer(nn.Module):
+    """GCN layer wrapper"""
+    def __init__(self, in_channels, out_channels):
+        super(GCNLayer, self).__init__()
+        self.conv = GCNConv(in_channels, out_channels)
+    
+    def forward(self, x, edge_index, edge_weight=None):
+        return self.conv(x, edge_index, edge_weight)
+
+
+class RegHead(nn.Module):
+    """Regression head"""
+    def __init__(self, in_features, out_features=1):
+        super(RegHead, self).__init__()
+        self.linear = nn.Linear(in_features, out_features)
+    
+    def forward(self, x):
+        return self.linear(x)
+
+
+class SimpleGCNModel(nn.Module):
+    """
+    Graph Convolutional Network model for CMG degradation prediction.
+    
+    This matches the actual saved model structure with:
+    - edge_weights parameter
+    - gcn1 and gcn2 GCN layers
+    - reg_head regression head
+    """
+    
+    def __init__(self, num_nodes=5, reg_head_type='linear', lambda_reg=0.0001):
+        super(SimpleGCNModel, self).__init__()
+        self.num_nodes = num_nodes
+        self.reg_head_type = reg_head_type
+        self.lambda_reg = lambda_reg
+        
+        # Edge weights - according to checkpoint, this should be a square matrix [num_nodes, num_nodes]
+        # not a 1D vector. This represents the adjacency matrix weights.
+        self.edge_weights = nn.Parameter(torch.ones(num_nodes, num_nodes))
+        
+        # GCN layers matching actual checkpoint structure
+        # Based on the error, checkpoint has:
+        # - gcn1.conv.lin.weight: [32, 69] means output_dim=32, input_dim=69
+        # - gcn2.conv.lin.weight: [32, 32] means output_dim=32, input_dim=32
+        # - reg_head.linear.weight: [1, 32] means output_dim=1, input_dim=32
+        
+        # The data shape is [batch_size, num_nodes, 69]
+        # Each node has 69 input features
+        input_features = 69
+        
+        self.gcn1 = GCNLayer(input_features, 32)
+        self.gcn2 = GCNLayer(32, 32)
+        
+        # Regression head takes only the output from one aggregated representation
+        # Based on checkpoint [1, 32], it takes 32 features and outputs 1 value
+        self.reg_head = RegHead(32, 1)
+        
+        # Scalers for normalization
+        self.scaler_x = None
+        self.scaler_y = None
+    
+    def forward(self, x, edge_index=None):
+        """
+        Forward pass through the network.
+        
+        Args:
+            x: Input features, shape [batch_size, num_nodes, num_features]
+            edge_index: Edge connectivity (optional, will be generated if None)
+        """
+        # NOTE: Input normalization is NOT applied here because:
+        # 1. The loaded scaler expects 3 features (num_nodes), not 69 (num_features)
+        # 2. This suggests the model was trained with raw/differently processed data
+        # 3. The training data might already be in the correct scale
+        # x = self.normalize_input(x)  # DISABLED - see above
+        
+        batch_size = x.shape[0]
+        
+        # Generate fully connected edge_index if not provided
+        if edge_index is None:
+            edge_index = self._generate_edge_index()
+        
+        # Extract edge weights from the adjacency matrix
+        edge_weight_values = self.edge_weights[edge_index[0], edge_index[1]]
+        edge_weight_values = torch.abs(edge_weight_values)  # Ensure positive weights
+        
+        # Process each sample individually (GCNConv expects single graph, not batched)
+        outputs = []
+        for i in range(batch_size):
+            # Get single sample [num_nodes, num_features]
+            x_i = x[i]  # Shape: [num_nodes, num_features]
+            
+            # GCN layers
+            h = torch.relu(self.gcn1(x_i, edge_index, edge_weight_values))
+            h = torch.relu(self.gcn2(h, edge_index, edge_weight_values))
+            
+            # Global mean pooling: aggregate node features to graph-level representation
+            # Shape: [num_nodes, feature_dim] -> [feature_dim]
+            h_pooled = h.mean(dim=0)
+            
+            # Regression head
+            out_i = self.reg_head(h_pooled.unsqueeze(0))  # Add batch dim for linear layer
+            outputs.append(out_i)
+        
+        # Stack all outputs
+        out = torch.cat(outputs, dim=0)  # Shape: [batch_size, 1]
+        
+        return out
+    
+    def _generate_edge_index(self):
+        """Generate fully connected graph edge index"""
+        edges = []
+        for i in range(self.num_nodes):
+            for j in range(self.num_nodes):
+                if i != j:
+                    edges.append([i, j])
+        edge_index = torch.tensor(edges, dtype=torch.long).t()
+        return edge_index
+    
+    def load_scalers(self, scaler_path):
+        """Load data scalers from pickle file."""
+        try:
+            with open(scaler_path, 'rb') as f:
+                scalers = pickle.load(f)
+                if isinstance(scalers, dict):
+                    # New format: {'channel_scaler': ..., 'label_scaler': ...}
+                    self.scaler_x = scalers.get('channel_scaler')
+                    self.scaler_y = scalers.get('label_scaler')
+                else:
+                    # Old format: tuple (scaler_x, scaler_y)
+                    self.scaler_x, self.scaler_y = scalers
+        except Exception as e:
+            print(f"Warning: Failed to load scalers from {scaler_path}: {e}")
+    
+    def normalize_input(self, x):
+        """
+        Normalize input features using the loaded scaler.
+        
+        Args:
+            x: Input tensor of shape [batch_size, num_nodes, num_features]
+        
+        Returns:
+            Normalized tensor of the same shape
+        """
+        if self.scaler_x is not None and hasattr(self.scaler_x, 'transform'):
+            import numpy as np
+            # Convert to numpy
+            x_np = x.numpy() if isinstance(x, torch.Tensor) else x
+            original_shape = x_np.shape
+            
+            # Reshape to [batch_size * num_nodes, num_features]
+            x_reshaped = x_np.reshape(-1, original_shape[-1])
+            
+            # Apply scaler
+            x_normalized = self.scaler_x.transform(x_reshaped)
+            
+            # Reshape back
+            x_normalized = x_normalized.reshape(original_shape)
+            
+            # Convert back to tensor if needed
+            return torch.tensor(x_normalized, dtype=torch.float32)
+        else:
+            return x
+    
+    def denormalize_labels(self, labels):
+        """Denormalize predicted labels using the loaded scaler."""
+        if self.scaler_y is not None and hasattr(self.scaler_y, 'inverse_transform'):
+            import numpy as np
+            # Reshape if necessary
+            if len(labels.shape) == 1:
+                labels = labels.reshape(-1, 1)
+            return self.scaler_y.inverse_transform(labels)
+        else:
+            # No scaler available, return as-is
+            return labels

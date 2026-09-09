@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 省略其他头部信息 -->
+    <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+    <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            overflow: hidden; /* 防止出现滚动条 */
+        }
+        
+        .page-container {
+            width: 98%;
+            height: 98vh;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin: 5px 0;
+            color: #409EFF;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 10px;
+            height: calc(100% - 35px); /* 减去标题高度 */
+        }
+        
+        .param-card, .result-card {
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .param-card {
+            width: 55%;  /* 从40%改为60% */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .result-card {
+            width: 45%;  /* 从60%改为40% */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-header {
+            background-color: #f6f8fa;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eaeefb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            margin: 0;
+            font-size: 16px;
+            color: #303133;
+            font-weight: 500;
+        }
+        
+        .card-body {
+            padding: 10px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        /* 紧凑型表单样式 */
+        .el-form-item {
+            margin-bottom: 8px;
+        }
+        
+        .el-form-item__label {
+            line-height: 30px;
+            padding: 0;
+            font-size: 13px;
+        }
+        
+        .el-form-item__content {
+            line-height: 30px;
+        }
+        
+        .el-input__inner {
+            height: 30px;
+            line-height: 30px;
+            padding: 0 10px;
+        }
+        
+        .el-select {
+            width: 100%;
+        }
+        
+        /* 结果图片容器 */
+        .result-tabs-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .el-tabs {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .el-tabs__content {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .el-tab-pane {
+            height: 100%;
+        }
+        
+        .result-image-container {
+            text-align: center;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result-image {
+            max-width: 95%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        
+        /* 按钮容器 */
+        .button-container {
+            text-align: center;
+            margin: 10px 0 5px 0;
+        }
+        
+        .action-button {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        /* 选项卡样式紧凑化 */
+        .el-tabs__item {
+            height: 36px;
+            line-height: 36px;
+            font-size: 14px;
+            padding: 0 15px;
+        }
+        
+        /* 加载指示器样式 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+        
+        .loading-text {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #fff;
+        }
+        
+        .error-message {
+            background-color: #fff;
+            border: 1px solid #f56c6c;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            color: #f56c6c;
+            max-width: 80%;
+            max-height: 40%;
+            overflow-y: auto;
+        }
+        
+        /* 结果消息样式 */
+        .result-message {
+            padding: 8px;
+            margin-bottom: 10px;
+            background-color: #f0f9eb;
+            color: #67c23a;
+            border-radius: 4px;
+            border-left: 3px solid #67c23a;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sim-model" class="page-container">
+        <h1 class="page-title">电机仿真系统</h1>
+        
+        <div class="main-content">
+            <!-- 参数配置卡片 -->
+            <div class="param-card">
+                <div class="card-header">
+                    <h3 class="card-title">参数配置</h3>
+                </div>
+                <div class="card-body">
+                    <el-form :model="simulationParams" label-width="120px" size="mini">
+                        <el-row :gutter="10">
+                            <el-col :span="12">
+                                <el-form-item label="电机相电阻 [Ω]">
+                                    <el-input v-model="simulationParams.BLDC_Rs" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="电机电感 [H]">
+                                    <el-input v-model="simulationParams.BLDC_Ls" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+
+                        <el-row :gutter="10">
+                            <el-col :span="12">
+                                <el-form-item label="电机极数">
+                                    <el-input v-model="simulationParams.BLDC_p" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="转矩常数">
+                                    <el-input v-model="simulationParams.BLDC_Kt" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        
+                        <el-row :gutter="10">
+                            <el-col :span="12">
+                                <el-form-item label="框架转速 [rpm]">
+                                    <el-input v-model="simulationParams.Init_command_omega" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="仿真频率 [Hz]">
+                                    <el-input v-model="simulationParams.fs" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        
+                        <el-row :gutter="10">
+                            <el-col :span="12">
+                                <el-form-item label="转子惯量 [kg·m²]">
+                                    <el-input v-model="simulationParams.RotorInertia" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="工况选择">
+                                    <el-select v-model="simulationParams.operating_condition">
+                                        <el-option :value="1" label="矩形工况"></el-option>
+                                        <el-option :value="2" label="正弦工况"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        
+                        <el-row :gutter="10">
+                            <el-col :span="12">
+                                <el-form-item label="仿真时间 [s]">
+                                    <el-input v-model="simulationParams.sim_time" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="仿真轮数">
+                                    <el-input v-model="simulationParams.cycle" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        
+                        <el-row :gutter="10">
+                            <el-col :span="12">
+                                <el-form-item label="退化系数1">
+                                    <el-input v-model="simulationParams.mu_EHL_input" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="退化系数2">
+                                    <el-input v-model="simulationParams.viscosity_input" type="number"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        
+                        <!-- 进行仿真按钮（居中） -->
+                        <div class="button-container">
+                            <el-button class="action-button" type="primary" @click="runSimulation" :disabled="isLoading">
+                                <i class="el-icon-video-play"></i> 开始仿真
+                            </el-button>
+                        </div>
+                    </el-form>
+                </div>
+            </div>
+
+            <!-- 仿真结果展示 -->
+            <div class="result-card" v-if="simulationResult">
+                <div class="card-header">
+                    <h3 class="card-title">仿真结果</h3>
+                    <el-button class="action-button" type="success" size="mini" @click="downloadData">
+                        <i class="el-icon-download"></i> 下载数据
+                    </el-button>
+                </div>
+                <div class="card-body">
+                    <div v-if="simulationResult.message" class="result-message">
+                        {{ simulationResult.message }}
+                    </div>
+                    <div v-if="simulationResult.plots" class="result-tabs-container">
+                        <el-tabs v-model="activeTab" type="card">
+                            <el-tab-pane label="电流" name="current">
+                                <div class="result-image-container">
+                                    <img :src="'data:image/png;base64,' + simulationResult.plots.current" alt="Current Plot" class="result-image">
+                                </div>
+                            </el-tab-pane>
+                            <el-tab-pane label="电压" name="voltage">
+                                <div class="result-image-container">
+                                    <img :src="'data:image/png;base64,' + simulationResult.plots.voltage" alt="Voltage Plot" class="result-image">
+                                </div>
+                            </el-tab-pane>
+                            <el-tab-pane label="转速" name="speed">
+                                <div class="result-image-container">
+                                    <img :src="'data:image/png;base64,' + simulationResult.plots.speed" alt="Speed Plot" class="result-image">
+                                </div>
+                            </el-tab-pane>
+                            <el-tab-pane label="摩擦力矩" name="friction">
+                                <div class="result-image-container">
+                                    <img :src="'data:image/png;base64,' + simulationResult.plots.friction" alt="Friction Torque Plot" class="result-image">
+                                </div>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </div>
+                    <!-- 无结果时的占位提示 -->
+                    <div v-else class="result-image-container" style="color:#909399;font-size:14px;">
+                        请点击"开始仿真"按钮运行仿真获取结果
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 无结果时的占位卡片 -->
+            <div class="result-card" v-else>
+                <div class="card-header">
+                    <h3 class="card-title">仿真结果</h3>
+                </div>
+                <div class="card-body">
+                    <div class="result-image-container" style="color:#909399;font-size:14px;">
+                        请点击"开始仿真"按钮运行仿真获取结果
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 加载指示器 -->
+        <div class="loading-overlay" v-if="isLoading">
+            <el-progress type="circle" :percentage="100" status="success" :indeterminate="true" stroke-width="4"></el-progress>
+            <div class="loading-text">仿真计算中，请稍候...</div>
+            <div class="error-message" v-if="matlabError">
+                {{ matlabErrorMessage }}
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        var vm = new Vue({
+            el: "#sim-model",
+            data() {
+                return {
+                    // 仿真参数 - 与run_motor_simulation函数完全匹配
+                    simulationParams: {
+                        BLDC_Rs: 0.62,
+                        BLDC_Ls: 112/(10**6), // 电机项电感，直接使用一致的表达式
+                        BLDC_p: 8.0,
+                        BLDC_Kt: 0.037,
+                        Init_command_omega: 6000.0,
+                        fs: 10**4, // 修正为10**4，与MATLAB中的1e4保持一致
+                        RotorInertia: 0.23875,
+                        operating_condition: 1,
+                        sim_time: 9.0,
+                        cycle: 2,
+                        mu_EHL_input: 0.04,
+                        viscosity_input: 45
+                    },
+                    simulationResult: null,
+                    simulationId: '',  // 保存仿真ID以便下载数据
+                    activeTab: 'current',
+                    matlabError: false,
+                    matlabErrorMessage: '',
+                    isLoading: false
+                }
+            },
+            methods: {
+                // 运行仿真
+                async runSimulation() {
+                    try {
+                        this.isLoading = true;
+                        this.$message.info("仿真计算中，请稍候...");
+                        
+                        // 直接发送参数，不需要转换微亨
+                        const params = {...this.simulationParams};
+                        
+                        // 发送请求到服务器
+                        let response = await axios.post('/run-simulation', params, {
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (response.data.error) {
+                            this.matlabError = true;
+                            this.matlabErrorMessage = response.data.error;
+                            
+                            // 检查是否是MATLAB Engine错误
+                            if (response.data.error.includes('MATLAB Engine for Python未安装')) {
+                                this.$alert(response.data.error, 'MATLAB Engine错误', {
+                                    confirmButtonText: '确定',
+                                    type: 'error',
+                                    dangerouslyUseHTMLString: true
+                                });
+                            } else if (response.data.error.includes('找不到Simulink模型文件')) {
+                                this.$alert(response.data.error, 'Simulink模型文件错误', {
+                                    confirmButtonText: '确定',
+                                    type: 'error',
+                                    dangerouslyUseHTMLString: true
+                                });
+                            } else {
+                                this.$message.error(`仿真失败: ${response.data.error}`);
+                            }
+                        } else {
+                            this.matlabError = false;
+                            this.matlabErrorMessage = '';
+                            this.simulationResult = response.data;
+                            this.simulationId = response.data.simulation_id;
+                            this.$message.success("仿真成功");
+                        }
+                    } catch (error) {
+                        console.error("仿真请求失败:", error);
+                        this.$message.error(`仿真请求失败: ${error.message}`);
+                        if (error.response && error.response.data && error.response.data.error) {
+                            // 显示服务器返回的详细错误信息
+                            this.matlabError = true;
+                            this.matlabErrorMessage = error.response.data.error;
+                        }
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                // 下载仿真数据
+                downloadData() {
+                    if (this.simulationId) {
+                        window.location.href = `/download-data/${this.simulationId}`;
+                    } else {
+                        // 如果没有simulationId，直接使用默认路径
+                        window.location.href = `/download-simulation-data`;
+                    }
+                }
+            },
+        })
+    </script>
+</body>
+</html>

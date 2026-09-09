@@ -1,0 +1,852 @@
+/* 覆盖Element UI的默认样式 */
+.red-border-input .el-input__inner {
+    border-color: red;
+}
+.green-border-input .el-input__inner {
+    border-color: green;
+}
+
+/* 基础样式 - 科技蓝色主题 */
+body {
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f5ff;
+    color: #2c3e50;
+    overflow: hidden;
+}
+
+/* 科技蓝色主题 */
+.tech-blue-theme {
+    --primary-light: #e6f7ff;
+    --primary-medium: #1890ff;
+    --primary-dark: #096dd9;
+    --secondary-light: #bae7ff;
+    --secondary-medium: #40a9ff;
+    --secondary-dark: #0050b3;
+    --accent-light: #91d5ff;
+    --accent-medium: #69c0ff;
+    --accent-dark: #0050b3;
+    --gray-light: #f5f5f5;
+    --gray-medium: #d9d9d9;
+    --gray-dark: #8c8c8c;
+    --text-primary: #2c3e50;
+    --text-secondary: #606266;
+    --text-light: #909399;
+    --success: #52c41a;
+    --warning: #faad14;
+    --danger: #f5222d;
+    --info: #1890ff;
+    --border-radius: 4px;
+    --card-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+}
+
+/* 页面整体布局 */
+.page-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 左右两侧容器样式 */
+.section-container {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.left-section {
+    border-right: 1px solid rgba(9, 109, 217, 0.1);
+}
+
+.right-section {
+    background-color: rgba(230, 247, 255, 0.3);
+}
+
+/* 标题样式 */
+.section-header {
+    padding: 15px 20px;
+    background: linear-gradient(to right, #096dd9, #40a9ff);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    flex-shrink: 0; /* 防止标题区域被压缩 */
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 内容区域 */
+.section-content {
+    flex: 1; /* 使内容区域填满剩余空间 */
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+}
+
+/* 操作区域 */
+.operation-panel {
+    background-color: var(--primary-light);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--secondary-light);
+    box-shadow: var(--card-shadow);
+}
+
+.file-operation-section {
+    margin-bottom: 15px;
+}
+
+.file-input-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.file-input-container label {
+    font-weight: 500;
+    min-width: 120px;
+    color: var(--text-secondary);
+}
+
+.file-input {
+    flex: 1;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--secondary-light);
+    border-radius: var(--border-radius);
+    background-color: white;
+    transition: var(--transition);
+}
+
+.file-input:hover, .file-input:focus {
+    border-color: var(--primary-medium);
+}
+
+/* 按钮行样式 */
+.buttons-row {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.function-btn {
+    min-width: 140px;
+    background-color: var(--primary-medium) !important;
+    border-color: var(--primary-medium) !important;
+}
+
+.function-btn:hover {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+/* 结果展示容器 */
+.results-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 200px); /* 确保内容区域有足够的最小高度 */
+}
+
+/* 仪表盘区域 */
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    padding: 20px;
+    background-color: rgba(230, 247, 255, 0.5);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+}
+
+/* 专家评估结果 */
+.assessment-result {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary-light);
+    padding: 12px 15px;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--primary-medium);
+    margin-bottom: 20px;
+}
+
+.info-label {
+    font-weight: 500;
+    margin-right: 10px;
+    color: var(--text-secondary);
+    min-width: 100px;
+}
+
+.info-value {
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    background-color: white !important;
+    border-color: var(--primary-medium) !important;
+}
+
+.result-value {
+    font-weight: 600;
+    font-size: 18px !important;
+    color: var(--primary-medium) !important;
+}
+
+.help-icon {
+    margin-left: 8px;
+    color: var(--primary-medium);
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+.help-icon:hover {
+    color: var(--primary-dark);
+}
+
+/* 系统健康状态区域 */
+.system-health-container {
+    margin-top: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.system-health-card {
+    box-shadow: none !important;
+    border: 1px solid var(--secondary-light);
+    flex: 1;
+}
+
+.tech-card {
+    box-shadow: 0 4px 15px rgba(24, 144, 255, 0.1) !important;
+    border-radius: var(--border-radius);
+    background: linear-gradient(to bottom right, white, var(--primary-light));
+}
+
+.card-header {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-dark);
+    border-bottom: 1px solid var(--secondary-light);
+    background-color: var(--primary-light);
+}
+
+.system-list {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.system-item {
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.system-item:last-child {
+    border-bottom: none;
+}
+
+.system-name {
+    display: flex;
+    align-items: center;
+}
+
+.system-name .el-tag {
+    font-size: 14px;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+    background-color: var(--primary-light) !important;
+    color: var(--primary-dark) !important;
+    border-color: var(--secondary-light) !important;
+}
+
+.system-progress {
+    padding-left: 15px;
+}
+
+/* 右侧寿命预测与健康演化区域 */
+.model-selection-panel {
+    background-color: var(--primary-light);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--secondary-light);
+    box-shadow: var(--card-shadow);
+}
+
+.panel-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--secondary-light);
+}
+
+.selection-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.selection-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 250px;
+}
+
+.selection-item label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.analyze-btn {
+    margin-top: 10px;
+    width: 100%;
+    background-color: var(--primary-medium) !important;
+    border-color: var(--primary-medium) !important;
+}
+
+.analyze-btn:hover {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+/* 预测结果区域 */
+.prediction-results {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.result-dashboard {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: rgba(230, 247, 255, 0.5);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+}
+
+.result-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.result-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+}
+
+.result-detail {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.detail-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.detail-value {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--primary-medium);
+}
+
+.trend-visualization {
+    flex: 1;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.trend-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-container {
+    flex: 1;
+    min-height: 250px;
+}
+
+.trend-placeholder {
+    flex: 1;
+    background: linear-gradient(to bottom, rgba(230, 247, 255, 0.3), transparent);
+    border-radius: var(--border-radius);
+    min-height: 250px;
+}
+
+/* Element UI 组件覆盖样式 */
+.el-card__body {
+    overflow: auto;
+    padding: 15px !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.el-progress .el-progress__text {
+    top: 50%;
+    white-space: pre-wrap !important;
+    font-size: 14px !important;
+}
+
+.el-progress .el-progress-bar__outer {
+    background: rgba(24, 144, 255, 0.1);
+    height: 16px !important;
+    border-radius: 100px;
+}
+
+.el-progress-bar__inner {
+    border-radius: 100px;
+    background: linear-gradient(to right, var(--primary-medium), var(--secondary-medium)) !important;
+}
+
+.el-button--primary {
+    background-color: var(--primary-medium);
+    border-color: var(--primary-medium);
+}
+
+.el-button--primary:hover, 
+.el-button--primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: #fff;
+}
+
+.el-select .el-input__inner {
+    border-color: var(--secondary-light);
+}
+
+.el-select .el-input.is-focus .el-input__inner {
+    border-color: var(--primary-medium);
+}
+
+.el-select .el-input__inner:hover {
+    border-color: var(--primary-medium);
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--gray-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--primary-medium);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-dark);
+}
+
+/* 新增布局样式 */
+.main-container {
+    width: 100%;
+    max-width: 50%;
+    margin: 0;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.header {
+    width: 100%;
+    margin-bottom: 30px;
+    height: 50%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e6ed;
+    box-sizing: border-box;
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    color: #303133;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.input-section {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.dashboard-section {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    width: 220px;
+    align-items: center;
+}
+
+.file-section {
+    margin-top: 10px;
+}
+
+.info-section {
+    margin-top: 15px;
+}
+
+.result-section {
+    margin-top: 15px;
+}
+
+.info-box {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.info-box span {
+    margin-right: 10px;
+}
+
+.result-box {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.result-box span {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.main-content {
+    width: 100%;
+    height: auto; /* Allow the content to determine the height */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Align items to fill the container width */
+    justify-content: flex-start; /* Align content to the top */
+}
+
+.button-container {
+    margin-bottom: 15px;
+}
+
+.system-health-container {
+    width: 100%;
+}
+
+.el-tag {
+    font-size: 14px;
+}
+
+.el-progress__text {
+    font-size: 16px;
+}
+
+.el-col {
+    position: relative;
+}
+
+.el-col::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -5px;
+    border-bottom: 1px dashed #ddd;
+    width: 100%;
+}
+
+/* 诊断面板 */
+.diagnostic-panel {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 文件操作区 */
+.file-operation-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #e0e6ed;
+}
+
+.file-input-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.file-input-container label {
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.file-input {
+    flex: 1;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    background-color: #fafafa;
+}
+
+.analyze-btn {
+    min-width: 120px;
+}
+
+/* 信息网格 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.assessment-result {
+    grid-column: span 2;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    background-color: #f9fafc;
+    padding: 12px 15px;
+    border-radius: 4px;
+    border-left: 3px solid #409EFF;
+}
+
+.info-label {
+    font-weight: 500;
+    margin-right: 10px;
+    color: #606266;
+    min-width: 100px;
+}
+
+.info-value {
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.result-value {
+    font-weight: 600;
+    font-size: 18px !important;
+    color: #409EFF !important;
+}
+
+.help-icon {
+    margin-left: 8px;
+    color: #909399;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.help-icon:hover {
+    color: #409EFF;
+}
+
+/* 系统分析区域 */
+.system-section {
+    margin-top: 30px;
+}
+
+.section-header {
+    margin-bottom: 15px;
+}
+
+.section-button {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+
+.system-health-card {
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    font-size: 18px;
+    font-weight: 500;
+    color: #303133;
+}
+
+.system-list {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.system-item {
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.system-item:last-child {
+    border-bottom: none;
+}
+
+.system-name {
+    display: flex;
+    align-items: center;
+}
+
+.system-name .el-tag {
+    font-size: 14px;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.system-progress {
+    padding-left: 15px;
+}
+
+/* Element UI 组件覆盖样式 */
+.el-button--primary {
+    background-color: #409EFF;
+    border-color: #409EFF;
+}
+
+.el-button--primary:hover, 
+.el-button--primary:focus {
+    background-color: #66b1ff;
+    border-color: #66b1ff;
+    color: #fff;
+}
+
+/* 新的布局样式 */
+.content-layout {
+    display: flex;
+    width: 100%;
+}
+
+.left-panel {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    padding-right: 20px;
+}
+
+.system-section {
+    width: 50%;
+}
+
+/* 仪表盘容器 */
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    flex-grow: 1;
+}
+
+/* 评估结果项 */
+.assessment-result {
+    display: flex;
+    align-items: center;
+    background-color: #f9fafc;
+    padding: 12px 15px;
+    border-radius: 4px;
+    border-left: 3px solid #409EFF;
+    margin-bottom: 20px;
+}
+
+.info-label {
+    font-weight: 500;
+    margin-right: 10px;
+    color: #606266;
+    min-width: 100px;
+}
+
+.info-value {
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.result-value {
+    font-weight: 600;
+    font-size: 18px !important;
+    color: #409EFF !important;
+}
+
+.help-icon {
+    margin-left: 8px;
+    color: #909399;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.help-icon:hover {
+    color: #409EFF;
+}

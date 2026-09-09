@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2017年11月28日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSDB004"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204968896"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "安全阀"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "安全阀是启闭件受外力作用下处于常闭状态，当设备或管道内的介质压力升高超过规定值时，通过向系统外排放介质来防止管道或设备内介质压力超过规定数值的特殊阀门。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "10.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

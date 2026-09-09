@@ -1,0 +1,106 @@
+[
+  {
+    "id": 1,
+    "component": "液氧泵",
+    "fault_name": "气蚀故障",
+    "fault_prob": "0.05",
+    "fault_reason": "叶轮磨损、轴承失效",
+    "degree_harm": "Ⅱ"
+  },
+  {
+    "id": 2,
+    "component": "液氧涡轮",
+    "fault_name": "转速下降",
+    "fault_prob": "0.3",
+    "fault_reason": "转子破坏、叶冠脱落",
+    "degree_harm": "Ⅰ~Ⅱ"
+  },
+  {
+    "id": 3,
+    "component": "煤油管路",
+    "fault_name": "堵塞故障",
+    "fault_prob": "0.01",
+    "fault_reason": "胶质沉积堵塞",
+    "degree_harm": "Ⅱ~Ⅲ"
+  },
+  {
+    "id": 4,
+    "component": "煤油主阀",
+    "fault_name": "卡滞故障",
+    "fault_prob": "0.02",
+    "fault_reason": "腐蚀锈蚀异物堵塞",
+    "degree_harm": "Ⅱ~Ⅲ"
+  },
+  {
+    "id": 5,
+    "component": "燃气发生器",
+    "fault_name": "燃气泄漏",
+    "fault_prob": "0.1",
+    "fault_reason": "密封失效",
+    "degree_harm": "Ⅰ"
+  },
+  {
+    "id": 6,
+    "component": "燃烧室",
+    "fault_name": "燃烧不稳定",
+    "fault_prob": "0.2",
+    "fault_reason": "燃料混合不均",
+    "degree_harm": "Ⅰ"
+  },
+  {
+    "id": 7,
+    "component": "尾喷管",
+    "fault_name": "喷管堵塞",
+    "fault_prob": "0.03",
+    "fault_reason": "积碳堵塞",
+    "degree_harm": "Ⅰ"
+  },
+  {
+    "id": 8,
+    "component": "TVC",
+    "fault_name": "效率下降",
+    "fault_prob": "0.05",
+    "fault_reason": "异物入侵、润滑不足",
+    "degree_harm": "Ⅱ"
+  },
+  {
+    "id": 9,
+    "component": "RCS",
+    "fault_name": "力矩下降",
+    "fault_prob": "0.05",
+    "fault_reason": "电磁阀线圈烧毁",
+    "degree_harm": "Ⅱ"
+  },
+  {
+    "id": 10,
+    "component": "栅格舵",
+    "fault_name": "舵面卡滞",
+    "fault_prob": "0.04",
+    "fault_reason": "机械磨损",
+    "degree_harm": "Ⅱ"
+  },
+  {
+    "id": 11,
+    "component": "控制器",
+    "fault_name": "控制器无信号",
+    "fault_prob": "0.1",
+    "fault_reason": "电源断开、通信故障",
+    "degree_harm": "Ⅰ"
+  },
+  {
+    "id": 12,
+    "component": "传感器",
+    "fault_name": "信号恒偏差",
+    "fault_prob": "0.03",
+    "fault_reason": "电磁干扰、材料老化",
+    "degree_harm": "Ⅲ"
+  },
+  {
+    "id": 13,
+    "component": "传感器",
+    "fault_name": "卡死故障",
+    "fault_prob": "0.03",
+    "fault_reason": "电磁干扰、材料老化",
+    "degree_harm": "Ⅲ"
+  }
+]

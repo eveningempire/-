@@ -1,0 +1,129 @@
+/* 全局样式覆盖 */
+
+/* Card 样式增强 */
+.el-card {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+
+.el-card:hover {
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1);
+}
+
+.el-card__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+}
+
+.el-card__body {
+  padding: 20px;
+}
+
+/* Button 样式增强 */
+.el-button {
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.el-button--primary {
+  background-color: #409EFF;
+  border-color: #409EFF;
+}
+
+.el-button--primary:hover, 
+.el-button--primary:focus {
+  background-color: #66b1ff;
+  border-color: #66b1ff;
+}
+
+.el-button--success {
+  background-color: #67c23a;
+  border-color: #67c23a;
+}
+
+.el-button--success:hover,
+.el-button--success:focus {
+  background-color: #85ce61;
+  border-color: #85ce61;
+}
+
+/* Table 样式增强 */
+.el-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+.el-table th {
+  background-color: #f5f7fa !important;
+  color: #606266;
+  font-weight: 600;
+  height: 50px;
+}
+
+.el-table td {
+  padding: 12px 0;
+}
+
+.el-table__row:hover td {
+  background-color: #f5f7fa;
+}
+
+/* Dialog 样式增强 */
+.el-dialog {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 16px rgba(0, 0, 0, 0.1);
+}
+
+.el-dialog__header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.el-dialog__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.el-dialog__body {
+  padding: 24px;
+}
+
+.el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Form 样式增强 */
+.el-form-item__label {
+  font-weight: 500;
+}
+
+/* 分页控件样式 */
+.el-pagination {
+  margin-top: 20px;
+  text-align: right;
+}
+
+/* 输入框样式 */
+.el-input__inner {
+  border-radius: 4px;
+}
+
+/* 标签样式 */
+.el-tag {
+  border-radius: 4px;
+}
+
+/* 下拉菜单样式 */
+.el-dropdown-menu {
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}

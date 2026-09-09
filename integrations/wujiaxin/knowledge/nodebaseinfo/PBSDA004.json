@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2017年9月1日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSDA004"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204967255"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "相变材料"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "相变材料是指在物质发生相变时，可吸收或释放大量能量（即相变焓）的一类材料。相变材料是利用潜热储能，储热密度大，蓄热装置结构紧凑，并且在相变过程中本身温度基本不变，易于管理。由于外太空温度属于极寒或极热环境，对宇航员、航天器的保护要求非常严格，普通材料无法适应恶劣条件，因此，需要特殊材料进行保护。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "10.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

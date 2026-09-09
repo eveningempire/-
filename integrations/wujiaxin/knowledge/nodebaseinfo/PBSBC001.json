@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年5月1日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSBC001"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204907296"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "主母线"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "用于遮盖负荷控制柜的分配母线系统，高度为 150 mm 的母线盖板和电缆接线区域盖板将母线隔室与仪器室分隔开来，以保护手指，防护等级为 IP 20。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "50.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "1000.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "220.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "5.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

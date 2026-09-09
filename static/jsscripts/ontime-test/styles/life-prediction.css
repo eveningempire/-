@@ -1,0 +1,140 @@
+/* 右侧寿命预测与健康演化区域 */
+.model-selection-panel {
+    background: linear-gradient(135deg, var(--purple-light), rgba(255, 255, 255, 0.9));
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--purple-light);
+    box-shadow: var(--card-shadow);
+}
+
+.panel-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--purple-dark);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--purple-light);
+}
+
+.selection-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.selection-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 250px;
+}
+
+.selection-item label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.analyze-btn {
+    margin-top: 10px;
+    width: 100%;
+    background-color: var(--purple-medium) !important;
+    border-color: var(--purple-medium) !important;
+}
+
+.analyze-btn:hover {
+    background-color: var(--purple-dark) !important;
+    border-color: var(--purple-dark) !important;
+}
+
+/* 预测结果区域 */
+.prediction-results {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.result-dashboard {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(230, 247, 255, 0.5), rgba(239, 219, 255, 0.3));
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+}
+
+.result-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.result-item:first-child {
+    border-right: 1px dashed rgba(145, 213, 255, 0.5);
+    padding-right: 20px;
+}
+
+.result-item:last-child {
+    padding-left: 20px;
+}
+
+.result-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--purple-dark);
+    margin-bottom: 15px;
+}
+
+.result-detail {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.detail-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.detail-value {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--purple-medium);
+}
+
+/* 左边用蓝色系 */
+.result-item:first-child .detail-value {
+    color: var(--primary-medium);
+}
+
+/* 右边用紫色系 */
+.result-item:last-child .detail-value {
+    color: var(--purple-medium);
+}
+
+.trend-visualization {
+    flex: 1;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.trend-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, white, var(--purple-light)) !important;
+}
+
+.trend-card .card-header {
+    background-color: var(--purple-light);
+    color: var(--purple-dark);
+    border-bottom: 1px solid rgba(145, 213, 255, 0.3);
+}

@@ -1,0 +1,171 @@
+/* 保留之前的布局样式，确保向后兼容 */
+.main-container {
+    width: 100%;
+    max-width: 50%;
+    margin: 0;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.header {
+    width: 100%;
+    margin-bottom: 30px;
+    height: 50%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e6ed;
+    box-sizing: border-box;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    color: #303133;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.input-section {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.dashboard-section {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    width: 220px;
+    align-items: center;
+}
+
+.file-section {
+    margin-top: 10px;
+}
+
+.info-section {
+    margin-top: 15px;
+}
+
+.result-section {
+    margin-top: 15px;
+}
+
+.info-box {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.info-box span {
+    margin-right: 10px;
+}
+
+.result-box {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.result-box span {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.main-content {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+.button-container {
+    margin-bottom: 15px;
+}
+
+.system-section {
+    margin-top: 30px;
+}
+
+.section-header {
+    margin-bottom: 15px;
+}
+
+.section-button {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+
+.el-tag {
+    font-size: 14px;
+}
+
+.el-progress__text {
+    font-size: 16px;
+}
+
+.el-col {
+    position: relative;
+}
+
+.el-col::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -5px;
+    border-bottom: 1px dashed #ddd;
+    width: 100%;
+}
+
+/* 内容布局样式 */
+.content-layout {
+    display: flex;
+    width: 100%;
+}
+
+.left-panel {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    padding-right: 20px;
+}
+
+.system-section {
+    width: 50%;
+}
+
+/* 诊断面板 */
+.diagnostic-panel {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 信息网格 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}

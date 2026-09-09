@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年6月19日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSAA002"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "760024012994129"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "燃料管路"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "燃料管路是连接机构和燃料发动机的管路，主要用来进行运输燃料。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "50.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

@@ -1,0 +1,62 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年5月7日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSAA001"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4294967295"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "氧化剂管路"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "氧化剂管路连接机构主要由球形接头、外套螺母、锥形接管嘴组成；其中球形接头和氧化剂试验台管路焊接，锥面接管嘴与氧化剂发动机管路焊接，用外套落寞将球形接头和锥面管嘴的锥面压紧，实现氧化剂试验台管路与氧化剂发动机管路的连接。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "5.01 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "40.01 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "5.1 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "1.1 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    },
+    {
+        "consumerinfo": "已飞行次数",
+        "attributevalue": 2
+    }
+]

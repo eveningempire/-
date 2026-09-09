@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2016年12月1日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSCC001"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204967211"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "接收机"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "外差接收机中外差方法久经检验，性能出色。实施原理是混频到中频 (IF)。IF需选择足够高的频率，使得实际滤波器在工作频段中能够提供良好的镜像抑制和LO隔离。当有超高动态范围ADC可用时，增加一个混频级以降低频率也很常见。此外，接收机增益分布在不同的频率上，这使得高增益接收机发生振荡的风险非常小。通过适当的频率规划，外差接收机可以实现非常好的杂散能量和噪声性能。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "10.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "100.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "220.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "5.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

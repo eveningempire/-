@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年6月5日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSCB001"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204967233"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "上行接收机"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "上行接收机为独立四路上行光接收，可同时接收四路上行光信号，满足各种应用场合。全智能化的设计，所有功能都可以自动完成，本地控制模块有完整的状态指示及控制功能，也可由标准SNMP的后台网管软件监控或调整。可以四通道射频独立输出，也可以具备二切一接口功能，两路均可分别独立实现反向通路的冗余备份； 具备四合一接口功能，一路混合输出，即也可以四通道混合输出"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "4.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "18.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "220.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "5.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

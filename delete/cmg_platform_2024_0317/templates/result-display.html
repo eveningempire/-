@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/echarts-5.3.1/dist/echarts.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/core/dist/logic-flow.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Menu.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Group.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/DndPanel.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Snapshot.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/SelectionSelect.js"></script>
+    <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/@logicflow/core/dist/style/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/@logicflow/extension/lib/style/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/msfgComponent/msfgCss/index.css">
+    <style>
+        /* 覆盖Element UI的默认样式 */
+        .red-border-input .el-input__inner {
+          border-color: red;
+        }
+        .green-border-input .el-input__inner {
+          border-color: green;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            font-family: "Microsoft YaHei";
+        }
+
+        .el-card__body {
+            overflow: auto;
+        }
+
+        .el-progress .el-progress__text {
+            top: 50%;
+            white-space: pre;
+        }
+
+        .el-progress .el-progress-bar__outer {
+            background: rgba(81, 196, 201, 0.5);
+        }
+
+        .header {
+            width: 100%;
+            height: 50%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .header .left-section,
+        .header .right-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        /*.main-content {*/
+        /*    width: 100%;*/
+        /*    height: 50%;*/
+        /*    display: flex;*/
+        /*    flex-direction: column;*/
+        /*    align-items: center;*/
+        /*    justify-content: center;*/
+        /*}*/
+
+        .main-content {
+            width: 100%;
+            height: auto; /* Allow the content to determine the height */
+            display: flex;
+            flex-direction: column;
+            align-items: stretch; /* Align items to fill the container width */
+            justify-content: flex-start; /* Align content to the top */
+        }
+
+        .button-container {
+            margin-bottom: 10px;
+        }
+
+        .el-tag {
+            font-size: 16px;
+        }
+
+        .el-progress__text {
+            font-size: 16px;
+        }
+
+        .el-col {
+            position: relative;
+        }
+
+        .el-col::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -5px;
+            border-bottom: 1px dashed #ddd;
+            width: 100%;
+        }
+    </style>
+    <title>现场排故工具</title>
+</head>
+
+<body>
+    <div id="result-display">
+        <div class="header">
+            <div class="left-section">
+                <span> 现场排故工具 > {{obj.split("#")[0]}}产品故障诊断 </span>
+            </div>
+            <div class="right-section" style="justify-content: flex-end;">
+                <el-button size="small" type="warning" >
+                    <el-avatar icon="el-icon-user-solid" :size="20" fit="fill"></el-avatar>
+                    <span style="font-size: 15px!important; vertical-align: center;"></span>
+                </el-button>
+            </div>
+            <el-row :gutter="20" class="full-width">
+                <!-- First row -->
+                <el-col :span="4">
+<!--                    <input type="file" ref="dataFile" accept="application/.csv" @change="resetTestCount" />-->
+                    <el-input :class="{'red-border-input': isRedBorder, 'green-border-input': isGreenBorder}" v-model="newInstName" placeholder="输入新测试编号" size="mini" clearable @change="checkNewInstName"></el-input>
+                </el-col>
+                <el-col :span="4">
+                    <el-select v-model="instname" placeholder="查看历史测试" size="mini" clearable filterable default-first-option>
+                        <el-option v-for="institm in instances" :key="institm.name" :label="institm.name" :value="institm.name">
+                            <span style="float: left">{{ institm.name }}</span>
+                            <span style="float: right; color: #8492a6; font-size: 13px">
+                                {{ Math.round((1-institm.state)*10000)/100 }} ( {{ Math.round((1-institm.state_dd)*10000)/100 }} )
+                            </span>
+                        </el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="4">
+                    <span>开始时间: </span><el-tag size="mini" type="primary">{{ startTime }}</el-tag>
+                </el-col>
+                <el-col :span="4">
+                    <span>耗费时间: </span><el-tag size="mini" type="primary">{{ costtime }}</el-tag>
+                </el-col>
+                <!-- The right side will take 8 spans for the dashboard -->
+                <el-col :span="8" rowspan="2">
+                    <el-progress type="dashboard" :percentage="Math.round((1-(state*(1-w_dd)+state_dd*w_dd))*10000)/100" :color="getItemColor(state*(1-w_dd)+state_dd*w_dd)" :format="getState">
+                    </el-progress>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20" class="full-width" style="margin-top: 1px;">
+                <!-- Second row -->
+                <el-col :span="4">
+                    <input type="file" ref="dataFile" accept="application/.csv" @change="resetTestCount" :disabled="isFileInputDisabled" />
+                </el-col>
+                <el-col :span="4">
+<!--                    <el-button size="medium" @click="getResult" :disabled="instname === null">获取结果</el-button>-->
+                    <el-button size="medium" @click="getResult" :disabled="isGetResultDisabled">获取结果</el-button>
+                </el-col>
+                <el-col :span="4">
+                    <span>专家评估结果: </span><br>
+                    <el-tag size="mini" type="primary">{{ Math.round((1-actinstitm.state)*10000)/100 }}</el-tag>
+                </el-col>
+                <!-- <el-col :span="4">
+                    <span>融合评估结果: </span><br>
+                    <el-tag size="mini" type="primary">{{ Math.round((1-actinstitm.state_dd)*10000)/100 }}</el-tag>
+                </el-col> -->
+            </el-row>   
+        </div>
+        <div class="main-content">
+            <div class="button-container">
+                <el-button type="primary" @click="changeViewToMsfgResult">多信号流图推理结果</el-button>
+                <el-button type="primary" @click="changeView('systemHealth')">各分系统完好率</el-button>
+                <el-button type="primary" @click="changeView('diagnosticDetails')">诊断详情</el-button>
+                
+               
+            </div>
+            <div v-if="currentView === 'msfgResult'" style="width: 100%; height: 100%;">
+                <el-row style="z-index: 1;">
+                    <el-col :span="10"> 多信号流图推理结果 </el-col>
+                    <!-- <el-col :span="10" :offset="2">
+                        <span :style="{color: showDDmsfg ? '#ff4949' : '#13ce66'}">只显示专家规则判别</span>
+                        <el-switch v-model="showDDmsfg" size="mini" :active-color="'#13ce66'" :inactive-color="'#ff4949'"></el-switch>
+                        <span :style="{color: showDDmsfg ? '#13ce66' : '#ff4949'}">显示双策略判别</span>
+                    </el-col> -->
+                </el-row>
+                <div id="flowContainer" style="height: 68vh; width: 100%;">
+                    <ate-multi-signal-flow-graph ref="multiFlowShow" :editable="false" :obj="obj" />
+                </div>
+            </div>
+            <div v-if="currentView === 'systemHealth'" style="width: 100%; height: 100%;">
+                <el-card>
+                    <div slot="header">
+                        <el-row>
+                            <el-col :span="10">
+                                各分系统完好率
+                            </el-col>
+                            <el-col :span="10" :offset="2">
+                                <!-- <el-button type="primary" plain size="mini" @click="showDD=!showDD">
+                                    {{showDD?'只显示专家规则判别':'显示双策略判别'}} -->
+                                </el-button>
+                            </el-col>
+                        </el-row>
+                    </div>
+                    <div style="height: 60vh; overflow: auto">
+                        <el-row>
+                            <el-col :span="12">
+                                <!-- 通过 subsysname 查找数据 -->
+                                <el-row v-for="subsysInfo in systemData" :key="subsysInfo.name" style="padding: 5px 0;">
+                                    <el-col :span="5">
+                                        <el-tag type="primary" plain size="mini" @click="getInfo(subsysInfo.name, subsysInfo.name)">
+                                            {{ subsysInfo.name }}
+                                        </el-tag>
+                                    </el-col>
+                                    <el-col :span="15" :offset="1">
+                                        <p>
+                                            <el-progress :percentage="Math.round((1-getSystemState(subsysInfo.name))*10000)/100" :stroke-width="25" :text-inside="true" :color="getItemColor(getSystemState(subsysInfo.name))" :format="getSubState('[专家规则判别]')" @click.native="getInfo(subsysInfo.name, subsysInfo.name)">
+                                            </el-progress>
+                                        </p>
+                                        <!-- <p v-if="showDD">
+                                            <el-progress :percentage="Math.round((1-getSystemStateDD(subsysInfo.name))*10000)/100" :stroke-width="25" :text-inside="true" :color="getItemColor(getSystemStateDD(subsysInfo.name))" :format="getSubState('[数据驱动辅助判别]')" @click.native="getInfo(subsysInfo.name, subsysInfo.name)">
+                                            </el-progress>
+                                        </p> -->
+                                    </el-col>
+                                </el-row>
+                            </el-col>
+                            <el-col :span="12">
+                                <div ref="itemSubsysArea" :style="{height: '60vh', width: '100%'}"></div>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-card>
+            </div>
+            <div v-if="currentView === 'diagnosticDetails'" style="width: 100%; height: 100%;">
+                <el-card>
+                    <div slot="header">
+                        {{subsysname}}诊断详情
+                    </div>
+                    <el-row>
+                        <el-col :span="1">
+                            <div ref="itemSubsysArea" :style="{height: '60vh', width: '100%'}"></div>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-row :style="{'padding-left': '15px', height: '30vh'}">
+                                <el-row style="padding-top: 5px;">
+                                    <span>专家规则判别结果</span>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-row v-for="rule_row in rule_rows" :key="rule_row">
+                                            <el-col :span="Math.round(24 / rule_columns - 1)" :offset="1" v-for="ruleItem, count in allDetectInfoRules.slice((rule_row_actual + rule_row - 1) * rule_columns, (rule_row_actual + rule_row) * rule_columns)" :key="count">
+                                                <el-button :type="getItemType(ruleItem.state)" size="mini" @click="clickRuleDetail(count + (rule_row_actual + rule_row - 1) * rule_columns)" style="margin-top: 10px;">
+                                                    <div>{{ ruleItem.fname }}</div>
+                                                    <div>
+                                                        <el-progress :show-text="false" :stroke-width="5" :percentage="(1 - ruleItem.state) * 100" :color="getItemColor(ruleItem.state)"></el-progress>
+                                                    </div>
+                                                </el-button>
+                                            </el-col>
+                                        </el-row>
+                                    </el-col>
+                                    <!-- <el-col :span="2" v-if="allDetectInfoRules.length > rule_columns * rule_rows">
+                                        <el-slider v-model="ruleRowActualRatio" :format-tooltip="formatTooltip" vertical :style="{height: '30vh'}">
+                                        </el-slider>
+                                    </el-col> -->
+                                </el-row>
+                            </el-row>
+                            <el-divider></el-divider>
+                            <el-row :style="{'padding-left': '15px', height: '30vh'}" v-if="allDetectInfoDDs">
+                                <!-- <el-row style="padding-top: 5px;">
+                                    <span>数据驱动判别结果</span>
+                                </el-row> -->
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-row v-for="datadriven_row in datadriven_rows" :key="datadriven_row">
+                                            <el-col :span="Math.round(24 / datadriven_columns - 1)" :offset="1" v-for="datadrivenItem, count in allDetectInfoDDs.slice((datadriven_row_actual + datadriven_row - 1) * datadriven_columns, (datadriven_row_actual + datadriven_row) * datadriven_columns)" :key="count">
+                                                <el-button :type="getItemType(datadrivenItem.state)" size="mini" @click="clickDatadrivenDetail(count + (datadriven_row_actual + datadriven_row - 1) * datadriven_columns)" style="margin-top: 10px;">
+                                                    <div>{{ datadrivenItem.name }}</div>
+                                                    <div>
+                                                        <el-progress :show-text="false" :stroke-width="5" :percentage="(1 - datadrivenItem.state) * 100" :color="getItemColor(datadrivenItem.state)"></el-progress>
+                                                    </div>
+                                                </el-button>
+                                            </el-col>
+                                        </el-row>
+                                    </el-col>
+                                    <el-col :span="2" v-if="allDetectInfoDDs.length > datadriven_columns * datadriven_rows">
+                                        <el-slider v-model="datadriven_row_actual_ratio" :format-tooltip="formatTooltip" vertical :style="{height: '30vh'}">
+                                        </el-slider>
+                                    </el-col>
+                                </el-row>
+                            </el-row>
+                        </el-col>
+                    </el-row>
+                </el-card>
+            </div>
+            <div v-if="currentView === 'trendAnalysis'">
+                <!-- 修改后的代码 -->
+                <el-row style="width: 100%; height: 100%; display: flex;">
+                    <!-- Adjust the left side button container to use a fixed width -->
+                    <el-col :span="4" style="height: 100%; overflow-y: auto; flex-basis: 20%; max-width: 2000px;">
+                        <div class="button-container" style="display: flex; flex-direction: column;">
+                            <el-button v-for="subsys in subsystemNames" :key="subsys" type="primary" @click="selectSubsystem(subsys)" style="margin-bottom: 10px;">
+                                {{ subsys }}
+                            </el-button>
+                        </div>
+                    </el-col>
+
+                    <!-- Increase the width of the chart container to fill the remaining space -->
+                    <el-col :span="20" style="height: 100%; flex-grow: 1; width: 80%;">
+                        <div id="chart-container" style="width: 100%; height: 600px;"></div>
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+        <el-drawer :visible.sync="datadrivenDialog" :title="'判据['+(datadrivenClickItem.fname || datadrivenClickItem.name)+']详情信息'" :size="Math.round(windowLen*0.6)" v-if="datadrivenClickItem">
+            <el-card class="card" :style="{height: Math.round(allHeight+50)+'px', padding: '10px'}">
+                <el-row :style="{height: Math.round(allHeight*0.3)+'px', 'margin-top': '15px', 'margin-left': '15px', 'margin-right': '15px'}">
+                    <el-col :span="15">
+                        <el-descriptions size="mini" :column="1" border>
+                            <el-descriptions-item :label="datadrivenDescriptItem.name" v-for="datadrivenDescriptItem,k in datadrivenClickItem.descript" :key="k">
+                                <span v-text="datadrivenDescriptItem.value"></span>
+                            </el-descriptions-item>
+                        </el-descriptions>
+                    </el-col>
+                    <el-col :span="5" :offset="2" type="flex" align="middle">
+                        <el-progress type="dashboard" :percentage="Math.round((1-datadrivenClickItem.state)*10000)/100" :width="Math.min(windowLen*0.25, Math.round(allHeight*0.3))" :color="getItemColor(datadrivenClickItem.state)" :format="getItemState">
+                        </el-progress>
+                    </el-col>
+                </el-row>
+                <el-row :style="{height: Math.round(allHeight*0.2)+'px', 'margin-left': '5px', 'margin-right': '5px'}">
+                    <div :ref="'datadrivenItemArea'+ (datadrivenClickItem.fname || datadrivenClickItem.name)" :style="{height: Math.round(allHeight*0.2)+'px', width: Math.round(windowLen*0.5)+'px'}">
+                    </div>
+                </el-row>
+                <el-row :style="{height: Math.round(allHeight*0.5)+'px', 'margin-left': '5px', 'margin-right': '5px', 'overflow-y': 'auto'}">
+                    <div :ref="'datadrivenItemAreaBy'+pa" v-for="pa of (datadrivenClickItem.pnames || datadrivenClickItem.relatPara)" :key="pa" :style="{height: Math.round(allHeight*0.2)+'px', width: Math.round(windowLen*0.5)+'px'}">
+                    </div>
+                </el-row>
+            </el-card>
+        </el-drawer>
+    </div>
+</body>
+<script type="module">
+    
+    import { msfgComp } from '/static/jsscripts/msfgComponent/index.mjs'
+    var vm = new Vue({
+        el: "#result-display",
+        components: {
+            'ate-multi-signal-flow-graph': msfgComp,
+        },
+        data() {
+            return {
+                result222: [],  // 用于存储 result222 数据
+                w_dd: 0.3,
+                instances: [],
+                markLineData: [30, 60, 90],
+                visualConfig: [
+                    {
+                        gte: 90,
+                        lt: 100,
+                        color: '#93CE07'
+                    },
+                    {
+                        gte: 60,
+                        lt: 90,
+                        color: '#FBDB0F'
+                    },
+                    {
+                        gte: 30,
+                        lt: 60,
+                        color: '#FC7D02'
+                    },
+                    {
+                        gte: 0,
+                        lt: 30,
+                        color: '#FD0100'
+                    },
+                ],
+                showDD: true,
+                showDDmsfg: true,
+                detectInfoDDs: [],
+                allDetectInfoDDs: [],
+                detectInfoRules: [],
+                allDetectInfoRules: [],
+                detectInfoMfsg: [],
+                rule_columns: 3,
+                rule_rows: 3,
+                rule_row_actual: 0,
+                rule_row_actual_ratio: 100,
+                datadriven_row_actual: 0,
+                datadriven_row_actual_ratio: 100,
+                datadriven_columns: 3,
+                datadriven_rows: 3,
+                actinstitm: {},
+                state: 0,
+                state_dd: 0,
+                stateRange: [],
+                paraData: {},
+                pnames: {},
+                systemData: [],
+                systemData_dd: [],
+                timeData: [],
+                compMap: {},
+                datadrivenClickItem: null,
+                datadrivenDialog: false,
+                subsysname: null,
+                instname: null,  // 选择的历史架次编号
+                newInstName: null,  // 新建架次编号
+                checkNewInstNameOk: false,  // 检查新建的编号是否已经存在
+                isRedBorder: true,
+                isGreenBorder: false,
+                checkNewInstNameCss: {'border-color': 'green'},
+                isGetResultDisabled: true,  //是否禁用获取结果按钮
+                isFileInputDisabled: true,  //是否禁用文件上传按钮
+                obj: "",
+                usrname: "",
+                usrdes: "",
+                user: "",
+                admin: "admin",
+                currentView: 'msfgResult',
+                startTime: '',
+                testTime: '',
+                lastFile: null,
+                costtime:null
+                
+
+
+            }
+        },
+        created() {
+            this.resolveUrl(window.name);
+            window.name = "现场排故工具";
+            if (this.obj) {
+                let loading = this.$loading({
+                    lock: true,
+                    text: '加载中，请稍候...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 10, 0, 0.5)'
+                });
+                //let formData = new FormData();
+                //formData.append("obj", this.obj);
+                //axios.post("/ontime-test/get-inst-all", formData).then(res => {
+                //   this.instances = res.data;
+                //    loading.close();
+                //}).catch(err => {
+                //    this.$message.error("故障诊断失败")
+                //    loading.close()
+                //})
+                this.refreshInstances(loading);
+            }
+        },
+        mounted() {
+            if (this.obj) {
+                let loading = this.$loading({
+                    lock: true,
+                    text: '加载中，请稍候...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 10, 0, 0.5)'
+                })
+                let formData = new FormData();
+                formData.append("obj", this.obj);
+                axios.post("/ontime-test/init-msfg-panel", formData).then(res => {
+                    if (this.$refs.multiFlowShow) {
+                        this.$refs.multiFlowShow.handleUpdatImportData({
+                            value: {
+                                "SystemData": res.data
+                            },
+                            type: "global"
+                        });
+                    }
+                    loading.close();
+                }).catch(err => {
+                    this.$message.error("故障诊断失败")
+                    loading.close()
+                })
+            }
+        },
+        computed: {
+            allHeight() {
+                return (window.innerHeight - 100) || 700;
+            },
+            windowLen() {
+                return window.innerWidth;
+            },
+        },
+        watch: {
+            // checkNewInstNameOk(newValue, oldValue) {
+            //     if (newValue) {  // 检查通过, 启用两个按钮
+            //         this.isGetResultDisabled = false;
+            //         this.isFileInputDisabled = false;
+            //     } else {  // 检查不通过, 禁用两个按钮
+            //         this.isGetResultDisabled = true;
+            //         this.isFileInputDisabled = true;
+            //     }
+            // },
+            datadriven_row_actual_ratio(val, nval) {
+                if (this.subsysname) {
+                    let rows_all = Math.ceil(this.allDetectInfoDDs.length / this.datadriven_columns) - this.datadriven_rows;
+                    this.datadriven_row_actual = Math.round(rows_all * (1 - this.datadriven_row_actual_ratio / 100));
+                } else {
+                    this.datadriven_row_actual = 0;
+                }
+            },
+            ruleRowActualRatio(val, nval) {
+                if (this.subsysname) {
+                    let rows_all = Math.ceil(this.allDetectInfoRules.length / this.rule_columns) - this.rule_rows;
+                    this.rule_row_actual = Math.round(rows_all * (1 - this.ruleRowActualRatio / 100));
+                } else {
+                    this.rule_row_actual = 0;
+                }
+            },
+            instname(val, nval) {
+                if (this.instances.map(itm => itm.name).includes(this.instname)) {
+                    let loading = this.$loading({
+                        lock: true,
+                        text: '加载中，请稍候...',
+                        spinner: 'el-icon-loading',
+                        background: 'rgba(0, 10, 0, 0.5)'
+                    })
+                    this.actinstitm = this.instances.filter(itm => {
+                        return itm.name == this.instname
+                    })[0]
+                    const formData = new FormData();
+                    formData.append("obj", this.obj);
+                    formData.append("instname", this.instname);
+                    axios.post("/ontime-test/get-inst-one", formData).then(res => {
+                        this.state = res.data.state;
+                        this.state_dd = res.data.state_dd;
+                        this.compMap = res.data.compMap;
+                        this.stateRange = res.data.stateRange;
+                        this.detectInfo = res.data.detectInfo;
+                        this.systemData = res.data.systemData;
+                        this.systemData_dd = res.data.systemData_dd;
+                        this.timeData = res.data.timeData;
+                        this.pnames = res.data.pnames;
+                        this.paraData = res.data.paraData;
+                        this.detectInfoRules = this.detectInfo.rule;
+                        this.allDetectInfoRules = this.detectInfo.rule;
+                        this.detectInfoDDs = this.detectInfo.ml;
+                        this.allDetectInfoDDs = this.detectInfo.ml;
+                        this.detectInfoMfsg = this.detectInfo.mfsg;
+                        this.detectInfoMfsgDD = this.detectInfo.mfsg_dd;
+                        this.change_msfg_mode();
+                        this.$forceUpdate();
+                        loading.close();
+                    }).catch(err => {
+                        this.$message.error("故障诊断失败")
+                        loading.close()
+                    })
+                }
+            },
+            showDDmsfg(val, nval) {
+                this.change_msfg_mode();
+            }
+        },
+        methods: {
+            checkNewInstName(){
+                this.checkNewInstNameOk = null
+                if (!this.newInstName || this.newInstName.trim() === '') {
+                    this.$message.error("测试编号不可为空")
+                    this.checkNewInstNameOk = false
+                    this.isGetResultDisabled = true;
+                    this.isFileInputDisabled = true;
+                    this.isRedBorder = true
+                    this.isGreenBorder = false
+                } else {
+                    this.$message.success("可用的测试编号")
+                    this.checkNewInstNameOk = true
+                    this.isGetResultDisabled = false;
+                    this.isFileInputDisabled = false;
+                    this.isRedBorder = false
+                    this.isGreenBorder = true
+                }
+            },
+            // 改为异步方法
+            async getResult222() {
+                let formData = new FormData();
+                formData.append("obj", this.obj);
+
+                let loading = this.$loading({
+                    lock: true,
+                    text: '加载中，请稍候...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 10, 0, 0.5)'
+                });
+
+                try {
+                    const res = await axios.post("/ontime-test/get-result222", formData);
+                    this.result222 = res.data;
+                } catch (err) {
+                    this.$message.error("获取趋势分析数据失败");
+                } finally {
+                    loading.close();
+                }
+                
+            },
+
+            refreshInstances(loading) {
+                let formData = new FormData();
+                formData.append("obj", this.obj);
+                axios.post("/ontime-test/get-inst-all", formData).then(res => {
+                    this.instances = res.data;
+                    if (loading) loading.close();
+                }).catch(err => {
+                    this.$message.error("更新测试列表失败");
+                    if (loading) loading.close();
+                });
+            },
+
+            getSubsystemNames() {
+                this.subsystemNames = [...new Set(this.result222.map(item => item.subsystem_name))];
+            },
+
+            selectSubsystem(subsys) {
+                const chartData = this.result222.filter(item => item.subsystem_name === subsys);
+                const testTimes = [...new Set(chartData.map(item => item.test_time))];
+                const numberOfFlights = testTimes.length;
+
+                const totalPoints = 1000; // Total number of points for the chart
+                const pointsPerFlight = Math.floor(totalPoints / numberOfFlights);
+
+                if (this.chart) {
+                    this.chart.clear();
+                }
+
+                const seriesData = testTimes.map((testTime, index) => {
+                    const batchData = chartData.filter(item => item.test_time === testTime);
+                    let stateRanges = batchData.map(item => JSON.parse(item.stateRange)).flat();
+
+                    // Adjust the data length to match pointsPerFlight
+                    if (stateRanges.length < pointsPerFlight) {
+                        // Upsample by repeating values or using interpolation
+                        stateRanges = this.upsampleData(stateRanges, pointsPerFlight);
+                    } else if (stateRanges.length > pointsPerFlight) {
+                        // Downsample the data
+                        stateRanges = this.downsampleData(stateRanges, pointsPerFlight);
+                    }
+
+                    const xData = Array.from({ length: pointsPerFlight }, (_, i) => index * pointsPerFlight + i);
+
+                    return {
+                        name: `架次 ${index + 1}`,
+                        type: 'line',
+                        data: xData.map((x, i) => [x, stateRanges[i]]),
+                        smooth: true
+                    };
+                });
+
+                this.chart = echarts.init(document.getElementById('chart-container'));
+                const option = {
+                    title: { text: `Subsystem: ${subsys}` },
+                    tooltip: { trigger: 'axis' },
+                    xAxis: {
+                        type: 'value',
+                        min: 0,
+                        max: totalPoints,
+                        splitLine: { show: false },
+                        axisLabel: {
+                            formatter: function (value) {
+                                return ''; // Optionally, format x-axis labels
+                            }
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        min: 0,
+                        max: 1
+                    },
+                    series: seriesData
+                };
+                this.chart.setOption(option);
+            },
+
+            randomSample(data, targetLength) {
+                const sampled = [];
+                while (sampled.length < targetLength && data.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * data.length);
+                    sampled.push(data[randomIndex]);
+                    data.splice(randomIndex, 1);
+                }
+                return sampled;
+            },
+
+            upsampleData(data, targetLength) {
+                const result = [];
+                const factor = (data.length - 1) / (targetLength - 1);
+                for (let i = 0; i < targetLength; i++) {
+                    const idx = i * factor;
+                    const lower = Math.floor(idx);
+                    const upper = Math.ceil(idx);
+                    if (upper >= data.length) {
+                        result.push(data[data.length - 1]);
+                    } else {
+                        const weight = idx - lower;
+                        const value = data[lower] * (1 - weight) + data[upper] * weight;
+                        result.push(value);
+                    }
+                }
+                return result;
+            },
+
+            downsampleData(data, targetLength) {
+                const factor = data.length / targetLength;
+                const result = [];
+                for (let i = 0; i < targetLength; i++) {
+                    const idx = Math.floor(i * factor);
+                    result.push(data[idx]);
+                }
+                return result;
+            },
+
+            async goToTrendAnalysis() {
+                console.log("goToTrendAnalysis method triggered");
+                await this.getResult222();  // 等待获取到结果后再执行后续操作
+                this.getSubsystemNames();
+                this.currentView = 'trendAnalysis';
+            },
+
+            resolveUrl(urlStr) {
+                if (urlStr.includes("admin=")) {
+                    this.admin = urlStr.split("admin=")[1].split("&")[0];
+                } else {
+                    this.admin = "editor";
+                }
+                if (urlStr.includes("usrname=")) {
+                    this.usrname = urlStr.split("usrname=")[1].split("&")[0];
+                } else {
+                    this.usrname = "未登录";
+                    
+                }
+                if (urlStr.includes("usrname=")){
+                  this.usrdes = urlStr.split("descript=")[1].split("?")[0];
+                } else{
+                  this.usrdes = "";
+                }
+                if (urlStr.includes("usrid=")){
+                  this.user = urlStr.split("usrid=")[1].split("?")[0];
+                } else{
+                  this.user = "";
+                }
+                if (urlStr.includes("obj=")) {
+                    this.obj = urlStr.split("obj=")[1].split("&")[0];
+                    console.log(this.obj);
+                } else {
+                    this.obj = "";
+                }
+            },
+            changeUsrName() {
+                window.location.href = "/";
+            },
+            change_msfg_mode() {
+                if (this.showDDmsfg) {
+                    if (this.$refs.multiFlowShow) {
+                        this.$refs.multiFlowShow.handleUpdatImportData({
+                            value: {
+                                "SystemData": this.$refs.multiFlowShow.renderStructColor(this.detectInfoMfsgDD, "analyse")
+                            },
+                            type: "global"
+                        });
+                    }
+                } else {
+                    if (this.$refs.multiFlowShow) {
+                        this.$refs.multiFlowShow.handleUpdatImportData({
+                            value: {
+                                "SystemData": this.$refs.multiFlowShow.renderStructColor(this.detectInfoMfsg, "analyse")
+                            },
+                            type: "global"
+                        });
+                    }
+                }
+            },
+            cal_day(timestp) {
+                if (timestp) {
+                    return Math.round((new Date().getTime() - timestp) / 86400000);
+                } else {
+                    return "--"
+                }
+            },
+            convert_day(timestp) {
+                if (timestp) {
+                    var time = new Date(timestp);
+                    var year = time.getFullYear();
+                    var month = time.getMonth() + 1;
+                    var day = time.getDate();
+                    var hour = time.getHours();
+                    var minute = time.getMinutes();
+                    var second = time.getSeconds();
+                    return year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day) + ' ' + (hour < 10 ? '0' + hour : hour) + ':' + (minute < 10 ? '0' + minute : minute) + ':' + (second < 10 ? '0' + second : second)
+                } else {
+                    return '--'
+                }
+            },
+            getSystemState(name) {
+                let system = this.systemData.find(item => item.name === name);
+                return system ? system.state : 0;
+            },
+            getSystemStateDD(name) {
+                let system = this.systemData_dd.find(item => item.name === name);
+                return system ? system.state : 0;
+            },
+            getInfo(subsys, subsysName) {
+                this.subsysname = subsysName;
+
+                this.detectInfoRules = this.allDetectInfoRules.filter(itm => {
+                    return itm.component == subsys || (Object.keys(this.compMap).includes(itm.component) && this.compMap[itm.component] == subsys)
+                });
+                this.detectInfoDDs = this.allDetectInfoDDs.filter(itm => {
+                    return itm.component == subsys || (Object.keys(this.compMap).includes(itm.component) && this.compMap[itm.component] == subsys)
+                });
+
+                let sysData = this.systemData.filter(itm => {
+                    return itm.name == subsys;
+                });
+                let sysData_dd = this.systemData_dd.filter(itm => {
+                    return itm.name == subsys;
+                });
+
+                this.initZone(
+                    "itemSubsysArea",
+                    "分系统[" + this.subsysname + "]健康评估结果",
+                    this.timeData, [{
+                        name: "健康分数(专家检验推断)",
+                        type: 'line',
+                        data: sysData.length > 0 ? sysData[0].stateRange.map(itm => Math.round((1 - itm) * 10000) / 100) : [],
+                    }, {
+                        name: "健康分数(双策略融合)",
+                        type: 'line',
+                        data: sysData_dd.length > 0 ? sysData_dd[0].stateRange.map(itm => Math.round((1 - itm) * 10000) / 100) : [],
+                    }],
+                    null,
+                    this.markLineData, this.visualConfig
+                );
+            },
+            getItemState(score) {
+                if (score < 10) {
+                    return score + "分\n\n状态恶劣";
+                } else if (score < 50) {
+                    return score + "分\n\n状态较差";
+                } else if (score < 70) {
+                    return score + "%\n\n状态一般";
+                } else {
+                    return score + "%\n\n状态良好";
+                }
+            },
+            // draw Function
+            initZone(refName, title, timeData, data, dataName, markLineData, visualConfig) {
+                if (Array.isArray(this.$refs[refName])) {
+                    var itemZone = echarts.init(this.$refs[refName][0]);
+                } else {
+                    var itemZone = echarts.init(this.$refs[refName]);
+                }
+                let options = {
+                    title: {
+                        text: title,
+                        textStyle: {
+                            color: "black",
+                            fontSize: 18,
+                        },
+                        left: '1%'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    grid: {
+                        left: '10%',
+                        right: '25%',
+                        bottom: '25%'
+                    },
+                    toolbox: {
+                        right: 10,
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [
+                        {},
+                        {
+                            type: 'inside'
+                        }
+                    ],
+                }
+                if (dataName) {
+                    options.series = {
+                        name: dataName,
+                        type: 'line',
+                        data: data,
+                    };
+                    options.xAxis = {
+                        name: '测试日期',
+                        data: timeData,
+                        axisLabel: {
+                            color: 'black',
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "black",
+                            }
+                        }
+                    };
+                    options.yAxis = {
+                        name: '健康状态',
+                        type: 'value',
+                        min: 0,
+                        max: 100,
+                        axisLabel: {
+                            color: 'black',
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "black",
+                            }
+                        }
+                    };
+                } else {
+                    options.series = data;
+                    options.legend = {
+                        orient: 'vertical',
+                        x: 'right',
+                        y: 'center',
+                    };
+                    options.xAxis = {
+                        name: '测试时间',
+                        data: timeData,
+                        axisLabel: {
+                            color: 'black',
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "black",
+                            }
+                        }
+                    };
+                    options.yAxis = {
+                        name: '参数数值',
+                        type: 'value',
+                        axisLabel: {
+                            color: 'black',
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "black",
+                            }
+                        }
+                    }
+                }
+                if (markLineData) {
+                    options.series.markLine = {
+                        silent: true,
+                        lineStyle: {
+                            color: '#333'
+                        },
+                        data: [],
+                    }
+                    markLineData.forEach(itm => {
+                        options.series.markLine.data.push({
+                            yAxis: itm
+                        });
+                    })
+                }
+                if (visualConfig) {
+                    options.visualMap = {
+                        top: 50,
+                        right: 10,
+                        pieces: visualConfig,
+                    }
+                }
+                itemZone.setOption(options);
+            },
+            initItemZone(refName, pname, timeData, paraData, supportData, supportLabel) {
+                let itemData = [{
+                    name: pname + '|参数曲线',
+                    type: 'line',
+                    data: paraData[pname],
+                }];
+                if (supportData) {
+                    supportData.forEach((paraItem, count) => {
+                        itemData.push({
+                            name: supportLabel ? supportLabel[count] : '辅助线' + count,
+                            type: 'line',
+                            data: supportData[count],
+                        })
+                    })
+                }
+                this.initZone(refName + pname, pname, timeData, itemData, null);
+            },
+            getItemType(ratio) {
+                if (ratio > 0.9) {
+                    return "danger";
+                } else if (ratio > 0.6) {
+                    return "warning";
+                } else if (ratio > 0.3) {
+                    return "warning";
+                } else {
+                    return "success";
+                }
+            },
+            resetTestCount() {
+                this.startTime = '';
+                this.testTime = '';
+                this.lastFile = this.$refs.dataFile.files[0];
+            },
+            getResult() {
+
+                // ////
+
+                
+
+                //     //////
+
+
+                if (this.lastFile !== this.$refs.dataFile.files[0]) {
+                    this.resetTestCount();
+                }
+                const currentTime = new Date();
+                this.testTime = this.convert_day(currentTime.getTime());
+                if (!this.startTime) {
+                    this.startTime = this.testTime;
+                }
+                if (!this.newInstName) {
+                    this.$message.error("请输入测试编号");
+                } else {
+                    this.fetchResult(false);  // 请求后端
+                }
+            },
+            fetchResult(isViewChange) {
+                let loading = this.$loading({
+                    lock: true,
+                    text: '加载中，请稍候...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 10, 0, 0.5)'
+                })
+                let formData = new FormData();
+                formData.append("obj", this.obj);
+                formData.append("instname", this.newInstName);
+                formData.append("editor", this.user);
+                formData.append("dataFile", this.$refs.dataFile.files[0])
+
+
+                
+
+
+                axios.post("/ontime-test/analyse-data", formData).then(res => {
+                    this.state = res.data.state;
+                    this.state_dd = res.data.state_dd;
+                    this.compMap = res.data.compMap;
+                    this.stateRange = res.data.stateRange;
+                    this.detectInfo = res.data.detectInfo;
+                    this.systemData = res.data.systemData;
+                    this.systemData_dd = res.data.systemData_dd;
+                    this.timeData = res.data.timeData;
+                    this.pnames = res.data.pnames;
+                    this.paraData = res.data.paraData;
+                    this.detectInfoRules = this.detectInfo.rule;
+                    this.allDetectInfoRules = this.detectInfo.rule;
+                    this.detectInfoDDs = this.detectInfo.ml;
+                    this.allDetectInfoDDs = this.detectInfo.ml;
+                    this.detectInfoMfsg = this.detectInfo.mfsg;
+                    this.detectInfoMfsgDD = this.detectInfo.mfsg_dd;
+                    this.change_msfg_mode();
+                    this.actinstitm.state = res.data.state;
+                    this.actinstitm.state_dd = res.data.state_dd;
+                    this.$forceUpdate();
+                    loading.close();
+
+
+                    this.costtime = `${parseFloat(res.data.costtime).toFixed(2)}s`;
+
+                    console.log(this.costtime)
+                    
+
+                    // 请求成功, 当前架次诊断结束, 禁用上传数据和诊断按钮
+                    this.isFileInputDisabled = true;
+                    this.isGetResultDisabled = true;
+                    this.$message.success("当前测试数据诊断完成")
+                    this.refreshInstances();
+                }).catch(err => {
+                    console.log(err)
+                    this.$message.error("故障诊断失败")  // 请求不成功, 允许继续
+                    loading.close()
+                })
+            },
+            changeView(view) {
+                this.currentView = view;
+                if (view === 'msfgResult') {
+                    this.showDDmsfg = true;
+                    this.change_msfg_mode();
+                }
+            },
+            changeViewToMsfgResult() {
+                this.currentView = 'msfgResult';
+                this.showDDmsfg = true;
+                setTimeout(() => {
+                    this.change_msfg_mode();
+                }, 100);
+            },
+            backToPortal() {
+                // window.name = `现场排故工具?usrname=${this.usrname}&usrid=${this.user}&descript=${this.usrdes}&admin=${this.admin}`;
+                window.name = `现场排故工具?usrname=${encodeURIComponent(this.usrname)}&usrid=${encodeURIComponent(this.user)}&descript=${encodeURIComponent(this.usrdes)}&admin=${encodeURIComponent(this.admin)}`;
+                window.location.href = "/portal";
+            },
+            getItemColor(score) {
+                if (score > 0.9) {
+                    return "red";
+                } else if (score > 0.6) {
+                    return "orange";
+                } else if (score > 0.3) {
+                    return "#FBCD31";
+                } else {
+                    return "green";
+                }
+            },
+            getState(score) {
+                if (score < 10) {
+                    return (this.instname || this.obj.split("#")[0]) + "\n故障率显著\n\n(" + score + "%)";
+                } else if (score < 50) {
+                    return (this.instname || this.obj.split("#")[0]) + "\n故障率较高\n\n(" + score + "%)";
+                } else if (score < 70) {
+                    return (this.instname || this.obj.split("#")[0]) + "\n故障率一般\n\n(" + score + "%)";
+                } else {
+                    return (this.instname || this.obj.split("#")[0]) + "\n故障率较低\n\n(" + score + "%)";
+                }
+            },
+            getSubState(k) {
+                return score => {
+                    if (score < 10) {
+                        return k + ": 故障率显著(" + score + "%)";
+                    } else if (score < 50) {
+                        return k + ": 故障率较高(" + score + "%)";
+                    } else if (score < 70) {
+                        return k + ": 故障率一般(" + score + "%)";
+                    } else {
+                        return k + ": 故障率较低(" + score + "%)";
+                    }
+                }
+            },
+            clickDatadrivenDetail(count) {
+                this.datadrivenClickItem = this.allDetectInfoDDs[count];
+                this.datadrivenDialog = true;
+                this.$nextTick(() => {
+                    this.initZone(
+                        'datadrivenItemArea' + this.datadrivenClickItem.name,
+                        "故障[" + this.datadrivenClickItem.name + "]健康评估结果",
+                        this.timeData,
+                        this.datadrivenClickItem.scoreList.map(itm => Math.round((1 - itm) * 10000) / 100),
+                        "健康分数",
+                        this.markLineData, this.visualConfig)
+                    this.datadrivenClickItem.pnames.forEach((pname, cnt) => {
+                        if (this.datadrivenClickItem.sublabel) {
+                            this.initItemZone(
+                                'datadrivenItemAreaBy',
+                                pname,
+                                this.timeData,
+                                this.paraData,
+                                this.datadrivenClickItem.subvalue[cnt],
+                                this.datadrivenClickItem.sublabel)
+                        } else {
+                            this.initItemZone(
+                                'datadrivenItemAreaBy',
+                                pname,
+                                this.timeData,
+                                this.paraData)
+                        }
+                    })
+                })
+            },
+            clickRuleDetail(count) {
+                this.datadrivenClickItem = this.allDetectInfoRules[count];
+                this.datadrivenDialog = true;
+                this.$nextTick(() => {
+                    this.initZone(
+                        'datadrivenItemArea' + this.datadrivenClickItem.fname,
+                        "故障[" + this.datadrivenClickItem.fname + "]健康评估结果",
+                        this.timeData,
+                        this.datadrivenClickItem.scoreList.map(itm => Math.round((1 - itm) * 10000) / 100),
+                        "健康分数",
+                        this.markLineData, this.visualConfig)
+                    this.datadrivenClickItem.relatPara.forEach((pname, cnt) => {
+                        this.initItemZone(
+                            'datadrivenItemAreaBy',
+                            pname,
+                            this.timeData,
+                            this.paraData)
+                    })
+                })
+            },
+        },
+    })
+</script>
+</html>

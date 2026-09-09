@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+    <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        .wave {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        #enter-platform {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #000000;
+        }
+        #title-container {
+            margin-bottom: 30px; /* 控制标题与按钮之间的距离 */
+        }
+        #title-container h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1.5;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        #button-container el-button {
+            font-size: 1.5rem;
+        }
+    </style>
+    <title>基于模型的寿命预测系统平台</title>
+</head>
+<body>
+<div id="login">
+    <img src="/static/images/kongjianzhan/1.jpg" class="wave"/>
+    <div id="enter-platform">
+        <div id="title-container">
+            <h1>基于模型的寿命预测系统平台</h1>
+        </div>
+        <div id="button-container">
+            <el-button type="primary" size="large" @click="enterPlatform">进入系统平台</el-button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    new Vue({
+        el: "#login",
+        data() {
+            return {};
+        },
+        methods: {
+            enterPlatform() {
+                window.location.href = '/base-site'; // 替换为目标页面的路径
+            }
+        }
+    });
+</script>
+</body>
+</html>

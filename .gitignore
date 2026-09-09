@@ -1,0 +1,33 @@
+# Local Python environments and generated files
+.venv/
+**/__pycache__/
+*.py[cod]
+*.pyd
+*.egg-info/
+
+# Frontend dependencies/build caches
+frontend/node_modules/
+frontend/.vite/
+
+# Runtime output and local secrets
+logs/*
+media/*
+.env
+.env.*
+!.env.example
+
+# Large source data, database dumps and trained model binaries
+database-source/*.sql
+database-source/*.json
+integrations/qianze_simulation_data/*.zip
+integrations/**/*.pt
+integrations/**/*.pth
+integrations/**/*.pkl
+integrations/**/*.h5
+integrations/**/*.mat
+integrations/**/*.slx
+
+# Local databases and archives
+*.sqlite3
+*.db
+*.zip

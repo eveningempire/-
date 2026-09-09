@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSFG部件对应管理</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; }
+        .section { margin-bottom: 30px; }
+        .section h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d5f4e6; color: #27ae60; border: 1px solid #27ae60; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .auto-components { background: #e8f4fd; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .auto-components h3 { margin-top: 0; color: #2980b9; }
+        .component-tag { display: inline-block; background: #34495e; color: white; padding: 4px 8px; margin: 2px; border-radius: 4px; font-size: 12px; }
+        .refresh-btn { background: #3498db; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .refresh-btn:hover { background: #2980b9; }
+        .msfg-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #3498db; }
+        .msfg-info h3 { margin-top: 0; color: #2c3e50; }
+        .info-item { margin-bottom: 8px; }
+        .info-label { font-weight: bold; color: #7f8c8d; }
+                 .loading { text-align: center; color: #7f8c8d; font-style: italic; }
+         
+         /* 智能提示和建议样式 */
+         .suggestion-item { 
+             background: #f8f9fa; 
+             padding: 15px; 
+             border-radius: 6px; 
+             margin-bottom: 15px; 
+             border-left: 4px solid #3498db; 
+         }
+         .unmapped-list { 
+             display: flex; 
+             flex-wrap: wrap; 
+             gap: 5px; 
+             margin: 10px 0; 
+         }
+         .unmapped-item { 
+             background: #e9ecef; 
+             color: #495057; 
+             padding: 4px 8px; 
+             border-radius: 4px; 
+             font-size: 12px; 
+             border: 1px solid #dee2e6; 
+         }
+         .quick-action-btn { 
+             background: #e67e22; 
+             color: white; 
+             padding: 8px 16px; 
+             border: none; 
+             border-radius: 4px; 
+             cursor: pointer; 
+             font-weight: bold; 
+             transition: background-color 0.3s; 
+         }
+         .quick-action-btn:hover { 
+             background: #d35400; 
+         }
+         
+         /* 缺失映射警告框样式 */
+         .missing-mappings-alert {
+             background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+             color: white;
+             padding: 20px;
+             border-radius: 8px;
+             margin-bottom: 20px;
+             box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+             border-left: 5px solid #c44569;
+             animation: pulse 2s infinite;
+         }
+         
+         @keyframes pulse {
+             0% { box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3); }
+             50% { box-shadow: 0 4px 20px rgba(238, 90, 36, 0.5); }
+             100% { box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3); }
+         }
+         
+         .missing-mappings-alert h3 {
+             margin: 0;
+             font-size: 18px;
+             display: flex;
+             align-items: center;
+         }
+         
+         .missing-mappings-alert .alert-icon {
+             font-size: 24px;
+             margin-right: 10px;
+         }
+         
+         .missing-mappings-alert .mapping-section {
+             background: rgba(255,255,255,0.1);
+             padding: 12px;
+             border-radius: 6px;
+             margin-bottom: 10px;
+         }
+         
+         .missing-mappings-alert .mapping-tags {
+             display: flex;
+             flex-wrap: wrap;
+             gap: 5px;
+         }
+         
+         .missing-mappings-alert .mapping-tag {
+             background: rgba(255,255,255,0.2);
+             padding: 4px 8px;
+             border-radius: 4px;
+             font-size: 12px;
+         }
+         
+         .missing-mappings-alert .action-section {
+             background: rgba(255,255,255,0.15);
+             padding: 12px;
+             border-radius: 6px;
+             margin-top: 15px;
+         }
+         
+         /* 映射管理样式 */
+         .mapping-management {
+             background: #f8f9fa;
+             border-radius: 8px;
+             padding: 20px;
+         }
+         
+         .mapping-tabs {
+             display: flex;
+             border-bottom: 2px solid #dee2e6;
+             margin-bottom: 20px;
+         }
+         
+         .tab-btn {
+             background: none;
+             border: none;
+             padding: 12px 24px;
+             cursor: pointer;
+             font-size: 14px;
+             font-weight: 500;
+             color: #6c757d;
+             border-bottom: 3px solid transparent;
+             transition: all 0.3s;
+         }
+         
+         .tab-btn.active {
+             color: #3498db;
+             border-bottom-color: #3498db;
+             background: #fff;
+         }
+         
+         .tab-btn:hover {
+             color: #3498db;
+             background: #f8f9fa;
+         }
+         
+         .tab-content {
+             display: none;
+         }
+         
+         .tab-content.active {
+             display: block;
+         }
+         
+         .mapping-controls {
+             display: flex;
+             gap: 10px;
+             margin-bottom: 20px;
+             flex-wrap: wrap;
+         }
+         
+         .action-btn {
+             background: #6c757d;
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 14px;
+             transition: background-color 0.3s;
+         }
+         
+         .action-btn.primary {
+             background: #3498db;
+         }
+         
+         .action-btn:hover {
+             background: #495057;
+         }
+         
+         .action-btn.primary:hover {
+             background: #2980b9;
+         }
+         
+         .mappings-table {
+             background: white;
+             border-radius: 6px;
+             overflow: hidden;
+             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+         }
+         
+         .mappings-table table {
+             width: 100%;
+             border-collapse: collapse;
+         }
+         
+         .mappings-table th,
+         .mappings-table td {
+             padding: 12px;
+             text-align: left;
+             border-bottom: 1px solid #dee2e6;
+         }
+         
+         .mappings-table th {
+             background: #f8f9fa;
+             font-weight: 600;
+             color: #495057;
+         }
+         
+         .mappings-table tr:hover {
+             background: #f8f9fa;
+         }
+         
+         .mapping-checkbox {
+             width: 20px;
+             height: 20px;
+         }
+         
+         .mapping-actions {
+             display: flex;
+             gap: 5px;
+         }
+         
+         .mapping-actions button {
+             background: none;
+             border: none;
+             cursor: pointer;
+             padding: 4px 8px;
+             border-radius: 3px;
+             font-size: 12px;
+         }
+         
+         .mapping-actions .edit-btn {
+             color: #3498db;
+         }
+         
+         .mapping-actions .delete-btn {
+             color: #e74c3c;
+         }
+         
+         /* 模态框样式 */
+         .modal {
+             display: none;
+             position: fixed;
+             z-index: 1000;
+             left: 0;
+             top: 0;
+             width: 100%;
+             height: 100%;
+             background-color: rgba(0,0,0,0.5);
+         }
+         
+         .modal-content {
+             background-color: white;
+             margin: 5% auto;
+             padding: 0;
+             border-radius: 8px;
+             width: 90%;
+             max-width: 600px;
+             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+         }
+         
+         .modal-header {
+             padding: 20px;
+             border-bottom: 1px solid #dee2e6;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+         }
+         
+         .modal-header h3 {
+             margin: 0;
+             color: #2c3e50;
+         }
+         
+         .close {
+             color: #aaa;
+             font-size: 28px;
+             font-weight: bold;
+             cursor: pointer;
+         }
+         
+         .close:hover {
+             color: #000;
+         }
+         
+         .modal-body {
+             padding: 20px;
+         }
+         
+         .form-group {
+             margin-bottom: 15px;
+         }
+         
+         .form-group label {
+             display: block;
+             margin-bottom: 5px;
+             font-weight: 500;
+             color: #495057;
+         }
+         
+         .form-group select,
+         .form-group input,
+         .form-group textarea {
+             width: 100%;
+             padding: 8px 12px;
+             border: 1px solid #ced4da;
+             border-radius: 4px;
+             font-size: 14px;
+         }
+         
+         .form-group textarea {
+             resize: vertical;
+             min-height: 80px;
+         }
+         
+         .form-actions {
+             display: flex;
+             gap: 10px;
+             justify-content: flex-end;
+             margin-top: 20px;
+             padding-top: 20px;
+             border-top: 1px solid #dee2e6;
+         }
+         
+         /* 验证面板样式 */
+         .validation-panel {
+             background: #f8f9fa;
+             border-radius: 8px;
+             padding: 20px;
+         }
+         
+         .validation-controls {
+             display: flex;
+             gap: 10px;
+             margin-bottom: 20px;
+             flex-wrap: wrap;
+         }
+         
+         .validation-results {
+             background: white;
+             border-radius: 6px;
+             padding: 20px;
+             min-height: 200px;
+         }
+         
+         .validation-results h4 {
+             margin-top: 0;
+             color: #2c3e50;
+         }
+         
+         .validation-item {
+             margin-bottom: 15px;
+             padding: 10px;
+             border-radius: 4px;
+             border-left: 4px solid;
+         }
+         
+         .validation-item.success {
+             background: #d4edda;
+             border-left-color: #28a745;
+         }
+         
+         .validation-item.warning {
+             background: #fff3cd;
+             border-left-color: #ffc107;
+         }
+         
+         .validation-item.error {
+             background: #f8d7da;
+             border-left-color: #dc3545;
+         }
+         
+         .validation-item.info {
+             background: #d1ecf1;
+             border-left-color: #17a2b8;
+         }
+
+        .action-btn.secondary {
+            background: #27ae60;
+        }
+        .action-btn.secondary:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 MSFG部件对应管理</h1>
+
+        <!-- 选择区：清晰选择 CMG 型号 与 MSFG 配置 -->
+        <div class="section">
+            <h2>📋 选择配置</h2>
+            <div class="msfg-info">
+                <div class="info-item">
+                    <span class="info-label">CMG型号：</span>
+                    <select id="cmgSelect" onchange="onCmgChange()"></select>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">MSFG配置：</span>
+                    <select id="msfgSelect" onchange="onMsfgChange()"></select>
+                </div>
+            </div>
+        </div>
+
+        <!-- MSFG信息展示 -->
+        <div class="section">
+            <h2>📊 MSFG信息</h2>
+            <div class="msfg-info">
+                <div id="msfgInfo">请先选择 CMG 型号 与 MSFG 配置</div>
+            </div>
+        </div>
+        
+        <!-- 系统自动提取的部件 -->
+        <div class="section">
+            <h2>🔧 系统自动提取的部件</h2>
+            <div class="auto-components">
+                <h3>来源：MSFG图形结构</h3>
+                <div id="autoComponents">加载中...</div>
+                <button class="refresh-btn" onclick="refreshData()">🔄 刷新数据</button>
+                <p style="color: #7f8c8d; font-size: 14px; margin-top: 10px;">
+                    ℹ️ 这些部件是从MSFG编辑器的图形结构中自动提取的，无法直接编辑。要修改这些部件，请在MSFG编辑器中更改顶层系统节点的名称。
+                </p>
+            </div>
+        </div>
+
+        <!-- 系统提取的"测点→部件→故障"映射预览 -->
+        <div class="section">
+            <h2>🧭 测点→部件→故障 映射（预览）</h2>
+            <div id="mappingPreview">请先选择配置</div>
+            <p style="color: #7f8c8d; font-size: 14px; margin-top: 10px;">
+                ℹ️ 本区域展示后端当前提取/构建的映射结果摘要，便于核对检测阶段所用映射是否正确。
+            </p>
+        </div>
+
+        <!-- 智能提示和建议 -->
+        <div class="section">
+            <h2>💡 智能提示和建议</h2>
+            <div id="suggestions">请先选择 MSFG 配置</div>
+        </div>
+
+        <!-- 手动映射管理 -->
+        <div class="section">
+            <h2>🔧 手动映射管理</h2>
+            <div class="mapping-management">
+                <div class="mapping-tabs">
+                    <button class="tab-btn active" onclick="switchTab('test-component')">测点-部件映射</button>
+                    <button class="tab-btn" onclick="switchTab('fault-component')">故障-部件映射</button>
+                </div>
+                
+                <!-- 测点-部件映射管理 -->
+                <div id="test-component-tab" class="tab-content active">
+                    <div class="mapping-controls">
+                        <button class="action-btn primary" onclick="showAddMappingModal('test-component')">➕ 添加映射</button>
+                        <button class="action-btn" onclick="batchDeleteMappings('test-component')">🗑️ 批量删除</button>
+                        <button class="action-btn" onclick="exportMappings('test-component')">📤 导出</button>
+                        <button class="action-btn" onclick="importMappings('test-component')">📥 导入</button>
+                    </div>
+                    <div id="test-component-mappings" class="mappings-table">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+                
+                <!-- 故障-部件映射管理 -->
+                <div id="fault-component-tab" class="tab-content">
+                    <div class="mapping-controls">
+                        <button class="action-btn primary" onclick="showAddMappingModal('fault-component')">➕ 添加映射</button>
+                        <button class="action-btn" onclick="batchDeleteMappings('fault-component')">🗑️ 批量删除</button>
+                        <button class="action-btn" onclick="exportMappings('fault-component')">📤 导出</button>
+                        <button class="action-btn" onclick="importMappings('fault-component')">📥 导入</button>
+                    </div>
+                    <div id="fault-component-mappings" class="mappings-table">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 映射验证和测试 -->
+        <div class="section">
+            <h2>✅ 映射验证和测试</h2>
+            <div class="validation-panel">
+                <div class="validation-controls">
+                    <button class="action-btn primary" onclick="validateMappings()">🔍 验证映射完整性</button>
+                    <button class="action-btn" onclick="testMappingLogic()">🧪 测试推理逻辑</button>
+                    <button class="action-btn" onclick="generateMappingReport()">📊 生成映射报告</button>
+                    <button class="action-btn secondary" onclick="extractMappingsFromGraph()">✨ 从图结构提取</button>
+                </div>
+                <div id="validation-results" class="validation-results">
+                    <p>点击上方按钮开始验证和测试</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态显示 -->
+        <div id="status"></div>
+    </div>
+
+    <!-- 添加映射模态框 -->
+    <div id="mapping-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">添加映射</h3>
+                <span class="close" onclick="closeMappingModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="mapping-form">
+                    <div class="form-group">
+                        <label for="mapping-type">映射类型:</label>
+                        <select id="mapping-type" onchange="updateMappingForm()">
+                            <option value="test-component">测点-部件映射</option>
+                            <option value="fault-component">故障-部件映射</option>
+                        </select>
+                    </div>
+                    
+                    <div id="test-component-fields" class="mapping-fields">
+                        <div class="form-group">
+                            <label for="test-point">测试点:</label>
+                            <select id="test-point" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="component">部件:</label>
+                            <select id="component" required></select>
+                        </div>
+                    </div>
+                    
+                    <div id="fault-component-fields" class="mapping-fields" style="display:none;">
+                        <div class="form-group">
+                            <label for="fault-name">故障:</label>
+                            <select id="fault-name" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="component-fault">部件:</label>
+                            <select id="component-fault" required></select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mapping-weight">权重:</label>
+                        <input type="number" id="mapping-weight" min="0.1" max="10" step="0.1" value="1.0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mapping-description">描述:</label>
+                        <textarea id="mapping-description" rows="3" placeholder="可选：添加映射描述"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="action-btn primary">保存映射</button>
+                        <button type="button" class="action-btn" onclick="closeMappingModal()">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提取映射结果模态框 -->
+    <div id="extraction-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>提取的映射关系 (预览)</h3>
+                <span class="close" onclick="closeExtractionModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="extraction-results">
+                <!-- 结果将动态填充在这里 -->
+            </div>
+            <div class="form-actions">
+                <button type="button" class="action-btn" onclick="closeExtractionModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1/msfg';
+        let currentMsfgId = null;
+        let currentCmgId = null;
+        let currentMsfgData = null; // 用于存储当前MSFG配置的完整数据
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initSelectors();
+        });
+
+        async function initSelectors(){
+            await loadCmgModels();
+            await loadMsfgList();
+        }
+
+        async function loadCmgModels(){
+            try{
+                const resp = await fetch('/api/v1/data/cmg-models/');
+                const data = await resp.json();
+                const list = data.results || data;
+                const sel = document.getElementById('cmgSelect');
+                sel.innerHTML = '';
+                sel.appendChild(new Option('请选择...', ''));
+                list.forEach(m => sel.appendChild(new Option(m.model_name, m.id)));
+            }catch(e){
+                showStatus('加载CMG型号失败: '+e.message, 'error');
+            }
+        }
+
+        async function loadMsfgList(){
+            if(!currentCmgId){
+                const sel = document.getElementById('msfgSelect');
+                sel.innerHTML = '';
+                sel.appendChild(new Option('请先选择CMG', ''));
+                return;
+            }
+            try{
+                const resp = await fetch(`${API_BASE}/msfg-definitions/?cmg_model_id=${currentCmgId}`);
+                const data = await resp.json();
+                const list = data.results || data;
+                const sel = document.getElementById('msfgSelect');
+                sel.innerHTML = '';
+                sel.appendChild(new Option('请选择...', ''));
+                list.forEach(m => sel.appendChild(new Option(m.name+(m.is_active?'（激活）':''), m.id)));
+            }catch(e){
+                showStatus('加载MSFG定义失败: '+e.message, 'error');
+            }
+        }
+
+        function onCmgChange(){
+            const sel = document.getElementById('cmgSelect');
+            currentCmgId = sel.value ? parseInt(sel.value) : null;
+            currentMsfgId = null;
+            loadMsfgList();
+            document.getElementById('msfgInfo').innerHTML = '请先选择 MSFG 配置';
+            document.getElementById('autoComponents').innerHTML = '请先选择 MSFG 配置';
+            document.getElementById('mappingPreview').innerHTML = '请先选择 MSFG 配置';
+            document.getElementById('suggestions').innerHTML = '请先选择 MSFG 配置';
+        }
+
+        function onMsfgChange(){
+            const sel = document.getElementById('msfgSelect');
+            currentMsfgId = sel.value ? parseInt(sel.value) : null;
+            if(currentMsfgId){
+                loadSelectedMsfg(currentMsfgId);
+            }
+        }
+
+        async function loadSelectedMsfg(msfgId) {
+            try {
+                const resp = await fetch(`${API_BASE}/msfg-definitions/${msfgId}/`);
+                const msfg = await resp.json();
+                currentMsfgData = msfg; // 存储完整数据
+                displayMsfgInfo(msfg);
+                displayAutoComponents(msfg.component_names);
+                await displayMappingPreview();
+                await displaySuggestions(); // 加载智能提示
+            } catch (error) {
+                showStatus('加载MSFG配置失败: ' + error.message, 'error');
+                document.getElementById('msfgInfo').innerHTML = '<div class="error">加载失败: ' + error.message + '</div>';
+                document.getElementById('autoComponents').innerHTML = '<div class="error">加载失败</div>';
+                document.getElementById('mappingPreview').innerHTML = '<div class="error">加载失败</div>';
+                document.getElementById('suggestions').innerHTML = '<div class="error">加载失败</div>';
+            }
+        }
+
+        // 显示MSFG信息
+        function displayMsfgInfo(msfg) {
+            const container = document.getElementById('msfgInfo');
+            container.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">MSFG名称：</span>
+                    <span>${msfg.name || '未命名'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">CMG模型：</span>
+                    <span>${msfg.cmg_model_name || '未知'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">创建时间：</span>
+                    <span>${new Date(msfg.created_at).toLocaleString()}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">更新时间：</span>
+                    <span>${new Date(msfg.updated_at).toLocaleString()}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">测试点数量：</span>
+                    <span>${msfg.test_names ? msfg.test_names.length : 0}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">部件数量：</span>
+                    <span>${msfg.component_names ? msfg.component_names.length : 0}</span>
+                </div>
+            `;
+        }
+
+        // 显示系统自动提取的部件
+        function displayAutoComponents(components) {
+            const container = document.getElementById('autoComponents');
+            if (components && components.length > 0) {
+                container.innerHTML = components.map(comp => 
+                    `<span class="component-tag">${comp}</span>`
+                ).join('');
+            } else {
+                container.innerHTML = '<em>暂无自动提取的部件</em>';
+            }
+        }
+
+        // 刷新数据
+        async function refreshData() {
+            document.getElementById('autoComponents').innerHTML = '<div class="loading">正在刷新...</div>';
+            document.getElementById('mappingPreview').innerHTML = '<div class="loading">正在刷新...</div>';
+            document.getElementById('suggestions').innerHTML = '<div class="loading">正在刷新...</div>';
+            if(currentMsfgId){ await loadSelectedMsfg(currentMsfgId); }
+            showStatus('数据已刷新', 'success');
+        }
+
+        // 显示状态消息
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // 显示映射预览（从 graph-inspect 与 component-mappings 推断）
+        async function displayMappingPreview() {
+            const container = document.getElementById('mappingPreview');
+            if (!currentMsfgId) { container.innerHTML = '<em>无激活配置</em>'; return; }
+            try {
+                // 1) 从 graph-inspect 获取 测试点/故障 与 test→fault 基础映射
+                const giResp = await fetch(`${API_BASE}/msfg-definitions/${currentMsfgId}/graph-inspect/`);
+                const gi = await giResp.json();
+
+                // 2) 从 component-mappings 接口获取已保存/构建的"测点→部件"列表
+                const cmResp = await fetch(`${API_BASE}/component-mappings/?msfg_definition_id=${currentMsfgId}`);
+                const cmList = await cmResp.json();
+
+                // 组装预览：组件 -> { tests:[], faults:[] }
+                const compView = {};
+                for (const row of cmList || []) {
+                    const comp = row.component;
+                    const test = row.test_point;
+                    compView[comp] = compView[comp] || { tests: new Set(), faults: new Set() };
+                    compView[comp].tests.add(test);
+                    // 通过 test→fault 基础映射补充故障集合
+                    const faults = (gi.test_to_fault && gi.test_to_fault[test]) || [];
+                    faults.forEach(f => compView[comp].faults.add(f));
+                }
+
+                // 输出
+                if (!Object.keys(compView).length) {
+                    container.innerHTML = '<em>暂无测点→部件映射，请先在本页或编辑器生成/保存映射。</em>';
+                    return;
+                }
+
+                const html = Object.entries(compView).map(([comp, obj]) => {
+                    const tests = Array.from(obj.tests || []).join(', ');
+                    const faults = Array.from(obj.faults || []).join(', ');
+                    return `<div style="margin-bottom:12px;">
+                        <div><strong>部件：</strong>${comp}</div>
+                        <div><strong>测点：</strong>${tests || '<em>无</em>'}</div>
+                        <div><strong>故障（由测点连接）：</strong>${faults || '<em>无</em>'}</div>
+                    </div>`
+                }).join('');
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<div class="error">映射预览加载失败</div>';
+            }
+        }
+
+        // 显示智能提示和建议
+        async function displaySuggestions() {
+            const container = document.getElementById('suggestions');
+            if (!currentMsfgId) {
+                container.innerHTML = '<em>请先选择MSFG配置</em>';
+                return;
+            }
+
+            try {
+                const msfg = currentMsfgData;
+                const testNames = msfg.test_names || [];
+                const componentNames = msfg.component_names || [];
+                const faultNames = msfg.fault_names || [];
+
+                // 获取当前映射
+                const testComponentResp = await fetch(`${API_BASE}/component-mappings/?msfg_definition_id=${currentMsfgId}`);
+                const testComponentMappings = await testComponentResp.json();
+                
+                const faultComponentResp = await fetch(`${API_BASE}/fault-component-mappings/?msfg_definition_id=${currentMsfgId}`);
+                const faultComponentMappings = await faultComponentResp.json();
+
+                const mappedTests = new Set(testComponentMappings.map(m => m.test_point));
+                const mappedFaults = new Set(faultComponentMappings.map(m => m.fault_name));
+                const mappedComponents = new Set([
+                    ...testComponentMappings.map(m => m.component),
+                    ...faultComponentMappings.map(m => m.component)
+                ]);
+
+                const unmappedTests = testNames.filter(t => !mappedTests.has(t));
+                const unmappedFaults = faultNames.filter(f => !mappedFaults.has(f));
+                const unmappedComponents = componentNames.filter(c => !mappedComponents.has(c));
+
+                let suggestions = [];
+
+                // 生成建议
+                if (unmappedTests.length > 0) {
+                    suggestions.push({
+                        type: 'warning',
+                        title: '未映射的测试点',
+                        description: `发现 ${unmappedTests.length} 个测试点尚未映射到部件`,
+                        items: unmappedTests,
+                        action: '建议为这些测试点选择合适的部件进行映射'
+                    });
+                }
+
+                if (unmappedFaults.length > 0) {
+                    suggestions.push({
+                        type: 'warning',
+                        title: '未映射的故障',
+                        description: `发现 ${unmappedFaults.length} 个故障尚未映射到部件`,
+                        items: unmappedFaults.slice(0, 10), // 只显示前10个
+                        action: '建议为这些故障选择合适的部件进行映射'
+                    });
+                }
+
+                if (unmappedComponents.length > 0) {
+                    suggestions.push({
+                        type: 'info',
+                        title: '未使用的部件',
+                        description: `发现 ${unmappedComponents.length} 个部件尚未被映射使用`,
+                        items: unmappedComponents,
+                        action: '这些部件可能需要与测试点或故障建立映射关系'
+                    });
+                }
+
+                if (suggestions.length === 0) {
+                    suggestions.push({
+                        type: 'success',
+                        title: '映射完成',
+                        description: '所有测试点和故障都已正确映射到部件',
+                        items: [],
+                        action: '映射关系完整，可以进行故障诊断分析'
+                    });
+                }
+
+                // 生成智能映射建议
+                const mappingSuggestions = generateMappingSuggestions(unmappedTests, unmappedFaults, componentNames);
+
+                // 渲染建议
+                const suggestionsHtml = suggestions.map(suggestion => `
+                    <div class="suggestion-item">
+                        <h4 style="margin: 0 0 10px 0; color: ${suggestion.type === 'success' ? '#27ae60' : suggestion.type === 'warning' ? '#f39c12' : '#3498db'}">
+                            ${suggestion.title}
+                        </h4>
+                        <p style="margin: 0 0 10px 0;">${suggestion.description}</p>
+                        ${suggestion.items.length > 0 ? `
+                            <div class="unmapped-list">
+                                ${suggestion.items.map(item => `<span class="unmapped-item">${item}</span>`).join('')}
+                                ${suggestion.items.length > 10 ? `<span class="unmapped-item">... 还有 ${suggestion.items.length - 10} 个</span>` : ''}
+                            </div>
+                        ` : ''}
+                        <p style="margin: 10px 0 0 0; font-weight: bold;">💡 ${suggestion.action}</p>
+                    </div>
+                `).join('');
+
+                // 渲染智能映射建议
+                const mappingSuggestionsHtml = mappingSuggestions.length > 0 ? `
+                    <div class="suggestion-item">
+                        <h4 style="margin: 0 0 10px 0; color: #e67e22;">
+                            🔧 智能映射建议
+                        </h4>
+                        <p style="margin: 0 0 10px 0;">基于工程知识的自动映射建议，点击"一键添加"快速补全映射关系</p>
+                        <div style="margin-bottom: 15px;">
+                            <button class="quick-action-btn" onclick="addAllSuggestedMappings()" style="background: #e67e22; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                                🚀 一键添加所有建议映射
+                            </button>
+                        </div>
+                        ${mappingSuggestions.map(suggestion => `
+                            <div style="background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 4px; border-left: 3px solid #e67e22;">
+                                <div style="font-weight: bold; color: #e67e22; margin-bottom: 5px;">${suggestion.category}</div>
+                                ${suggestion.mappings.map(mapping => `
+                                    <div style="margin: 3px 0; font-size: 14px;">
+                                        <span style="color: #2c3e50;">${mapping.from}</span>
+                                        <span style="color: #7f8c8d;"> → </span>
+                                        <span style="color: #27ae60;">${mapping.to}</span>
+                                        <span style="color: #7f8c8d; font-size: 12px;"> (${mapping.reason})</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '';
+
+                // 添加缺失映射的醒目提示框
+                const missingMappingsAlert = (unmappedTests.length > 0 || unmappedFaults.length > 0) ? `
+                    <div class="missing-mappings-alert">
+                        <h3>
+                            <span class="alert-icon">⚠️</span>
+                            🚨 重要提醒：缺失的映射关系
+                        </h3>
+                        <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.5;">
+                            <strong>以下映射关系缺失，将严重影响故障诊断推理的准确性：</strong>
+                        </p>
+                        ${unmappedTests.length > 0 ? `
+                            <div class="mapping-section">
+                                <h4 style="margin: 0 0 8px 0; color: #fff;">📊 缺失的测试点-部件映射 (${unmappedTests.length}个)</h4>
+                                <p style="margin: 0 0 8px 0; font-size: 14px;">这些测试点无法关联到具体部件，导致无法进行有效的故障定位：</p>
+                                <div class="mapping-tags">
+                                    ${unmappedTests.slice(0, 8).map(test => 
+                                        `<span class="mapping-tag">${test}</span>`
+                                    ).join('')}
+                                    ${unmappedTests.length > 8 ? `<span class="mapping-tag">... 还有${unmappedTests.length - 8}个</span>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${unmappedFaults.length > 0 ? `
+                            <div class="mapping-section">
+                                <h4 style="margin: 0 0 8px 0; color: #fff;">⚡ 缺失的故障-部件映射 (${unmappedFaults.length}个)</h4>
+                                <p style="margin: 0 0 8px 0; font-size: 14px;">这些故障无法关联到具体部件，导致无法进行准确的故障诊断：</p>
+                                <div class="mapping-tags">
+                                    ${unmappedFaults.slice(0, 8).map(fault => 
+                                        `<span class="mapping-tag">${fault}</span>`
+                                    ).join('')}
+                                    ${unmappedFaults.length > 8 ? `<span class="mapping-tag">... 还有${unmappedFaults.length - 8}个</span>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="action-section">
+                            <h4 style="margin: 0 0 8px 0; color: #fff;">🎯 立即行动建议</h4>
+                            <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+                                <li>点击下方的"🚀 一键添加所有建议映射"按钮快速补全</li>
+                                <li>或使用映射关系编辑器手动添加缺失的映射</li>
+                                <li>补全映射后，故障诊断推理的准确性和完整性将显著提升</li>
+                            </ul>
+                        </div>
+                    </div>
+                ` : '';
+
+                container.innerHTML = missingMappingsAlert + suggestionsHtml + mappingSuggestionsHtml;
+            } catch (error) {
+                container.innerHTML = '<div class="error">智能提示加载失败: ' + error.message + '</div>';
+            }
+        }
+
+        // 生成智能映射建议
+        function generateMappingSuggestions(unmappedTests, unmappedFaults, componentNames) {
+            const suggestions = [];
+
+            // 测点-部件映射建议
+            const testSuggestions = [];
+            
+            // 转速相关测点
+            const speedTests = unmappedTests.filter(t => t.includes('转速'));
+            speedTests.forEach(test => {
+                if (test.includes('高速')) {
+                    testSuggestions.push({
+                        from: test,
+                        to: '转子控制器',
+                        reason: '高速转速控制',
+                        type: 'test-component'
+                    });
+                } else if (test.includes('低速')) {
+                    testSuggestions.push({
+                        from: test,
+                        to: '框架控制器',
+                        reason: '低速转速控制',
+                        type: 'test-component'
+                    });
+                }
+            });
+
+            // 轴温相关测点
+            const tempTests = unmappedTests.filter(t => t.includes('轴温') || t.includes('温度'));
+            tempTests.forEach(test => {
+                testSuggestions.push({
+                    from: test,
+                    to: '转子轴承',
+                    reason: '轴承温度监测',
+                    type: 'test-component'
+                });
+            });
+
+            // 开关信号测点
+            const switchTests = unmappedTests.filter(t => t.includes('开关'));
+            switchTests.forEach(test => {
+                if (test.includes('100V')) {
+                    testSuggestions.push({
+                        from: test,
+                        to: '电源板',
+                        reason: '100V开关控制',
+                        type: 'test-component'
+                    });
+                }
+            });
+
+            // 其他测点
+            const otherTests = unmappedTests.filter(t => 
+                !t.includes('转速') && !t.includes('轴温') && !t.includes('温度') && !t.includes('开关')
+            );
+            otherTests.forEach(test => {
+                if (test.includes('SPI') || test.includes('旋变')) {
+                    testSuggestions.push({
+                        from: test,
+                        to: '旋变SPI',
+                        reason: '旋变信号处理',
+                        type: 'test-component'
+                    });
+                } else if (test.includes('1553')) {
+                    testSuggestions.push({
+                        from: test,
+                        to: '1553B接口',
+                        reason: '通信接口',
+                        type: 'test-component'
+                    });
+                }
+            });
+
+            if (testSuggestions.length > 0) {
+                suggestions.push({
+                    category: '📈 测点-部件映射建议',
+                    mappings: testSuggestions
+                });
+            }
+
+            // 故障-部件映射建议
+            const faultSuggestions = [];
+
+            // 电源相关故障
+            const powerFaults = unmappedFaults.filter(f => 
+                f.includes('电源') || f.includes('电压') || f.includes('V') || f.includes('加电') || f.includes('断电')
+            );
+            powerFaults.forEach(fault => {
+                faultSuggestions.push({
+                    from: fault,
+                    to: '电源板',
+                    reason: '电源系统',
+                    type: 'fault-component'
+                });
+            });
+
+            // 电机相关故障
+            const motorFaults = unmappedFaults.filter(f => 
+                f.includes('电机') || f.includes('驱动') || f.includes('PWM') || f.includes('绕组')
+            );
+            motorFaults.forEach(fault => {
+                if (fault.includes('框架')) {
+                    faultSuggestions.push({
+                        from: fault,
+                        to: '框架控制器',
+                        reason: '框架电机控制',
+                        type: 'fault-component'
+                    });
+                } else if (fault.includes('转子')) {
+                    faultSuggestions.push({
+                        from: fault,
+                        to: '转子控制器',
+                        reason: '转子电机控制',
+                        type: 'fault-component'
+                    });
+                } else {
+                    faultSuggestions.push({
+                        from: fault,
+                        to: '转子驱动电机',
+                        reason: '电机本体',
+                        type: 'fault-component'
+                    });
+                }
+            });
+
+            // 轴承相关故障
+            const bearingFaults = unmappedFaults.filter(f => 
+                f.includes('轴承') || f.includes('轴温') || f.includes('温度')
+            );
+            bearingFaults.forEach(fault => {
+                faultSuggestions.push({
+                    from: fault,
+                    to: '转子轴承',
+                    reason: '轴承系统',
+                    type: 'fault-component'
+                });
+            });
+
+            // 通信相关故障
+            const commFaults = unmappedFaults.filter(f => 
+                f.includes('通信') || f.includes('1553') || f.includes('SPI') || f.includes('解调')
+            );
+            commFaults.forEach(fault => {
+                if (fault.includes('1553')) {
+                    faultSuggestions.push({
+                        from: fault,
+                        to: '1553B接口',
+                        reason: '1553通信',
+                        type: 'fault-component'
+                    });
+                } else if (fault.includes('SPI') || fault.includes('旋变')) {
+                    faultSuggestions.push({
+                        from: fault,
+                        to: '旋变SPI',
+                        reason: '旋变信号',
+                        type: 'fault-component'
+                    });
+                } else if (fault.includes('解调')) {
+                    faultSuggestions.push({
+                        from: fault,
+                        to: '旋变解调机箱',
+                        reason: '信号解调',
+                        type: 'fault-component'
+                    });
+                }
+            });
+
+            // 采样相关故障
+            const samplingFaults = unmappedFaults.filter(f => 
+                f.includes('采样') || f.includes('采集') || f.includes('电流') || f.includes('电压')
+            );
+            samplingFaults.forEach(fault => {
+                if (fault.includes('电流')) {
+                    if (fault.includes('框架')) {
+                        faultSuggestions.push({
+                            from: fault,
+                            to: '框架电流采样',
+                            reason: '框架电流',
+                            type: 'fault-component'
+                        });
+                    } else {
+                        faultSuggestions.push({
+                            from: fault,
+                            to: '转子电流采样',
+                            reason: '转子电流',
+                            type: 'fault-component'
+                        });
+                    }
+                } else if (fault.includes('电压')) {
+                    faultSuggestions.push({
+                        from: fault,
+                        to: '框架电流采样',
+                        reason: '电压采样',
+                        type: 'fault-component'
+                    });
+                }
+            });
+
+            if (faultSuggestions.length > 0) {
+                suggestions.push({
+                    category: '⚡ 故障-部件映射建议',
+                    mappings: faultSuggestions
+                });
+            }
+
+            return suggestions;
+        }
+
+        // 一键添加所有建议映射
+        async function addAllSuggestedMappings() {
+            if (!currentMsfgId) {
+                showStatus('请先选择MSFG配置', 'warning');
+                return;
+            }
+
+            try {
+                const msfg = currentMsfgData;
+                const testNames = msfg.test_names || [];
+                const componentNames = msfg.component_names || [];
+                const faultNames = msfg.fault_names || [];
+
+                // 获取当前映射
+                const testComponentResp = await fetch(`${API_BASE}/component-mappings/?msfg_definition_id=${currentMsfgId}`);
+                const testComponentMappings = await testComponentResp.json();
+                
+                const faultComponentResp = await fetch(`${API_BASE}/fault-component-mappings/?msfg_definition_id=${currentMsfgId}`);
+                const faultComponentMappings = await faultComponentResp.json();
+
+                const mappedTests = new Set(testComponentMappings.map(m => m.test_point));
+                const mappedFaults = new Set(faultComponentMappings.map(m => m.fault_name));
+
+                const unmappedTests = testNames.filter(t => !mappedTests.has(t));
+                const unmappedFaults = faultNames.filter(f => !mappedFaults.has(f));
+
+                // 生成建议映射
+                const testSuggestions = generateMappingSuggestions(unmappedTests, unmappedFaults, componentNames);
+                
+                let addedCount = 0;
+                let errorCount = 0;
+
+                // 添加测点-部件映射
+                for (const suggestion of testSuggestions) {
+                    if (suggestion.category.includes('测点-部件')) {
+                        for (const mapping of suggestion.mappings) {
+                            try {
+                                const response = await fetch(`${API_BASE}/component-mappings/`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    body: JSON.stringify({
+                                        msfg_definition_id: currentMsfgId,
+                                        test_point: mapping.from,
+                                        component: mapping.to,
+                                        weight: 1.0
+                                    })
+                                });
+
+                                if (response.ok) {
+                                    addedCount++;
+                                } else {
+                                    errorCount++;
+                                }
+                            } catch (error) {
+                                errorCount++;
+                            }
+                        }
+                    }
+                }
+
+                // 添加故障-部件映射
+                for (const suggestion of testSuggestions) {
+                    if (suggestion.category.includes('故障-部件')) {
+                        for (const mapping of suggestion.mappings) {
+                            try {
+                                const response = await fetch(`${API_BASE}/fault-component-mappings/`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    body: JSON.stringify({
+                                        msfg_definition_id: currentMsfgId,
+                                        fault_name: mapping.from,
+                                        component_name: mapping.to,
+                                        weight: 1.0
+                                    })
+                                });
+
+                                if (response.ok) {
+                                    addedCount++;
+                                } else {
+                                    errorCount++;
+                                }
+                            } catch (error) {
+                                errorCount++;
+                            }
+                        }
+                    }
+                }
+
+                // 刷新显示
+                await displaySuggestions();
+                await displayMappingPreview();
+
+                if (addedCount > 0) {
+                    showStatus(`成功添加 ${addedCount} 个映射关系${errorCount > 0 ? `，${errorCount} 个失败` : ''}`, 'success');
+                } else {
+                    showStatus('没有添加任何映射关系', 'warning');
+                }
+
+            } catch (error) {
+                showStatus('批量添加映射失败: ' + error.message, 'error');
+            }
+        }
+
+        // 辅助函数：获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // 映射管理功能
+        let currentTab = 'test-component';
+
+        // 切换标签页
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // 更新标签按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 更新内容区域
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // 加载对应数据
+            loadMappings(tabName);
+        }
+
+        // 加载映射数据
+        async function loadMappings(mappingType) {
+            if (!currentMsfgId) {
+                document.getElementById(mappingType + '-mappings').innerHTML = '<p>请先选择MSFG配置</p>';
+                return;
+            }
+
+            try {
+                const endpoint = mappingType === 'test-component' ? 
+                    `${API_BASE}/component-mappings/?msfg_definition_id=${currentMsfgId}` :
+                    `${API_BASE}/fault-component-mappings/?msfg_definition_id=${currentMsfgId}`;
+                
+                const response = await fetch(endpoint);
+                const mappings = await response.json();
+                
+                displayMappings(mappingType, mappings);
+            } catch (error) {
+                document.getElementById(mappingType + '-mappings').innerHTML = 
+                    '<div class="error">加载映射失败: ' + error.message + '</div>';
+            }
+        }
+
+        // 显示映射表格
+        function displayMappings(mappingType, mappings) {
+            const container = document.getElementById(mappingType + '-mappings');
+            
+            if (!mappings || mappings.length === 0) {
+                container.innerHTML = '<p>暂无映射数据</p>';
+                return;
+            }
+
+            const headers = mappingType === 'test-component' ? 
+                ['选择', '测试点', '部件', '权重', '描述', '操作'] :
+                ['选择', '故障', '部件', '权重', '描述', '操作'];
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            ${headers.map(h => `<th>${h}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mappings.map(mapping => `
+                            <tr>
+                                <td><input type="checkbox" class="mapping-checkbox" value="${mapping.id}"></td>
+                                <td>${mappingType === 'test-component' ? mapping.test_point : mapping.fault_name}</td>
+                                <td>${mapping.component || mapping.component_name}</td>
+                                <td>${mapping.weight}</td>
+                                <td>${mapping.description || '-'}</td>
+                                <td class="mapping-actions">
+                                    <button class="edit-btn" onclick="editMapping('${mappingType}', ${mapping.id})">编辑</button>
+                                    <button class="delete-btn" onclick="deleteMapping('${mappingType}', ${mapping.id})">删除</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // 显示添加映射模态框
+        function showAddMappingModal(mappingType) {
+            if (!currentMsfgId) {
+                showStatus('请先选择MSFG配置', 'warning');
+                return;
+            }
+
+            document.getElementById('mapping-type').value = mappingType;
+            updateMappingForm();
+            populateMappingForm();
+            document.getElementById('mapping-modal').style.display = 'block';
+        }
+
+        // 关闭模态框
+        function closeMappingModal() {
+            document.getElementById('mapping-modal').style.display = 'none';
+            document.getElementById('mapping-form').reset();
+        }
+
+        // 更新映射表单
+        function updateMappingForm() {
+            const mappingType = document.getElementById('mapping-type').value;
+            const testFields = document.getElementById('test-component-fields');
+            const faultFields = document.getElementById('fault-component-fields');
+            
+            if (mappingType === 'test-component') {
+                testFields.style.display = 'block';
+                faultFields.style.display = 'none';
+            } else {
+                testFields.style.display = 'none';
+                faultFields.style.display = 'block';
+            }
+        }
+
+        // 填充映射表单选项
+        async function populateMappingForm() {
+            if (!currentMsfgData) return;
+
+            const testPointSelect = document.getElementById('test-point');
+            const componentSelect = document.getElementById('component');
+            const faultNameSelect = document.getElementById('fault-name');
+            const componentFaultSelect = document.getElementById('component-fault');
+
+            // 填充测试点选项
+            const testNames = currentMsfgData.test_names || [];
+            testPointSelect.innerHTML = '<option value="">请选择测试点</option>' +
+                testNames.map(name => `<option value="${name}">${name}</option>`).join('');
+
+            // 填充故障选项
+            const faultNames = currentMsfgData.fault_names || [];
+            faultNameSelect.innerHTML = '<option value="">请选择故障</option>' +
+                faultNames.map(name => `<option value="${name}">${name}</option>`).join('');
+
+            // 填充部件选项
+            const componentNames = currentMsfgData.component_names || [];
+            const componentOptions = '<option value="">请选择部件</option>' +
+                componentNames.map(name => `<option value="${name}">${name}</option>`).join('');
+            
+            componentSelect.innerHTML = componentOptions;
+            componentFaultSelect.innerHTML = componentOptions;
+        }
+
+        // 处理映射表单提交
+        document.getElementById('mapping-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const mappingType = document.getElementById('mapping-type').value;
+            const weight = document.getElementById('mapping-weight').value;
+            const description = document.getElementById('mapping-description').value;
+            
+            let mappingData = {
+                msfg_definition_id: currentMsfgId,
+                weight: parseFloat(weight),
+                description: description
+            };
+
+            if (mappingType === 'test-component') {
+                mappingData.test_point = document.getElementById('test-point').value;
+                mappingData.component = document.getElementById('component').value;
+            } else {
+                mappingData.fault_name = document.getElementById('fault-name').value;
+                mappingData.component_name = document.getElementById('component-fault').value;
+            }
+
+            try {
+                const endpoint = mappingType === 'test-component' ? 
+                    `${API_BASE}/component-mappings/` :
+                    `${API_BASE}/fault-component-mappings/`;
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(mappingData)
+                });
+
+                if (response.ok) {
+                    showStatus('映射添加成功', 'success');
+                    closeMappingModal();
+                    loadMappings(mappingType);
+                    await displaySuggestions();
+                    await displayMappingPreview();
+                } else {
+                    const error = await response.json();
+                    showStatus('添加失败: ' + (error.error || '未知错误'), 'error');
+                }
+            } catch (error) {
+                showStatus('添加失败: ' + error.message, 'error');
+            }
+        });
+
+        // 编辑映射
+        async function editMapping(mappingType, mappingId) {
+            // 这里可以实现编辑功能，暂时显示提示
+            showStatus('编辑功能开发中', 'warning');
+        }
+
+        // 删除映射
+        async function deleteMapping(mappingType, mappingId) {
+            if (!confirm('确定要删除这个映射吗？')) return;
+
+            try {
+                const endpoint = mappingType === 'test-component' ? 
+                    `${API_BASE}/component-mappings/${mappingId}/` :
+                    `${API_BASE}/fault-component-mappings/${mappingId}/`;
+                
+                const response = await fetch(endpoint, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (response.ok) {
+                    showStatus('映射删除成功', 'success');
+                    loadMappings(mappingType);
+                    await displaySuggestions();
+                    await displayMappingPreview();
+                } else {
+                    showStatus('删除失败', 'error');
+                }
+            } catch (error) {
+                showStatus('删除失败: ' + error.message, 'error');
+            }
+        }
+
+        // 批量删除映射
+        async function batchDeleteMappings(mappingType) {
+            const checkboxes = document.querySelectorAll(`#${mappingType}-mappings .mapping-checkbox:checked`);
+            if (checkboxes.length === 0) {
+                showStatus('请选择要删除的映射', 'warning');
+                return;
+            }
+
+            if (!confirm(`确定要删除选中的 ${checkboxes.length} 个映射吗？`)) return;
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const checkbox of checkboxes) {
+                try {
+                    const mappingId = checkbox.value;
+                    const endpoint = mappingType === 'test-component' ? 
+                        `${API_BASE}/component-mappings/${mappingId}/` :
+                        `${API_BASE}/fault-component-mappings/${mappingId}/`;
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    errorCount++;
+                }
+            }
+
+            showStatus(`删除完成: 成功 ${successCount} 个，失败 ${errorCount} 个`, 
+                errorCount === 0 ? 'success' : 'warning');
+            
+            loadMappings(mappingType);
+            await displaySuggestions();
+            await displayMappingPreview();
+        }
+
+        // 导出映射
+        function exportMappings(mappingType) {
+            showStatus('导出功能开发中', 'warning');
+        }
+
+        // 导入映射
+        function importMappings(mappingType) {
+            showStatus('导入功能开发中', 'warning');
+        }
+
+        // 验证映射完整性
+        async function validateMappings() {
+            if (!currentMsfgId) {
+                showStatus('请先选择MSFG配置', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('validation-results');
+            container.innerHTML = '<div class="loading">正在验证...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/validate-mappings/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        msfg_definition_id: currentMsfgId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('验证请求失败');
+                }
+
+                const data = await response.json();
+                
+                // 生成验证结果
+                let validationResults = [];
+
+                // MSFG基本信息
+                validationResults.push({
+                    type: 'info',
+                    title: `📋 MSFG配置: ${data.msfg_definition.name}`,
+                    message: `测试点: ${data.msfg_definition.test_count} | 故障: ${data.msfg_definition.fault_count} | 部件: ${data.msfg_definition.component_count}`
+                });
+
+                // 映射统计
+                validationResults.push({
+                    type: 'info',
+                    title: `📊 映射统计`,
+                    message: `测点-部件映射: ${data.mapping_stats.test_component_mappings} | 故障-部件映射: ${data.mapping_stats.fault_component_mappings} | 覆盖率: ${data.mapping_stats.coverage_percentage}%`
+                });
+
+                // 检查测试点映射
+                if (data.validation_issues.unmapped_tests.length === 0) {
+                    validationResults.push({
+                        type: 'success',
+                        title: '✅ 测试点映射完整',
+                        message: `所有 ${data.msfg_definition.test_count} 个测试点都已映射到部件`
+                    });
+                } else {
+                    validationResults.push({
+                        type: 'error',
+                        title: '❌ 测试点映射不完整',
+                        message: `${data.validation_issues.unmapped_tests.length} 个测试点未映射: ${data.validation_issues.unmapped_tests.slice(0, 5).join(', ')}${data.validation_issues.unmapped_tests.length > 5 ? '...' : ''}`
+                    });
+                }
+
+                // 检查故障映射
+                if (data.validation_issues.unmapped_faults.length === 0) {
+                    validationResults.push({
+                        type: 'success',
+                        title: '✅ 故障映射完整',
+                        message: `所有 ${data.msfg_definition.fault_count} 个故障都已映射到部件`
+                    });
+                } else {
+                    validationResults.push({
+                        type: 'error',
+                        title: '❌ 故障映射不完整',
+                        message: `${data.validation_issues.unmapped_faults.length} 个故障未映射: ${data.validation_issues.unmapped_faults.slice(0, 5).join(', ')}${data.validation_issues.unmapped_faults.length > 5 ? '...' : ''}`
+                    });
+                }
+
+                // 检查部件使用情况
+                if (data.validation_issues.unmapped_components.length === 0) {
+                    validationResults.push({
+                        type: 'success',
+                        title: '✅ 部件使用完整',
+                        message: `所有 ${data.msfg_definition.component_count} 个部件都被使用`
+                    });
+                } else {
+                    validationResults.push({
+                        type: 'warning',
+                        title: '⚠️ 部件使用不完整',
+                        message: `${data.validation_issues.unmapped_components.length} 个部件未被使用: ${data.validation_issues.unmapped_components.slice(0, 5).join(', ')}${data.validation_issues.unmapped_components.length > 5 ? '...' : ''}`
+                    });
+                }
+
+                // 整体评估
+                const coverageLevel = data.validation_summary.coverage_level;
+                const coverageColor = coverageLevel === 'excellent' ? 'success' : coverageLevel === 'good' ? 'success' : coverageLevel === 'fair' ? 'warning' : 'error';
+                const coverageIcon = coverageLevel === 'excellent' ? '🏆' : coverageLevel === 'good' ? '✅' : coverageLevel === 'fair' ? '⚠️' : '❌';
+                
+                validationResults.push({
+                    type: coverageColor,
+                    title: `${coverageIcon} 整体评估: ${coverageLevel.toUpperCase()}`,
+                    message: `映射完整性: ${data.validation_summary.is_complete ? '完整' : '不完整'} | 覆盖率等级: ${coverageLevel}`
+                });
+
+                // 渲染验证结果
+                const html = validationResults.map(result => `
+                    <div class="validation-item ${result.type}">
+                        <h4>${result.title}</h4>
+                        <p>${result.message}</p>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                container.innerHTML = '<div class="validation-item error"><h4>❌ 验证失败</h4><p>' + error.message + '</p></div>';
+            }
+        }
+
+        // 测试推理逻辑
+        async function testMappingLogic() {
+            if (!currentMsfgId) {
+                showStatus('请先选择MSFG配置', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('validation-results');
+            container.innerHTML = '<div class="loading">正在测试推理逻辑...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/test-mapping-logic/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        msfg_definition_id: currentMsfgId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('测试请求失败');
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const html = `
+                        <div class="validation-item success">
+                            <h4>✅ 推理逻辑测试通过</h4>
+                            <p>MSFG推理算法运行正常，可以正确处理映射关系</p>
+                        </div>
+                        <div class="validation-item info">
+                            <h4>📋 测试详情</h4>
+                            <ul>
+                                <li>测试点数量: ${data.test_data.test_nodes_count}</li>
+                                <li>故障数量: ${data.test_data.fault_nodes_count}</li>
+                                <li>边数量: ${data.test_data.edges_count}</li>
+                                <li>部件映射数量: ${data.test_data.component_mappings_count}</li>
+                                <li>推理时间: ${data.execution_time}秒</li>
+                            </ul>
+                        </div>
+                        <div class="validation-item info">
+                            <h4>📊 分析结果</h4>
+                            <ul>
+                                <li>测试结果数量: ${data.analysis_result.test_results_count}</li>
+                                <li>故障结果数量: ${data.analysis_result.fault_results_count}</li>
+                                <li>部件结果数量: ${data.analysis_result.component_results_count}</li>
+                                <li>系统整体健康度: ${data.analysis_result.system_results.overall_health || 'N/A'}</li>
+                            </ul>
+                        </div>
+                        <div class="validation-item info">
+                            <h4>🔗 映射验证</h4>
+                            <ul>
+                                <li>测点-部件映射: ${data.mapping_validation.test_component_mappings}</li>
+                                <li>故障-部件映射: ${data.mapping_validation.fault_component_mappings}</li>
+                                <li>映射的部件: ${data.mapping_validation.mapped_components.join(', ') || '无'}</li>
+                            </ul>
+                        </div>
+                    `;
+                    
+                    container.innerHTML = html;
+                } else {
+                    const html = `
+                        <div class="validation-item error">
+                            <h4>❌ 推理逻辑测试失败</h4>
+                            <p>错误信息: ${data.error}</p>
+                        </div>
+                        <div class="validation-item warning">
+                            <h4>📋 测试数据</h4>
+                            <ul>
+                                <li>测试点数量: ${data.test_data.test_nodes_count}</li>
+                                <li>故障数量: ${data.test_data.fault_nodes_count}</li>
+                                <li>边数量: ${data.test_data.edges_count}</li>
+                                <li>部件映射数量: ${data.test_data.component_mappings_count}</li>
+                                <li>执行时间: ${data.execution_time}秒</li>
+                            </ul>
+                        </div>
+                    `;
+                    
+                    container.innerHTML = html;
+                }
+
+            } catch (error) {
+                container.innerHTML = '<div class="validation-item error"><h4>❌ 测试失败</h4><p>' + error.message + '</p></div>';
+            }
+        }
+
+        // 生成映射报告
+        async function generateMappingReport() {
+            if (!currentMsfgId) {
+                showStatus('请先选择MSFG配置', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('validation-results');
+            container.innerHTML = '<div class="loading">正在生成报告...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/generate-mapping-report/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        msfg_definition_id: currentMsfgId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('报告生成请求失败');
+                }
+
+                const data = await response.json();
+                
+                // 生成报告
+                const reportDate = new Date(data.report_info.generated_at).toLocaleString();
+                const html = `
+                    <div class="validation-item success">
+                        <h4>📊 MSFG映射关系报告</h4>
+                        <p><strong>生成时间:</strong> ${reportDate}</p>
+                        <p><strong>MSFG配置:</strong> ${data.report_info.msfg_definition_name}</p>
+                        <p><strong>CMG模型:</strong> ${data.report_info.cmg_model_name}</p>
+                    </div>
+                    <div class="validation-item info">
+                        <h4>📈 统计概览</h4>
+                        <ul>
+                            <li>测试点总数: ${data.statistics.test_names_count}</li>
+                            <li>故障总数: ${data.statistics.fault_names_count}</li>
+                            <li>部件总数: ${data.statistics.component_names_count}</li>
+                            <li>测点-部件映射: ${data.statistics.test_component_mappings_count}</li>
+                            <li>故障-部件映射: ${data.statistics.fault_component_mappings_count}</li>
+                            <li>总映射数: ${data.statistics.total_mappings_count}</li>
+                        </ul>
+                    </div>
+                    <div class="validation-item info">
+                        <h4>🔗 测点-部件映射详情</h4>
+                        ${data.test_component_mappings.length > 0 ? `
+                            <ul>
+                                ${data.test_component_mappings.map(m => `
+                                    <li>${m.test_point_name} → ${m.component_name} 
+                                        (权重: ${m.weight}, 重要度: ${m.importance_weight}${m.is_critical ? ', 关键部件' : ''})
+                                        ${m.description ? `<br><small>描述: ${m.description}</small>` : ''}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : '<p>暂无测点-部件映射</p>'}
+                    </div>
+                    <div class="validation-item info">
+                        <h4>⚡ 故障-部件映射详情</h4>
+                        ${data.fault_component_mappings.length > 0 ? `
+                            <ul>
+                                ${data.fault_component_mappings.map(m => `
+                                    <li>${m.fault_name} → ${m.component_name} 
+                                        (权重: ${m.weight}${m.is_critical ? ', 关键映射' : ''})
+                                        ${m.description ? `<br><small>描述: ${m.description}</small>` : ''}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : '<p>暂无故障-部件映射</p>'}
+                    </div>
+                    <div class="validation-item info">
+                        <h4>🔧 部件映射摘要</h4>
+                        ${Object.keys(data.component_summary).length > 0 ? `
+                            <ul>
+                                ${Object.entries(data.component_summary).map(([component, summary]) => `
+                                    <li><strong>${component}</strong>:
+                                        <ul>
+                                            <li>测点数量: ${summary.test_points_count}</li>
+                                            <li>故障数量: ${summary.faults_count}</li>
+                                            <li>总映射数: ${summary.total_mappings}</li>
+                                            <li>平均测点权重: ${summary.avg_test_weight.toFixed(2)}</li>
+                                            <li>平均故障权重: ${summary.avg_fault_weight.toFixed(2)}</li>
+                                            <li>关键部件: ${summary.is_critical ? '是' : '否'}</li>
+                                        </ul>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : '<p>暂无部件映射摘要</p>'}
+                    </div>
+                `;
+                
+                container.innerHTML = html;
+
+            } catch (error) {
+                container.innerHTML = '<div class="validation-item error"><h4>❌ 报告生成失败</h4><p>' + error.message + '</p></div>';
+            }
+        }
+
+        // ✨ 新增功能：从图结构提取映射
+        async function extractMappingsFromGraph() {
+            if (!currentMsfgId || !currentMsfgData) {
+                showStatus('请先选择一个有效的MSFG配置', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('validation-results');
+            container.innerHTML = '<div class="loading">正在从图结构中提取映射关系...</div>';
+
+            try {
+                // 使用存储的MSFG数据中的raw_graph_data
+                const graphData = currentMsfgData.raw_graph_data;
+                if (!graphData) {
+                    throw new Error('当前MSFG配置中没有找到图数据(raw_graph_data)');
+                }
+
+                const response = await fetch(`${API_BASE}/msfg-definitions/${currentMsfgId}/extract-mappings-from-graph/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        graphData: graphData
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || '提取映射失败');
+                }
+
+                const result = await response.json();
+                const mappings = result.extracted_mappings;
+                
+                // 在验证结果区域显示成功信息
+                container.innerHTML = `<div class="validation-item success"><h4>✨ 提取成功</h4><p>已成功从图结构中提取映射关系，详情请见弹窗。</p></div>`;
+                
+                // 在模态框中显示详细结果
+                displayExtractionResults(mappings);
+
+            } catch (error) {
+                container.innerHTML = `<div class="validation-item error"><h4>❌ 提取失败</h4><p>${error.message}</p></div>`;
+            }
+        }
+
+        function displayExtractionResults(mappings) {
+            const resultsContainer = document.getElementById('extraction-results');
+            let html = '';
+
+            const renderMappingTable = (title, data, headers) => {
+                let tableHtml = `<h4>${title} (${data.length}条)</h4>`;
+                if (data.length === 0) {
+                    return tableHtml + '<p>无</p>';
+                }
+                tableHtml += '<table><thead><tr>';
+                headers.forEach(h => tableHtml += `<th>${h}</th>`);
+                tableHtml += '</tr></thead><tbody>';
+                data.forEach(item => {
+                    tableHtml += '<tr>';
+                    headers.forEach(h => {
+                        const key = h.toLowerCase().replace(' ', '_').replace('-', '_');
+                        tableHtml += `<td>${item[key] || ''}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</tbody></table>';
+                return tableHtml;
+            };
+
+            html += renderMappingTable(
+                '测点 → 故障', 
+                mappings.test_to_fault, 
+                ['test_point_name', 'fault_name', 'type']
+            );
+            html += renderMappingTable(
+                '故障 → 部件', 
+                mappings.fault_to_component, 
+                ['fault_name', 'component_name', 'type']
+            );
+            html += renderMappingTable(
+                '测点 → 部件', 
+                mappings.test_to_component, 
+                ['test_point_name', 'component_name', 'type', 'via']
+            );
+
+            resultsContainer.innerHTML = html;
+            document.getElementById('extraction-modal').style.display = 'block';
+        }
+
+        function closeExtractionModal() {
+            document.getElementById('extraction-modal').style.display = 'none';
+        }
+
+        // 在MSFG选择变化时加载映射数据
+        async function onMsfgChange(){
+            const sel = document.getElementById('msfgSelect');
+            currentMsfgId = sel.value ? parseInt(sel.value) : null;
+            if(currentMsfgId){
+                await loadSelectedMsfg(currentMsfgId);
+                // 加载当前标签页的映射数据
+                loadMappings(currentTab);
+            }
+        }
+    </script>
+</body>
+</html>

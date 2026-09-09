@@ -1,0 +1,1837 @@
+{
+  "SystemData": [
+    {
+      "data": {
+        "nodes": [
+          {
+            "id": "5f1f9e39-eeb2-4d93-9518-1be3fd84a2a1",
+            "type": "test-node",
+            "x": 0,
+            "y": 0,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 0,
+              "value": "+12V遥测"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 0,
+                "id": "5f1f9e39-eeb2-4d93-9518-1be3fd84a2a1_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 0,
+                "id": "5f1f9e39-eeb2-4d93-9518-1be3fd84a2a1_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "18c72f76-ae69-4be4-aa92-8921ab143b0e",
+            "type": "test-node",
+            "x": 0,
+            "y": 80,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 80,
+              "value": "+5V遥测"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 80,
+                "id": "18c72f76-ae69-4be4-aa92-8921ab143b0e_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 80,
+                "id": "18c72f76-ae69-4be4-aa92-8921ab143b0e_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "cc443b8b-ae62-4600-8264-cc9e0570229f",
+            "type": "test-node",
+            "x": 0,
+            "y": 160,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 160,
+              "value": "+45V遥测"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 160,
+                "id": "cc443b8b-ae62-4600-8264-cc9e0570229f_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 160,
+                "id": "cc443b8b-ae62-4600-8264-cc9e0570229f_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "859d319b-e7e5-4255-a78c-283ab37ac53c",
+            "type": "test-node",
+            "x": 0,
+            "y": 240,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 240,
+              "value": "100V遥测"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 240,
+                "id": "859d319b-e7e5-4255-a78c-283ab37ac53c_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 240,
+                "id": "859d319b-e7e5-4255-a78c-283ab37ac53c_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "89130dcb-7802-45d0-be35-97ca0023293c",
+            "type": "test-node",
+            "x": 0,
+            "y": 320,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 320,
+              "value": "高速电机电压"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 320,
+                "id": "89130dcb-7802-45d0-be35-97ca0023293c_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 320,
+                "id": "89130dcb-7802-45d0-be35-97ca0023293c_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "4e915ae7-6d7a-4769-9819-97d91351a291",
+            "type": "test-node",
+            "x": 0,
+            "y": 400,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 400,
+              "value": "高速电机电流"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 400,
+                "id": "4e915ae7-6d7a-4769-9819-97d91351a291_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 400,
+                "id": "4e915ae7-6d7a-4769-9819-97d91351a291_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "537267cf-7efe-49b7-8e6b-e072618df507",
+            "type": "test-node",
+            "x": 0,
+            "y": 480,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 480,
+              "value": "高速转速"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 480,
+                "id": "537267cf-7efe-49b7-8e6b-e072618df507_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 480,
+                "id": "537267cf-7efe-49b7-8e6b-e072618df507_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "150e8ce8-bf79-4053-aec6-5316263e61e5",
+            "type": "test-node",
+            "x": 0,
+            "y": 560,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 560,
+              "value": "高速转速控制精度"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 560,
+                "id": "150e8ce8-bf79-4053-aec6-5316263e61e5_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 560,
+                "id": "150e8ce8-bf79-4053-aec6-5316263e61e5_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "b32ca58d-44af-4a93-8170-f41613055b38",
+            "type": "test-node",
+            "x": 0,
+            "y": 640,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 640,
+              "value": "高速转速控制稳定度"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 640,
+                "id": "b32ca58d-44af-4a93-8170-f41613055b38_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 640,
+                "id": "b32ca58d-44af-4a93-8170-f41613055b38_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "c9ac62cf-7fff-40a0-8b95-7c32bf0bb46b",
+            "type": "test-node",
+            "x": 0,
+            "y": 720,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 720,
+              "value": "低速转速"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 720,
+                "id": "c9ac62cf-7fff-40a0-8b95-7c32bf0bb46b_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 720,
+                "id": "c9ac62cf-7fff-40a0-8b95-7c32bf0bb46b_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "5cbd9507-7d26-470f-b7d9-e35459a53e34",
+            "type": "test-node",
+            "x": 0,
+            "y": 800,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 800,
+              "value": "低速A相电流"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 800,
+                "id": "5cbd9507-7d26-470f-b7d9-e35459a53e34_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 800,
+                "id": "5cbd9507-7d26-470f-b7d9-e35459a53e34_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "c2dc3ad8-59ae-48a0-8fe4-9a6599036c1d",
+            "type": "test-node",
+            "x": 0,
+            "y": 880,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 880,
+              "value": "低速C相电流"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 880,
+                "id": "c2dc3ad8-59ae-48a0-8fe4-9a6599036c1d_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 880,
+                "id": "c2dc3ad8-59ae-48a0-8fe4-9a6599036c1d_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "75233157-570b-4093-9f12-cdd517cf2ae6",
+            "type": "test-node",
+            "x": 0,
+            "y": 960,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 960,
+              "value": "低速位置"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 960,
+                "id": "75233157-570b-4093-9f12-cdd517cf2ae6_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 960,
+                "id": "75233157-570b-4093-9f12-cdd517cf2ae6_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "9f6ff3ad-4530-45c2-a200-157c5b83539e",
+            "type": "test-node",
+            "x": 0,
+            "y": 1040,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 1040,
+              "value": "高速固紧端轴温"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 1040,
+                "id": "9f6ff3ad-4530-45c2-a200-157c5b83539e_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 1040,
+                "id": "9f6ff3ad-4530-45c2-a200-157c5b83539e_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "2a8009ef-699b-4362-87ba-18590e71aa8c",
+            "type": "test-node",
+            "x": 0,
+            "y": 1120,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 1120,
+              "value": "高速滑动端轴温"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 1120,
+                "id": "2a8009ef-699b-4362-87ba-18590e71aa8c_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 1120,
+                "id": "2a8009ef-699b-4362-87ba-18590e71aa8c_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "5ee06026-807c-426d-8818-e91af0736745",
+            "type": "test-node",
+            "x": 0,
+            "y": 1200,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 1200,
+              "value": "低速壳温"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 1200,
+                "id": "5ee06026-807c-426d-8818-e91af0736745_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 1200,
+                "id": "5ee06026-807c-426d-8818-e91af0736745_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "a4a74d85-8b2b-4171-b852-82acca530322",
+            "type": "test-node",
+            "x": 0,
+            "y": 1280,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 1280,
+              "value": "定角锁定精度"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 1280,
+                "id": "a4a74d85-8b2b-4171-b852-82acca530322_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 1280,
+                "id": "a4a74d85-8b2b-4171-b852-82acca530322_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "a43b6ce5-6229-4bb0-8174-55382e847599",
+            "type": "test-node",
+            "x": 0,
+            "y": 1360,
+            "properties": {
+              "collision": false,
+              "detectable": true,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "icon": "http://127.0.0.1:8080/static/svg/delay-bc444a81.svg",
+              "isAbandoned": false,
+              "isReserved": false,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "testCost": 0,
+              "testTime": 0,
+              "typeColor": "#eea2a4",
+              "ui": "node-red",
+              "width": 120
+            },
+            "text": {
+              "x": 0,
+              "y": 1360,
+              "value": "框架电流"
+            },
+            "anchors": [
+              {
+                "x": -20,
+                "y": 1360,
+                "id": "a43b6ce5-6229-4bb0-8174-55382e847599_left",
+                "type": "left"
+              },
+              {
+                "x": 20,
+                "y": 1360,
+                "id": "a43b6ce5-6229-4bb0-8174-55382e847599_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a",
+            "type": "fault-node",
+            "x": 400,
+            "y": 0.0,
+            "properties": {
+              "MTTF": 100000,
+              "collision": false,
+              "detectable": true,
+              "flevel": 0,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "hierarchyLabel": null,
+              "icon": "http://127.0.0.1:8080/static/svg/%E6%95%85%E9%9A%9C-7ed317a5.svg",
+              "repairCost": 0,
+              "repairTime": 0,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "typeColor": "#edc3ae",
+              "ui": "node-red",
+              "width": 140
+            },
+            "text": {
+              "x": 400,
+              "y": 0.0,
+              "value": "电源系统故障"
+            },
+            "anchors": [
+              {
+                "x": 380,
+                "y": 0.0,
+                "id": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a_left",
+                "type": "left"
+              },
+              {
+                "x": 420,
+                "y": 0.0,
+                "id": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b",
+            "type": "fault-node",
+            "x": 400,
+            "y": 96.0,
+            "properties": {
+              "MTTF": 100000,
+              "collision": false,
+              "detectable": true,
+              "flevel": 0,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "hierarchyLabel": null,
+              "icon": "http://127.0.0.1:8080/static/svg/%E6%95%85%E9%9A%9C-7ed317a5.svg",
+              "repairCost": 0,
+              "repairTime": 0,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "typeColor": "#edc3ae",
+              "ui": "node-red",
+              "width": 140
+            },
+            "text": {
+              "x": 400,
+              "y": 96.0,
+              "value": "高速电机故障"
+            },
+            "anchors": [
+              {
+                "x": 380,
+                "y": 96.0,
+                "id": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_left",
+                "type": "left"
+              },
+              {
+                "x": 420,
+                "y": 96.0,
+                "id": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "71e6d927-7097-4171-b3af-9592f895c2c1",
+            "type": "fault-node",
+            "x": 400,
+            "y": 192.0,
+            "properties": {
+              "MTTF": 100000,
+              "collision": false,
+              "detectable": true,
+              "flevel": 0,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "hierarchyLabel": null,
+              "icon": "http://127.0.0.1:8080/static/svg/%E6%95%85%E9%9A%9C-7ed317a5.svg",
+              "repairCost": 0,
+              "repairTime": 0,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "typeColor": "#edc3ae",
+              "ui": "node-red",
+              "width": 140
+            },
+            "text": {
+              "x": 400,
+              "y": 192.0,
+              "value": "低速电机故障"
+            },
+            "anchors": [
+              {
+                "x": 380,
+                "y": 192.0,
+                "id": "71e6d927-7097-4171-b3af-9592f895c2c1_left",
+                "type": "left"
+              },
+              {
+                "x": 420,
+                "y": 192.0,
+                "id": "71e6d927-7097-4171-b3af-9592f895c2c1_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "8246e733-2739-42ea-9281-56e04f3fd8ea",
+            "type": "fault-node",
+            "x": 400,
+            "y": 288.0,
+            "properties": {
+              "MTTF": 100000,
+              "collision": false,
+              "detectable": true,
+              "flevel": 0,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "hierarchyLabel": null,
+              "icon": "http://127.0.0.1:8080/static/svg/%E6%95%85%E9%9A%9C-7ed317a5.svg",
+              "repairCost": 0,
+              "repairTime": 0,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "typeColor": "#edc3ae",
+              "ui": "node-red",
+              "width": 140
+            },
+            "text": {
+              "x": 400,
+              "y": 288.0,
+              "value": "轴承过热"
+            },
+            "anchors": [
+              {
+                "x": 380,
+                "y": 288.0,
+                "id": "8246e733-2739-42ea-9281-56e04f3fd8ea_left",
+                "type": "left"
+              },
+              {
+                "x": 420,
+                "y": 288.0,
+                "id": "8246e733-2739-42ea-9281-56e04f3fd8ea_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15",
+            "type": "fault-node",
+            "x": 400,
+            "y": 384.0,
+            "properties": {
+              "MTTF": 100000,
+              "collision": false,
+              "detectable": true,
+              "flevel": 0,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "hierarchyLabel": null,
+              "icon": "http://127.0.0.1:8080/static/svg/%E6%95%85%E9%9A%9C-7ed317a5.svg",
+              "repairCost": 0,
+              "repairTime": 0,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "typeColor": "#edc3ae",
+              "ui": "node-red",
+              "width": 140
+            },
+            "text": {
+              "x": 400,
+              "y": 384.0,
+              "value": "轴承磨损"
+            },
+            "anchors": [
+              {
+                "x": 380,
+                "y": 384.0,
+                "id": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15_left",
+                "type": "left"
+              },
+              {
+                "x": 420,
+                "y": 384.0,
+                "id": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "aa260001-d541-4996-a429-85871b188667",
+            "type": "fault-node",
+            "x": 400,
+            "y": 480.0,
+            "properties": {
+              "MTTF": 100000,
+              "collision": false,
+              "detectable": true,
+              "flevel": 0,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "hierarchyLabel": null,
+              "icon": "http://127.0.0.1:8080/static/svg/%E6%95%85%E9%9A%9C-7ed317a5.svg",
+              "repairCost": 0,
+              "repairTime": 0,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "typeColor": "#edc3ae",
+              "ui": "node-red",
+              "width": 140
+            },
+            "text": {
+              "x": 400,
+              "y": 480.0,
+              "value": "控制电路故障"
+            },
+            "anchors": [
+              {
+                "x": 380,
+                "y": 480.0,
+                "id": "aa260001-d541-4996-a429-85871b188667_left",
+                "type": "left"
+              },
+              {
+                "x": 420,
+                "y": 480.0,
+                "id": "aa260001-d541-4996-a429-85871b188667_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "1170e4db-2708-41e0-a786-ef852ac0da65",
+            "type": "fault-node",
+            "x": 400,
+            "y": 576.0,
+            "properties": {
+              "MTTF": 100000,
+              "collision": false,
+              "detectable": true,
+              "flevel": 0,
+              "fuzzible": false,
+              "fuzzy_state": 0,
+              "hierarchyLabel": null,
+              "icon": "http://127.0.0.1:8080/static/svg/%E6%95%85%E9%9A%9C-7ed317a5.svg",
+              "repairCost": 0,
+              "repairTime": 0,
+              "showType": "edit",
+              "state": 0,
+              "systemId": 1,
+              "typeColor": "#edc3ae",
+              "ui": "node-red",
+              "width": 140
+            },
+            "text": {
+              "x": 400,
+              "y": 576.0,
+              "value": "框架结构故障"
+            },
+            "anchors": [
+              {
+                "x": 380,
+                "y": 576.0,
+                "id": "1170e4db-2708-41e0-a786-ef852ac0da65_left",
+                "type": "left"
+              },
+              {
+                "x": 420,
+                "y": 576.0,
+                "id": "1170e4db-2708-41e0-a786-ef852ac0da65_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "9d9d54e8-c627-470f-9db4-13d4d1a875da",
+            "type": "subsystem-node",
+            "x": 800,
+            "y": 0.0,
+            "properties": {
+              "fields": {
+                "input": 3,
+                "output": 1
+              },
+              "inputNameMap": {
+                "1": "输入",
+                "2": "输入",
+                "3": "输入"
+              },
+              "outputNameMap": {
+                "1": "输出"
+              },
+              "systemId": 1,
+              "tableName": "电源系统"
+            },
+            "text": {
+              "x": 800,
+              "y": 0.0,
+              "value": " "
+            },
+            "anchors": [
+              {
+                "x": 780,
+                "y": 0.0,
+                "id": "9d9d54e8-c627-470f-9db4-13d4d1a875da_left",
+                "type": "left"
+              },
+              {
+                "x": 820,
+                "y": 0.0,
+                "id": "9d9d54e8-c627-470f-9db4-13d4d1a875da_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "bc7de180-cb9d-4430-b8db-20cbf0e35619",
+            "type": "subsystem-node",
+            "x": 800,
+            "y": 96.0,
+            "properties": {
+              "fields": {
+                "input": 3,
+                "output": 1
+              },
+              "inputNameMap": {
+                "1": "输入",
+                "2": "输入",
+                "3": "输入"
+              },
+              "outputNameMap": {
+                "1": "输出"
+              },
+              "systemId": 1,
+              "tableName": "高速电机系统"
+            },
+            "text": {
+              "x": 800,
+              "y": 96.0,
+              "value": " "
+            },
+            "anchors": [
+              {
+                "x": 780,
+                "y": 96.0,
+                "id": "bc7de180-cb9d-4430-b8db-20cbf0e35619_left",
+                "type": "left"
+              },
+              {
+                "x": 820,
+                "y": 96.0,
+                "id": "bc7de180-cb9d-4430-b8db-20cbf0e35619_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "c3b79b6f-d0be-4b0a-9541-d602c6501fdc",
+            "type": "subsystem-node",
+            "x": 800,
+            "y": 192.0,
+            "properties": {
+              "fields": {
+                "input": 3,
+                "output": 1
+              },
+              "inputNameMap": {
+                "1": "输入",
+                "2": "输入",
+                "3": "输入"
+              },
+              "outputNameMap": {
+                "1": "输出"
+              },
+              "systemId": 1,
+              "tableName": "低速电机系统"
+            },
+            "text": {
+              "x": 800,
+              "y": 192.0,
+              "value": " "
+            },
+            "anchors": [
+              {
+                "x": 780,
+                "y": 192.0,
+                "id": "c3b79b6f-d0be-4b0a-9541-d602c6501fdc_left",
+                "type": "left"
+              },
+              {
+                "x": 820,
+                "y": 192.0,
+                "id": "c3b79b6f-d0be-4b0a-9541-d602c6501fdc_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "d9394b87-7fbc-4c35-9eb5-963d22c297f9",
+            "type": "subsystem-node",
+            "x": 800,
+            "y": 288.0,
+            "properties": {
+              "fields": {
+                "input": 3,
+                "output": 1
+              },
+              "inputNameMap": {
+                "1": "输入",
+                "2": "输入",
+                "3": "输入"
+              },
+              "outputNameMap": {
+                "1": "输出"
+              },
+              "systemId": 1,
+              "tableName": "轴承系统"
+            },
+            "text": {
+              "x": 800,
+              "y": 288.0,
+              "value": " "
+            },
+            "anchors": [
+              {
+                "x": 780,
+                "y": 288.0,
+                "id": "d9394b87-7fbc-4c35-9eb5-963d22c297f9_left",
+                "type": "left"
+              },
+              {
+                "x": 820,
+                "y": 288.0,
+                "id": "d9394b87-7fbc-4c35-9eb5-963d22c297f9_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "757d101c-960a-49d5-a2b9-ce125b4cf51c",
+            "type": "subsystem-node",
+            "x": 800,
+            "y": 384.0,
+            "properties": {
+              "fields": {
+                "input": 3,
+                "output": 1
+              },
+              "inputNameMap": {
+                "1": "输入",
+                "2": "输入",
+                "3": "输入"
+              },
+              "outputNameMap": {
+                "1": "输出"
+              },
+              "systemId": 1,
+              "tableName": "控制系统"
+            },
+            "text": {
+              "x": 800,
+              "y": 384.0,
+              "value": " "
+            },
+            "anchors": [
+              {
+                "x": 780,
+                "y": 384.0,
+                "id": "757d101c-960a-49d5-a2b9-ce125b4cf51c_left",
+                "type": "left"
+              },
+              {
+                "x": 820,
+                "y": 384.0,
+                "id": "757d101c-960a-49d5-a2b9-ce125b4cf51c_right",
+                "type": "right"
+              }
+            ]
+          },
+          {
+            "id": "093fcda7-4c84-4c8f-948d-5443c8c0a26d",
+            "type": "subsystem-node",
+            "x": 800,
+            "y": 480.0,
+            "properties": {
+              "fields": {
+                "input": 3,
+                "output": 1
+              },
+              "inputNameMap": {
+                "1": "输入",
+                "2": "输入",
+                "3": "输入"
+              },
+              "outputNameMap": {
+                "1": "输出"
+              },
+              "systemId": 1,
+              "tableName": "框架系统"
+            },
+            "text": {
+              "x": 800,
+              "y": 480.0,
+              "value": " "
+            },
+            "anchors": [
+              {
+                "x": 780,
+                "y": 480.0,
+                "id": "093fcda7-4c84-4c8f-948d-5443c8c0a26d_left",
+                "type": "left"
+              },
+              {
+                "x": 820,
+                "y": 480.0,
+                "id": "093fcda7-4c84-4c8f-948d-5443c8c0a26d_right",
+                "type": "right"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "id": "3721073f-4712-4a04-abe8-45be931c0abc",
+            "type": "custom-edge",
+            "sourceNodeId": "5f1f9e39-eeb2-4d93-9518-1be3fd84a2a1",
+            "targetNodeId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a",
+            "startPoint": {
+              "x": 20,
+              "y": 0
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 0.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "5f1f9e39-eeb2-4d93-9518-1be3fd84a2a1_right",
+            "targetAnchorId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a_left"
+          },
+          {
+            "id": "2d3912dc-8af0-41b5-8a05-526b17833375",
+            "type": "custom-edge",
+            "sourceNodeId": "18c72f76-ae69-4be4-aa92-8921ab143b0e",
+            "targetNodeId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a",
+            "startPoint": {
+              "x": 20,
+              "y": 80
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 0.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "18c72f76-ae69-4be4-aa92-8921ab143b0e_right",
+            "targetAnchorId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a_left"
+          },
+          {
+            "id": "2d163896-b2f1-4e18-b8bb-b1f1981d7887",
+            "type": "custom-edge",
+            "sourceNodeId": "cc443b8b-ae62-4600-8264-cc9e0570229f",
+            "targetNodeId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a",
+            "startPoint": {
+              "x": 20,
+              "y": 160
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 0.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "cc443b8b-ae62-4600-8264-cc9e0570229f_right",
+            "targetAnchorId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a_left"
+          },
+          {
+            "id": "b448b196-9840-427d-ad51-58e9c907811e",
+            "type": "custom-edge",
+            "sourceNodeId": "859d319b-e7e5-4255-a78c-283ab37ac53c",
+            "targetNodeId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a",
+            "startPoint": {
+              "x": 20,
+              "y": 240
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 0.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "859d319b-e7e5-4255-a78c-283ab37ac53c_right",
+            "targetAnchorId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a_left"
+          },
+          {
+            "id": "184cf1c6-c28f-4117-ba36-52e4f7b8ce18",
+            "type": "custom-edge",
+            "sourceNodeId": "89130dcb-7802-45d0-be35-97ca0023293c",
+            "targetNodeId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b",
+            "startPoint": {
+              "x": 20,
+              "y": 320
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 96.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "89130dcb-7802-45d0-be35-97ca0023293c_right",
+            "targetAnchorId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_left"
+          },
+          {
+            "id": "8b4d7bbe-257c-444d-bded-f33d9584d1f3",
+            "type": "custom-edge",
+            "sourceNodeId": "4e915ae7-6d7a-4769-9819-97d91351a291",
+            "targetNodeId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b",
+            "startPoint": {
+              "x": 20,
+              "y": 400
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 96.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "4e915ae7-6d7a-4769-9819-97d91351a291_right",
+            "targetAnchorId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_left"
+          },
+          {
+            "id": "2ce570d0-005e-4168-bc5c-ed74f805b5c6",
+            "type": "custom-edge",
+            "sourceNodeId": "537267cf-7efe-49b7-8e6b-e072618df507",
+            "targetNodeId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b",
+            "startPoint": {
+              "x": 20,
+              "y": 480
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 96.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "537267cf-7efe-49b7-8e6b-e072618df507_right",
+            "targetAnchorId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_left"
+          },
+          {
+            "id": "6fc05616-f652-4e09-abf3-963feb57010b",
+            "type": "custom-edge",
+            "sourceNodeId": "150e8ce8-bf79-4053-aec6-5316263e61e5",
+            "targetNodeId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b",
+            "startPoint": {
+              "x": 20,
+              "y": 560
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 96.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "150e8ce8-bf79-4053-aec6-5316263e61e5_right",
+            "targetAnchorId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_left"
+          },
+          {
+            "id": "46d7ff4d-f117-497a-ade4-fbe5cea97fba",
+            "type": "custom-edge",
+            "sourceNodeId": "150e8ce8-bf79-4053-aec6-5316263e61e5",
+            "targetNodeId": "aa260001-d541-4996-a429-85871b188667",
+            "startPoint": {
+              "x": 20,
+              "y": 560
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 480.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "150e8ce8-bf79-4053-aec6-5316263e61e5_right",
+            "targetAnchorId": "aa260001-d541-4996-a429-85871b188667_left"
+          },
+          {
+            "id": "96609481-0f82-41c8-8d76-bfe361af1e6f",
+            "type": "custom-edge",
+            "sourceNodeId": "b32ca58d-44af-4a93-8170-f41613055b38",
+            "targetNodeId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b",
+            "startPoint": {
+              "x": 20,
+              "y": 640
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 96.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "b32ca58d-44af-4a93-8170-f41613055b38_right",
+            "targetAnchorId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_left"
+          },
+          {
+            "id": "e682ab11-8b4b-4631-bc65-7f45a70ff8b0",
+            "type": "custom-edge",
+            "sourceNodeId": "b32ca58d-44af-4a93-8170-f41613055b38",
+            "targetNodeId": "aa260001-d541-4996-a429-85871b188667",
+            "startPoint": {
+              "x": 20,
+              "y": 640
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 480.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "b32ca58d-44af-4a93-8170-f41613055b38_right",
+            "targetAnchorId": "aa260001-d541-4996-a429-85871b188667_left"
+          },
+          {
+            "id": "9063331c-7ce3-45eb-8692-ace176bd520b",
+            "type": "custom-edge",
+            "sourceNodeId": "c9ac62cf-7fff-40a0-8b95-7c32bf0bb46b",
+            "targetNodeId": "71e6d927-7097-4171-b3af-9592f895c2c1",
+            "startPoint": {
+              "x": 20,
+              "y": 720
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 192.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "c9ac62cf-7fff-40a0-8b95-7c32bf0bb46b_right",
+            "targetAnchorId": "71e6d927-7097-4171-b3af-9592f895c2c1_left"
+          },
+          {
+            "id": "31a40f9a-fb38-4892-809d-49bd1fd6f6c6",
+            "type": "custom-edge",
+            "sourceNodeId": "5cbd9507-7d26-470f-b7d9-e35459a53e34",
+            "targetNodeId": "71e6d927-7097-4171-b3af-9592f895c2c1",
+            "startPoint": {
+              "x": 20,
+              "y": 800
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 192.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "5cbd9507-7d26-470f-b7d9-e35459a53e34_right",
+            "targetAnchorId": "71e6d927-7097-4171-b3af-9592f895c2c1_left"
+          },
+          {
+            "id": "acdb211f-79a4-43df-af7c-6b14cde7a02a",
+            "type": "custom-edge",
+            "sourceNodeId": "c2dc3ad8-59ae-48a0-8fe4-9a6599036c1d",
+            "targetNodeId": "71e6d927-7097-4171-b3af-9592f895c2c1",
+            "startPoint": {
+              "x": 20,
+              "y": 880
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 192.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "c2dc3ad8-59ae-48a0-8fe4-9a6599036c1d_right",
+            "targetAnchorId": "71e6d927-7097-4171-b3af-9592f895c2c1_left"
+          },
+          {
+            "id": "6f755eee-fd0d-4500-ba0c-d276b1558243",
+            "type": "custom-edge",
+            "sourceNodeId": "9f6ff3ad-4530-45c2-a200-157c5b83539e",
+            "targetNodeId": "8246e733-2739-42ea-9281-56e04f3fd8ea",
+            "startPoint": {
+              "x": 20,
+              "y": 1040
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 288.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "9f6ff3ad-4530-45c2-a200-157c5b83539e_right",
+            "targetAnchorId": "8246e733-2739-42ea-9281-56e04f3fd8ea_left"
+          },
+          {
+            "id": "ac8149b8-1483-481f-9957-5d701b5de76b",
+            "type": "custom-edge",
+            "sourceNodeId": "9f6ff3ad-4530-45c2-a200-157c5b83539e",
+            "targetNodeId": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15",
+            "startPoint": {
+              "x": 20,
+              "y": 1040
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 384.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "9f6ff3ad-4530-45c2-a200-157c5b83539e_right",
+            "targetAnchorId": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15_left"
+          },
+          {
+            "id": "0859353a-5b2f-4813-b13e-5373e40247f5",
+            "type": "custom-edge",
+            "sourceNodeId": "2a8009ef-699b-4362-87ba-18590e71aa8c",
+            "targetNodeId": "8246e733-2739-42ea-9281-56e04f3fd8ea",
+            "startPoint": {
+              "x": 20,
+              "y": 1120
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 288.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "2a8009ef-699b-4362-87ba-18590e71aa8c_right",
+            "targetAnchorId": "8246e733-2739-42ea-9281-56e04f3fd8ea_left"
+          },
+          {
+            "id": "182d1c6b-a64e-4c8f-8051-f0f614f5c23e",
+            "type": "custom-edge",
+            "sourceNodeId": "2a8009ef-699b-4362-87ba-18590e71aa8c",
+            "targetNodeId": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15",
+            "startPoint": {
+              "x": 20,
+              "y": 1120
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 384.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "2a8009ef-699b-4362-87ba-18590e71aa8c_right",
+            "targetAnchorId": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15_left"
+          },
+          {
+            "id": "bb621ce0-cb7a-420c-853e-18b8ff9eafe0",
+            "type": "custom-edge",
+            "sourceNodeId": "5ee06026-807c-426d-8818-e91af0736745",
+            "targetNodeId": "1170e4db-2708-41e0-a786-ef852ac0da65",
+            "startPoint": {
+              "x": 20,
+              "y": 1200
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 576.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "5ee06026-807c-426d-8818-e91af0736745_right",
+            "targetAnchorId": "1170e4db-2708-41e0-a786-ef852ac0da65_left"
+          },
+          {
+            "id": "1165a187-0254-4101-a991-1d6f2a449546",
+            "type": "custom-edge",
+            "sourceNodeId": "a43b6ce5-6229-4bb0-8174-55382e847599",
+            "targetNodeId": "1170e4db-2708-41e0-a786-ef852ac0da65",
+            "startPoint": {
+              "x": 20,
+              "y": 1360
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 576.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "a43b6ce5-6229-4bb0-8174-55382e847599_right",
+            "targetAnchorId": "1170e4db-2708-41e0-a786-ef852ac0da65_left"
+          },
+          {
+            "id": "4d0f7398-7898-4d8a-a04a-dc2d833725c2",
+            "type": "custom-edge",
+            "sourceNodeId": "75233157-570b-4093-9f12-cdd517cf2ae6",
+            "targetNodeId": "aa260001-d541-4996-a429-85871b188667",
+            "startPoint": {
+              "x": 20,
+              "y": 960
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 480.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "75233157-570b-4093-9f12-cdd517cf2ae6_right",
+            "targetAnchorId": "aa260001-d541-4996-a429-85871b188667_left"
+          },
+          {
+            "id": "17e489b0-2383-4318-85dc-c71cb4938c90",
+            "type": "custom-edge",
+            "sourceNodeId": "a4a74d85-8b2b-4171-b852-82acca530322",
+            "targetNodeId": "aa260001-d541-4996-a429-85871b188667",
+            "startPoint": {
+              "x": 20,
+              "y": 1280
+            },
+            "endPoint": {
+              "x": 380,
+              "y": 480.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "a4a74d85-8b2b-4171-b852-82acca530322_right",
+            "targetAnchorId": "aa260001-d541-4996-a429-85871b188667_left"
+          },
+          {
+            "id": "f910f14e-31da-45b6-9608-14bef8e90068",
+            "type": "custom-edge",
+            "sourceNodeId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a",
+            "targetNodeId": "9d9d54e8-c627-470f-9db4-13d4d1a875da",
+            "startPoint": {
+              "x": 420,
+              "y": 0.0
+            },
+            "endPoint": {
+              "x": 780,
+              "y": 0.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "88fea8fb-c2f0-47c1-95a0-f73ee9634c0a_right",
+            "targetAnchorId": "9d9d54e8-c627-470f-9db4-13d4d1a875da_left"
+          },
+          {
+            "id": "0e19b54e-dc05-46d1-ac6e-200cab92e254",
+            "type": "custom-edge",
+            "sourceNodeId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b",
+            "targetNodeId": "bc7de180-cb9d-4430-b8db-20cbf0e35619",
+            "startPoint": {
+              "x": 420,
+              "y": 96.0
+            },
+            "endPoint": {
+              "x": 780,
+              "y": 96.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "83056cec-1ef3-4700-89a3-1a69c7b6cd7b_right",
+            "targetAnchorId": "bc7de180-cb9d-4430-b8db-20cbf0e35619_left"
+          },
+          {
+            "id": "a52ef470-13b1-49c8-9d05-8f86f2fed114",
+            "type": "custom-edge",
+            "sourceNodeId": "71e6d927-7097-4171-b3af-9592f895c2c1",
+            "targetNodeId": "c3b79b6f-d0be-4b0a-9541-d602c6501fdc",
+            "startPoint": {
+              "x": 420,
+              "y": 192.0
+            },
+            "endPoint": {
+              "x": 780,
+              "y": 192.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "71e6d927-7097-4171-b3af-9592f895c2c1_right",
+            "targetAnchorId": "c3b79b6f-d0be-4b0a-9541-d602c6501fdc_left"
+          },
+          {
+            "id": "b10f37c9-b718-4bb2-9e01-2e28e3d56dd5",
+            "type": "custom-edge",
+            "sourceNodeId": "8246e733-2739-42ea-9281-56e04f3fd8ea",
+            "targetNodeId": "d9394b87-7fbc-4c35-9eb5-963d22c297f9",
+            "startPoint": {
+              "x": 420,
+              "y": 288.0
+            },
+            "endPoint": {
+              "x": 780,
+              "y": 288.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "8246e733-2739-42ea-9281-56e04f3fd8ea_right",
+            "targetAnchorId": "d9394b87-7fbc-4c35-9eb5-963d22c297f9_left"
+          },
+          {
+            "id": "9508fe84-e798-452e-bcfa-31ead3214544",
+            "type": "custom-edge",
+            "sourceNodeId": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15",
+            "targetNodeId": "d9394b87-7fbc-4c35-9eb5-963d22c297f9",
+            "startPoint": {
+              "x": 420,
+              "y": 384.0
+            },
+            "endPoint": {
+              "x": 780,
+              "y": 288.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "90494c6a-2b4b-4f2c-a80f-7387d9a70d15_right",
+            "targetAnchorId": "d9394b87-7fbc-4c35-9eb5-963d22c297f9_left"
+          },
+          {
+            "id": "90152152-da3f-41e7-8f99-1f3e76d85227",
+            "type": "custom-edge",
+            "sourceNodeId": "aa260001-d541-4996-a429-85871b188667",
+            "targetNodeId": "757d101c-960a-49d5-a2b9-ce125b4cf51c",
+            "startPoint": {
+              "x": 420,
+              "y": 480.0
+            },
+            "endPoint": {
+              "x": 780,
+              "y": 384.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "aa260001-d541-4996-a429-85871b188667_right",
+            "targetAnchorId": "757d101c-960a-49d5-a2b9-ce125b4cf51c_left"
+          },
+          {
+            "id": "6f716d1f-8197-4708-b13e-2e61a6a0376a",
+            "type": "custom-edge",
+            "sourceNodeId": "1170e4db-2708-41e0-a786-ef852ac0da65",
+            "targetNodeId": "093fcda7-4c84-4c8f-948d-5443c8c0a26d",
+            "startPoint": {
+              "x": 420,
+              "y": 576.0
+            },
+            "endPoint": {
+              "x": 780,
+              "y": 480.0
+            },
+            "properties": {},
+            "pointsList": [],
+            "sourceAnchorId": "1170e4db-2708-41e0-a786-ef852ac0da65_right",
+            "targetAnchorId": "093fcda7-4c84-4c8f-948d-5443c8c0a26d_left"
+          }
+        ]
+      }
+    }
+  ]
+}

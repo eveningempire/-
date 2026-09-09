@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年1月1日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSCC002"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "DS8500 HART"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "载波解调器"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "选用DS8500 HART调制解调器，一款用于过程控制的HART调制解调器，提供连续相位的FSK调制和解调。这款具有丰富功能的低功耗调制解调器完全满足HART通信基金会设定的物理层规范。DS8500具有诸多功能，使用户能够方便、高效地设计具备HART调制解调功能的过程控制系统。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "1.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "1000.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "220.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "5.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

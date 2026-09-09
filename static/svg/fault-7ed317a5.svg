@@ -1,0 +1,6 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="2" width="36" height="36" rx="4" fill="#fff2f0" stroke="#ff4d4f" stroke-width="2"/>
+  <polygon points="20,8 24,16 32,16 26,22 28,30 20,26 12,30 14,22 8,16 16,16" fill="#ff4d4f"/>
+  <text x="20" y="32" text-anchor="middle" font-size="8" fill="#ff4d4f" font-family="Arial">故障</text>
+</svg>
+

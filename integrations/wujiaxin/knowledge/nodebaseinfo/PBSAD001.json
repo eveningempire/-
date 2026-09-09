@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2017年10月27日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSAD001"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4294967200"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "燃气发生器"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "燃气发生器是产生具有一定压力及温度的燃烧气体作为涡轮的工质的装罝。一般由压气机、燃料泵及燃烧室等部件及其附属系统组成。燃气发生器只提供燃烧气体，并不对外直接做功。在某种意义上讲，火箭发动机及喷气发动机也是一种燃气发生器，它们产生的高温燃气通过尾喷管，变成高速气流喷射出去, 推动火箭或飞机前进。自由活塞式内燃机的自由活塞部分也是一种燃气发生器。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "50.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/tabularcomp.js"></script>
+
+  <!-- 样式设置 -->
+  <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+    #rule-edit {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="rule-edit">
+    <div
+      style="display: flex; width: calc(100% - 2rem); flex-direction: row; justify-content: space-between; padding: 0.5rem 0;"
+    >
+      <el-button-group>
+        <el-button type="success" plain size="mini" @click="importData">导入条目</el-button>
+        <el-button type="primary" plain size="mini" @click="exportData">导出条目</el-button>
+      </el-button-group>
+      <el-button-group>
+        <el-button type="success" plain size="mini" @click="openDialog(pageSize - 2, 'create')">添加条目</el-button>
+        <el-button type="primary" plain size="mini" @click="checkAll" :disabled="checkPass">检查条目</el-button>
+        <el-button type="primary" plain size="mini" @click="configRule">配置规则</el-button>
+        <el-button type="warning" plain size="mini" @click="delPage">删除本页</el-button>
+        <el-button type="danger" plain size="mini" @click="clearAll">清空条目</el-button>
+      </el-button-group>
+    </div>
+
+    <el-form
+      :inline="true"
+      :model="searchBox"
+      label-width="100px"
+      size="mini"
+      label-position="top"
+      style="display: flex; justify-content: space-around; align-items: center; width: 100%;"
+    >
+      <el-form-item label="规则表达式" prop="ruleExpress">
+        <el-input v-model="searchBox.ruleExpress" placeholder="请输入规则表达式" clearable />
+      </el-form-item>
+      <el-form-item label="故障名称">
+        <el-select v-model="searchBox.faultName" placeholder="请选择故障名称" clearable filterable default-first-option>
+          <el-option
+            v-for="(value, key) in colConfig[1].options"
+            :key="key"
+            :label="value.name"
+            :value="key"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="预案描述">
+        <el-input v-model="searchBox.planDescript" placeholder="请输入预案描述" clearable></el-input>
+      </el-form-item>
+      <el-form-item label="所属部件">
+        <el-select v-model="searchBox.component" placeholder="请选择部件" clearable filterable default-first-option>
+          <el-option label="显示全部" value="all"></el-option>
+          <el-option
+            v-for="(value, key) in colConfig[3].options"
+            :key="key"
+            :label="value"
+            :value="value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="规则来源">
+        <el-select v-model="searchBox.source" placeholder="请选择规则来源" clearable filterable default-first-option>
+          <el-option label="显示全部" value="all"></el-option>
+          <el-option
+            v-for="(source,index) in colConfig[4].options"
+            :key="index"
+            :label="source"
+            :value="source"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="规则状态">
+        <el-select v-model="searchBox.ruleOnline" placeholder="请选择规则状态" clearable>
+          <el-option :label="'显示全部'" :value="'all'"></el-option>
+          <el-option :label="'上线'" :value="true"></el-option>
+          <el-option :label="'下线'" :value="false"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" plain size="mini" @click="filterSearch">筛选</el-button>
+      </el-form-item>
+    </el-form>
+
+    <el-table
+      :data="tableDataShow"
+      size="small"
+      :max-height="500"
+      style="padding: 0.5rem 1rem;"
+      @cell-click="handleCellClick"
+    >
+      <el-table-column label="序号" :show-overflow-tooltip="true" :width="80">
+        <template slot-scope="scope">
+          <span>{{ showId[(currentPage - 1) * pageSize + scope.$index] + 1 }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="规则表达式" :show-overflow-tooltip="true" prop="ruleExpress"></el-table-column>
+      <el-table-column label="故障名称" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+            <span>{{Object.keys(colConfig[1].options).includes(scope.row.faultName) ? colConfig[1].options[scope.row.faultName].name : scope.row.faultName}}</el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="预案描述" :show-overflow-tooltip="true" prop="planDescript"></el-table-column>
+      <el-table-column label="所属部件" :show-overflow-tooltip="true" prop="component"></el-table-column>
+      <el-table-column label="规则来源" :show-overflow-tooltip="true" prop="source"></el-table-column>
+      <el-table-column label="规则状态">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.ruleOnline"
+            size="mini"
+            :key="scope.$index"
+            :active-color="'#13ce66'"
+            :inactive-color="'#ff4949'"
+          ></el-switch>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="错误" v-if="checkable">
+        <template slot-scope="scope">
+          <span v-if="!Object.keys(scope.row).includes('_tabular_comp_private_log')"
+            style="color: gray;">
+            未检测
+          </span>
+          <el-popover placement="right" trigger="hover"
+            v-else-if="scope.row['_tabular_comp_private_log'].warn + scope.row['_tabular_comp_private_log'].error > 0">
+            <div style="width: 200px; height: 150; font-size: 10px!important; overflow-y:auto;">
+              <ol>
+                <li v-for="it in scope.row['_tabular_comp_private_log'].info">
+                  <span v-if="setDefault(it.type, 'error').toLowerCase() === 'warn'"
+                    style="color: orange;"
+                    v-text="it.text || it"></span>
+                  <span v-else
+                    style="color: red;"
+                    v-text="it.text || it"></span>
+                </li>
+              </ol>
+            </div>
+            <div slot="reference">
+              <span v-if="scope.row['_tabular_comp_private_log'].error > 0" style="color: red;">
+                错误{{ scope.row['_tabular_comp_private_log'].error }} 条
+              </span>
+              &nbsp;&nbsp;
+              <span v-if="scope.row['_tabular_comp_private_log'].warn > 0" style="color: orange;">
+                警告{{ scope.row['_tabular_comp_private_log'].warn }} 条
+              </span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button
+            icon="el-icon-edit"
+            type="primary"
+            size="mini"
+            title="编辑条目"
+            plain
+            circle
+            @click="openDialog(scope.$index, 'edit')">
+          </el-button>
+          <el-button
+            icon="el-icon-plus"
+            type="success"
+            size="mini"
+            title="在下一行新增条目"
+            plain
+            circle
+            @click="openDialog(scope.$index, 'create')"
+          ></el-button>
+          <el-button
+            icon="el-icon-delete"
+            type="danger"
+            size="mini"
+            title="删除条目"
+            plain
+            circle
+            @click="delLine(scope.$index)"
+          ></el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-pagination
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      layout="total, prev, pager, next, jumper"
+      :total="showId.length"
+      v-if="showId.length > pageSize"
+    ></el-pagination>
+
+    <el-dialog
+      :title="dialogTitle"
+      :visible.sync="dialogVisible"
+    >
+      <el-form
+        :model="ruleDataForm"
+        label-width="100px"
+        size="mini"
+        label-position="right"
+      >
+        <el-form-item label="规则表达式" prop="ruleExpress">
+          <el-input v-model="ruleDataForm.ruleExpress" placeholder="请输入规则表达式" clearable />
+        </el-form-item>
+        <el-form-item label="故障名称" prop="faultName">
+          <el-select v-model="ruleDataForm.faultName" placeholder="请选择故障名称" clearable allow-create filterable default-first-option>
+            <el-option
+              v-for="(item, index) in colConfig[1].options"
+              :key="index"
+              :label="item.name"
+              :value="index"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="预案描述" prop="planDescript">
+          <el-input v-model="ruleDataForm.planDescript" placeholder="请输入预案描述" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="所属部件" prop="component">
+          <el-select v-model="ruleDataForm.component" placeholder="请选择部件" clearable allow-create filterable default-first-option>
+            <el-option
+              v-for="(item, index) in colConfig[3].options"
+              :key="index"
+              :label="item"
+              :value="item"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="规则来源">
+          <el-select v-model="ruleDataForm.source" placeholder="请选择规则来源" clearable filterable default-first-option>
+            <el-option
+              v-for="(source,index) in colConfig[4].options"
+              :key="index"
+              :label="source"
+              :value="source"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="closeDialog">取 消</el-button>
+        <el-button type="primary" @click="dialogFormUpdate">确 定</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</body>
+
+<script type="text/javascript">
+  var vm = new Vue({
+    el: "#rule-edit",
+    data() {
+      return {
+        obj: window.parent.vm.obj,
+        admin: window.parent.vm.admin,
+        showId: [],
+        searchBox: {
+          ruleExpress: "",
+          faultName: "",
+          planDescript: "",
+          component: "",
+          source:"",
+          ruleOnline: "",
+        },
+        currentPage: 1,
+        checkPass: true,
+        pageSize: 10,
+
+        dialogVisible: false,
+        editMode: "create",
+        editIndex: 0,
+        ruleDataForm: {
+          ruleExpress: "",
+          faultName: "",
+          planDescript: "",
+          component: "",
+          source:"",
+        },
+
+        tableData: [],
+        colConfig: [
+          {
+            name: "规则表达式",
+            key: "ruleExpress",
+            placeholder: "请输入规则表达式",
+          },
+          {//1
+            name: "故障名称",
+            key: "faultName",
+            // inputType: "select",
+            options: {},
+            placeholder: "请选择故障名称",
+          },
+          {
+            name: "预案描述",
+            key: "planDescript",
+            placeholder: "请输入预案描述",
+          },
+          {//3
+            name: "所属部件",
+            key: "component",
+            // inputType: "select",
+            options: {},
+            placeholder: "请选择部件",
+            outputType: "tag",
+          },
+          {
+            name: "规则来源",
+            key:"source",
+            options:{},
+            placeholder:"请选择规则来源",
+
+          },
+          {
+            name: "规则状态",
+            key: "ruleOnline",
+            inputType: "switch",
+            trueLabel: "上线",
+            falseLabel: "下线",
+          }
+        ],
+        checkable: true,
+        checkURL: "/rule-edit/check-all-data-default",
+        importURL: "/rule-edit/import-data-file-default",
+        exportURL: "/rule-edit/export-data-file-default",
+        exportFilename: "规则配置表.xlsx",
+        dataLoad: false,
+      }
+    },
+    computed: {
+      dataShowInfo () {
+        return this.showId.map((itm) =>
+          this.tableData[itm]
+        );
+      },
+      tableDataShow () {
+        return this.dataShowInfo.slice(
+          (this.currentPage - 1) * this.pageSize,
+          this.currentPage * this.pageSize,
+        );
+      },
+      dialogTitle () {
+        return this.editMode === "create" ? "新增条目" : "编辑条目";
+      },
+    },
+    created() {
+      const formData = new FormData();
+      formData.append("obj", this.obj);
+
+      axios.post("/rule-edit/get-config", formData)
+        .then(res => {
+          this.colConfig[1].options = res.data.faultNames;
+          this.colConfig[3].options = res.data.components;
+          this.colConfig[4].options = res.data.sources;
+        })
+        .catch(err => {});
+
+      axios.post("/rule-edit/init-all-rule", formData)
+        .then(res => {
+          this.ruleDataUpdate(res.data);
+          this.$forceUpdate();
+        })
+        .catch(err => { });
+
+      this.searchConfigInit();
+    },
+    watch: {
+      dataLoad (newVal) {
+        if (newVal) {
+          this.searchConfigInit();
+          this.filterSearch();
+          this.dataLoad = false;
+        }
+      }
+    },
+    methods: {
+      ruleDataUpdate (val) {
+        this.tableData = val;
+        this.showId = this.tableData.map((itm,itmId)=>itmId);
+        this.ruleDataLoad = true;
+      },
+      setDefault(val, val_default){
+        if (val === null || val === undefined){
+          return val_default;
+        } else {
+          return val;
+        }
+      },
+      importFile(innerFunc){
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        input.onchange = () => {
+          const file = input.files[0];
+          if (file) {
+            let loading = this.$loading({
+              lock: true,
+              text: '加载中，请稍候...',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 10, 0, 0.5)'
+            })
+
+            let formData = new FormData()
+            formData.append("obj", this.obj);
+            formData.append("tableDataFile", file)
+            formData.append("colConfig", JSON.stringify(this.colConfig))
+
+            axios.post(this.importURL, formData).then(response => {
+              innerFunc(response.data);
+              loading.close();
+            }).catch(error => {
+              this.$message.error("文件解析失败");
+              loading.close();
+            })
+          } else {
+            this.$message.error("未上传配置文件")
+          }
+        }
+        input.click();
+      },
+      searchConfigInit() {
+        this.colConfig.forEach((itm) => {
+          if (this.setDefault(itm.searchable, true)) {
+            if (itm.multiple) {
+              this.searchBox[itm.key] = [];
+            } else if (["select", "switch"].includes(itm.inputType)) {
+              this.searchBox[itm.key] = "all";
+            } else {
+              this.searchBox[itm.key] = "";
+            }
+          }
+        });
+      },
+      openDialog(index, mode) {
+        this.editIndex = this.getLineIndex(index);
+        this.editMode = mode;
+        if (mode === "edit") {
+          this.ruleDataForm = JSON.parse(JSON.stringify(this.tableData[this.getLineIndex(index)]));
+        } else {
+          this.ruleDataForm = this.lineInit();
+        }
+        this.dialogVisible = true;
+      },
+      closeDialog() {
+        this.dialogVisible = false;
+      },
+      dialogFormUpdate() {
+        let tableData = [...this.tableData];
+        if (this.editMode === "edit") {
+          tableData[this.showId[this.editIndex]] = this.ruleDataForm;
+          this.ruleDataUpdate(tableData);
+        } else {
+          this.addLine(this.editIndex, this.ruleDataForm);
+        }
+        this.dialogVisible = false;
+      },
+      lineInit() {
+        let defaultLine = {};
+        this.colConfig.forEach((itm) => {
+          if (itm.multiple) {
+            defaultLine[itm.key] = [];
+          } else if (itm.inputType == "select") {
+            defaultLine[itm.key] = itm.default || "";
+          } else if (itm.inputType == "switch") {
+            defaultLine[itm.key] = itm.default || false;
+          } else {
+            defaultLine[itm.key] = itm.default || "";
+          }
+        });
+        defaultLine.editable = true;
+        return defaultLine;
+      },
+      arrFullIn(a, b) {
+        return b.findIndex((itm) => !a.includes(itm)) == -1;
+      },
+      arrPartialIn(a, b) {
+        return b.findIndex((itm) => a.includes(itm)) != -1;
+      },
+      handleCurrentChange(currentPage) {
+        this.currentPage = Math.max(1, currentPage);
+      },
+      handleCellClick(row, column) {
+        if (column.property === "ruleExpress") {
+          navigator.clipboard.writeText(row.ruleExpress).then(() => {
+            this.$message({
+              message: "已复制规则表达式",
+              type: "success",
+            });
+          });
+        } else if (column.property === "planDescript") {
+          navigator.clipboard.writeText(row.planDescript).then(() => {
+            this.$message({
+              message: "已复制预案描述",
+              type: "success",
+            });
+          });
+        }
+      },
+      filterSearch() {
+        let showId = this.tableData.map((_, k) => k);
+        this.colConfig.forEach((itm) => {
+          // searchHow = 'fullIn'/'partialIn'/'equal'
+          if (
+            this.searchBox[itm.key] &&
+            this.searchBox[itm.key] !== "all" &&
+            (!itm.multiple || this.searchBox[itm.key].length !== 0)
+          ) {
+            if (itm.multiple && itm.searchHow == "fullIn") {
+              showId = showId.filter((infoId) =>
+                this.arrFullIn(
+                  this.tableData[infoId][itm.key],
+                  this.searchBox[itm.key]
+                )
+              );
+            } else if (itm.searchHow == "fullIn") {
+              showId = showId.filter((infoId) =>
+                this.tableData[infoId][itm.key].includes(
+                  this.searchBox[itm.key]
+                )
+              );
+            } else if (itm.multiple && itm.searchHow == "partialIn") {
+              showId = showId.filter((infoId) =>
+                this.arrPartialIn(
+                  this.tableData[infoId][itm.key],
+                  this.searchBox[itm.key]
+                )
+              );
+            } else if (itm.multiple) {
+              showId = showId.filter(
+                (infoId) =>
+                  this.tableData[infoId][itm.key].sort().join(";") ==
+                  this.searchBox[itm.key].sort().join(";")
+              );
+            } else {
+              showId = showId.filter(
+                (infoId) =>
+                  this.tableData[infoId][itm.key] == this.searchBox[itm.key]
+              );
+            }
+          }
+        });
+        this.showId = showId;
+        this.handleCurrentChange(1);
+      },
+      getLineIndex (index) {
+        return Math.min(
+          (this.currentPage - 1) * this.pageSize + index,
+          this.showId.length - 1,
+        )
+      },
+      addEditable(dataLine) {
+        let dataLine_ = JSON.parse(JSON.stringify(dataLine));
+        dataLine_.editable = dataLine_.editable || false;
+        return dataLine_;
+      },
+      addLine(index, ruleData) {
+        let ind = index;
+        if (this.showId.length <= index) {
+          if (this.showId.length) {
+            ind = this.showId.length - 1;
+          } else {
+            ind = -1;
+          }
+        }
+        let indTrue = -1;
+        if (ind !== -1) {
+          indTrue = this.showId[ind];
+        }
+        let tableData = [...this.tableData];
+        tableData.splice(indTrue + 1, 0, ruleData);
+        this.showId = this.showId.map((_, sId) =>
+          sId > ind ? this.showId[sId] + 1 : this.showId[sId]
+        );
+        this.showId.splice(ind + 1, 0, indTrue + 1);
+        this.checkPass = false;
+        this.ruleDataUpdate(tableData);
+      },
+      delLine(_index) {
+        const index = this.getLineIndex(_index);
+        let tableData = [...this.tableData];
+        tableData.splice(this.showId[index], 1);
+        this.showId = this.showId.map((_, sId) =>
+          sId > index ? this.showId[sId] - 1 : this.showId[sId]
+        );
+        this.showId.splice(index, 1);
+        this.ruleDataUpdate(tableData);
+      },
+      importData() {
+        this.importFile(
+          (data) => {
+            this.ruleDataUpdate(data.data);
+            this.$nextTick(() => {
+              this.searchConfigInit();
+              this.filterSearch();
+            });
+            if (this.checkable) {
+              this.checkPass = this.setDefault(data.checkPass, true);
+            } else {
+              this.checkPass = true;
+            }
+          }
+        );
+      },
+      exportData() {
+        let loading = this.$loading({
+          lock: true,
+          text: '加载中，请稍候...',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 10, 0, 0.5)'
+        });
+        var formData = new FormData();
+        formData.append("colConfig", JSON.stringify(this.colConfig))
+        formData.append("tableData", JSON.stringify(this.tableData))
+        formData.append("filename", this.exportFilename)
+
+        // P.S. while send blob-stream file, add option `{responseType:'blob'}`
+        //         to cancel default response-decode process
+        axios.post(this.exportURL, formData, {responseType:'blob'}).then(response => {
+          let fileBlob = new Blob(
+            [response.data],
+            { type: response.headers["content-type"] },
+          );
+          const link = document.createElement('a');
+          let filename = decodeURI(response.headers["content-disposition"]).split("filename");
+          filename = filename[filename.length - 1].split("=")[1].split('\'');
+          link.download = this.setDefault(this.exportFilename, filename[filename.length - 1].split(";")[0]);
+          link.href = window.URL.createObjectURL(fileBlob);
+          link.click();
+          window.URL.revokeObjectURL(link.href);
+          loading.close();
+        }).catch(error => {
+          this.$message.error("文件下载失败");
+          loading.close();
+        })
+      },
+      checkAll() {
+        let loading = this.$loading({
+          lock: true,
+          text: "加载中，请稍候...",
+          spinner: "el-icon-loading",
+          background: "rgba(0, 10, 0, 0.5)",
+        });
+
+        let formData = new FormData();
+        formData.append("obj", this.obj);
+        formData.append("tableData", JSON.stringify(this.tableData));
+        formData.append("colConfig", JSON.stringify(this.colConfig));
+
+        const url = this.checkURL;
+
+        axios
+          .post(
+            url,
+            formData
+          )
+          .then((response) => {
+            this.ruleDataUpdate(response.data.data);
+            this.$nextTick(() => {
+              this.searchConfigInit();
+              this.filterSearch();
+            });
+            this.checkPass = this.setDefault(response.data.checkPass, true);
+            if (!this.checkPass) {
+              this.$message.warning("存在错误条目");
+            } else {
+              this.$message.success("所有条目均书写无误");
+            }
+            loading.close();
+          })
+          .catch((error) => {
+            this.checkPass = false;
+            this.searchConfigInit();
+            this.filterSearch();
+            this.$message.error("条目检查失败");
+            loading.close();
+          });
+      },
+      delPage() {
+        let tableData = [...this.tableData];
+        this.showId
+          .slice(
+            (this.currentPage - 1) * this.pageSize,
+            this.currentPage * this.pageSize
+          )
+          .forEach((ind, count) => {
+            let index = ind - count;
+            tableData.splice(this.dataShowInfo[index], 1);
+            this.showId = this.showId.map((_, sId) =>
+              sId > index ? this.showId[sId] - 1 : this.showId[sId]
+            );
+            this.showId.splice(index, 1);
+          });
+        this.ruleDataUpdate(tableData);
+      },
+      clearAll() {
+        this.ruleDataUpdate([]);
+        this.$nextTick(() => {
+          this.searchConfigInit();
+          this.filterSearch();
+        });
+      },
+      configRule() {
+        const formData = new FormData();
+        formData.append("colConfig", JSON.stringify(this.colConfig));
+        formData.append("tableData", JSON.stringify(this.tableData));
+        formData.append("obj", this.obj);
+
+        axios.post(
+          "/rule-edit/config-rule",
+          formData
+        ).then(response => {
+          // TODO: complete the response process
+          this.$message.success("规则配置成功");
+        }).catch(error => {
+          this.$message.error("规则配置失败");
+        });
+      },
+    },
+  })
+</script>
+</html>

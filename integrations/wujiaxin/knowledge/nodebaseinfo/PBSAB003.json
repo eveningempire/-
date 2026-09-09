@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年9月3日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSAB003"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204967296"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "推力室燃料喷嘴"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "推力室燃料喷嘴将燃料推进剂以一定的流量引入燃烧室。喷嘴是构成喷注器的最基本元件。喷嘴组成喷注单元，按照一定顺序排列在喷注面上。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "6.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

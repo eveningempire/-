@@ -1,0 +1,9 @@
+﻿PHM 骞冲彴绂荤嚎杩佺Щ鏁欑▼锛堢畝鐗堬級
+
+涓€銆佸噯澶?1. 灏嗘湰鍘嬬缉鍖呭畬鏁磋В鍘嬪埌鏂扮數鑴戯紝渚嬪 D:\PHM銆?2. 鏂扮數鑴戞棤闇€鑱旂綉銆?
+浜屻€佸畨瑁呭苟鍚姩
+1. 鍙屽嚮 install_runtime_offline.bat锛屽畨瑁呭寘鍐呯殑 Python 鍜?Node.js銆?2. 鍏抽棴骞堕噸鏂版墦寮€鍛戒护琛岀獥鍙ｃ€?3. 鍦ㄨ縼绉荤洰褰曡繍琛?setup_migration.ps1銆?4. 鍙屽嚮 start_migration.bat銆?5. 娴忚鍣ㄦ墦寮€ http://localhost:5173
+
+涓夈€佹暟鎹?db.sqlite3 宸插寘鍚師鏁版嵁搴撴暟鎹紝涓嶉渶瑕佸啀瀵煎叆 SQL銆?浠ュ悗鍙渶鍚屾椂澶囦唤 db.sqlite3 鍜?media 鏂囦欢澶广€?
+鍥涖€佸仠姝?杩愯 stop_cmg_platform.bat锛屾垨鍏抽棴 Redis銆丏jango銆丯ode.js 杩涚▼绐楀彛銆?
+娉ㄦ剰锛氬繀椤诲畬鏁磋В鍘嬶紝涓嶈兘鍙鍒舵煇鍑犱釜瀛愮洰褰曘€侾ython 浣跨敤 3.10.11锛屼緷璧栧拰鍓嶇鍖呭潎宸查殢鍖呮彁渚涖€?

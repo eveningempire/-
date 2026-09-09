@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2017年12月1日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSBC002"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4294967288"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "监测传感器"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "相对于具备输出电流（电压、传感器温度）测定值功能的电流传感器，电池状态检测传感器是指，将充电率（SOC）、放电性能（SOF）、剩余容量（SOH）等铅蓄电池状态，作为基础测定值进行检测与输出的传感器。利用此检测传感器，可以对怠速停机时的重新起动性能及大功率工作时的放电容量进行估算。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "0.1 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "1.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "10.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.01 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

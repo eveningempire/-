@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年6月12日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSBA002"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "001"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "太阳电池阵母线"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "\t电源分系统由一次和二次电源组成，一次电源母线为全调节型直流母线系统，经调节的直流母线不论卫星进入光照期还是在阴影期，电压都稳定在27V±1V范围内。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "100.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "1000.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "220.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "5.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

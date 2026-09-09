@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年11月6日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSAC001"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4284967296"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "氧化剂涡轮泵"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "氧化剂涡轮泵分为低压氧化剂涡轮泵（LPOTP）和高压氧化剂涡轮泵（HPOTP）；LPOTP是一个靠液氧带动的六级涡轮驱动的轴流泵，尺寸为450mm×450mm。转速约5,150 rpm，它将液氧的压力从0.7MPa增加到2.9 MPa，加压后的液氧供给到HPOTP，从而保证在高压状态下工作的HPOTP不会产生空穴。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "70.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

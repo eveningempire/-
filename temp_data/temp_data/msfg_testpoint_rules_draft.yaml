@@ -1,0 +1,263 @@
+# MSFG 测点规则初稿（不要直接导入DB，可在前端“测点规则”页复制粘贴使用）
+# 说明：
+# - 表达式基于已注入的函数：mean/var/std/wmin/wmax/delta/slope/pct_change/between/adiff/ma_diff/rollstd/level
+# - level(x, median, mad) 返回稳健偏离Z值（abs(x-median)/MAD），若MAD为0内部用1e-9避免除0
+# - rollstd 等价 std 的别名
+# - 组合策略：and/or；“mean”组合用 (cond1 + cond2)/2 表示评分平均
+# - 时窗：可按需要调整，示例中 rollstd 窗默认120秒，ma_diff 子窗默认60秒
+# - 注意：报告中的 slope 定义为“短窗均值的差分（绝对值）”；本处以 ma_diff 近似。可按需要替换为 slope(...)
+
+meta:
+  cmg_model: "<填写CMG型号名称或ID>"
+  defaults:
+    roll_window_seconds: 120
+    sub_window_seconds: 60
+    z_threshold_upper: 3.0
+    z_threshold_two_tailed: 3.0
+
+rules:
+  - test_name: "高速转速"
+    rule_id: "TPR_高速转速_AND_SLOPE_LEVEL"
+    rule_expression: "( (ma_diff(\"高速转速\", 60) - 0.000156461) / max(0.000156461, 1e-9) > 3.0 ) and ( level(\"高速转速\", 7000, 0.020027) > 3.0 )"
+    weight: 1.0
+    is_online: true
+    description: "趋势与幅值偏离共同异常（稳健）"
+
+  - test_name: "低速转速"
+    rule_id: "TPR__LEVEL"低速转速
+    rule_expression: "level(\"低速转速\", 0.002918, 2.51621) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "低速位置"
+    rule_id: "TPR_低速位置_LEVEL"
+    rule_expression: "level(\"低速位置\", 96.9303, 6.93993) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "+12V遥测"
+    rule_id: "TPR_+12V遥测_LEVEL"
+    rule_expression: "level(\"+12V遥测\", 3.35938, 0) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "+5V遥测"
+    rule_id: "TPR_+5V遥测_OR_LEVEL_ROLLSTD"
+    rule_expression: "( level(\"+5V遥测\", 3.67188, 0) > 3.0 ) or ( (rollstd(\"+5V遥测\", 120) - 0.00486349) / max(0.00141086, 1e-9) > 3.0 )"
+    weight: 1.0
+    is_online: true
+    description: "任一指标显著异常即判异常（敏感）"
+
+  - test_name: "+45V遥测"
+    rule_id: "TPR_+45V遥测_LEVEL"
+    rule_expression: "level(\"+45V遥测\", 4.14062, 0) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "100V遥测"
+    rule_id: "TPR_100V遥测_SLOPE"
+    rule_expression: "(ma_diff(\"100V遥测\", 60) - 0) / max(0, 1e-9) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "趋势漂移（上尾），建议后续落地时用经验阈值替换"
+
+  - test_name: "高速电机电压"
+    rule_id: "TPR_高速电机电压_ROLLSTD"
+    rule_expression: "(rollstd(\"高速电机电压\", 120) - 0.013633) / max(0.00527085, 1e-9) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "局部波动增强（上尾）"
+
+  - test_name: "高速固紧端轴温"
+    rule_id: "TPR_高速固紧端轴温_AND_LEVEL_ROLLSTD"
+    rule_expression: "( level(\"高速固紧端轴温\", 2.73438, 0) > 3.0 ) and ( (rollstd(\"高速固紧端轴温\", 120) - 0) / max(0, 1e-9) > 3.0 )"
+    weight: 1.0
+    is_online: true
+    description: "幅值与波动共同异常"
+
+  - test_name: "高速滑动端轴温"
+    rule_id: "TPR_高速滑动端轴温_AND_LEVEL_ROLLSTD"
+    rule_expression: "( level(\"高速滑动端轴温\", 2.73438, 0) > 3.0 ) and ( (rollstd(\"高速滑动端轴温\", 120) - 0) / max(0, 1e-9) > 3.0 )"
+    weight: 1.0
+    is_online: true
+    description: "幅值与波动共同异常"
+
+  - test_name: "低速壳温"
+    rule_id: "TPR_低速壳温_LEVEL"
+    rule_expression: "level(\"低速壳温\", 2.46094, 0.039062) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "高速电机电流"
+    rule_id: "TPR_高速电机电流_AND_LEVEL_SLOPE"
+    rule_expression: "( level(\"高速电机电流\", 0.862334, 0.031035) > 3.0 ) and ( (ma_diff(\"高速电机电流\", 60) - 0.000207828) / max(0.000138547, 1e-9) > 3.0 )"
+    weight: 1.0
+    is_online: true
+    description: "幅值与趋势共同异常"
+
+  - test_name: "低速A相电流"
+    rule_id: "TPR_低速A相电流_LEVEL"
+    rule_expression: "level(\"低速A相电流\", 0.054688, 0.027344) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "低速C相电流"
+    rule_id: "TPR_低速C相电流_DIFF"
+    rule_expression: "(adiff(\"低速C相电流\", 2) - 0.013672) / max(0.013672, 1e-9) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "瞬时波动增强（上尾）"
+
+  - test_name: "定角锁定精度"
+    rule_id: "TPR_定角锁定精度_MEAN_LEVEL_DIFF"
+    rule_expression: "( (level(\"定角锁定精度\", 2.42155, 2.37228) > 3.0) + ( (adiff(\"定角锁定精度\", 2) - 0.05802) / max(0.05578, 1e-9) > 3.0 ) ) / 2"
+    weight: 1.0
+    is_online: true
+    description: "综合幅值与瞬时波动，取平均评分"
+
+  - test_name: "高速转速控制精度"
+    rule_id: "TPR_高速转速控制精度_SLOPE"
+    rule_expression: "(ma_diff(\"高速转速控制精度\", 60) - 0) / max(0, 1e-9) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "趋势漂移（上尾），建议后续用经验阈值替换"
+
+  - test_name: "高速转速控制稳定度"
+    rule_id: "TPR_高速转速控制稳定度_AND_SLOPE_LEVEL"
+    rule_expression: "( (ma_diff(\"高速转速控制稳定度\", 60) - 7.8125e-08) / max(7.8125e-08, 1e-9) > 3.0 ) and ( level(\"高速转速控制稳定度\", 0.0011, 5e-05) > 3.0 )"
+    weight: 1.0
+    is_online: true
+    description: "趋势与幅值偏离共同异常"
+
+
+
+
+
+
+
+# MSFG 测点规则（已按新语法可执行；去除了 Python max()/续行符）
+# 约定：
+# - 上尾： feature(name,...) > median + 3*MAD
+# - 双尾： level(name, median, MAD) > 3.0
+# - “瞬时波动增强”：优先使用 diffstd(name, k)
+
+meta:
+  cmg_model: "<你的CMG型号或ID>"
+  defaults:
+    roll_window_seconds: 120
+    sub_window_seconds: 60
+    z_threshold_upper: 3.0
+    z_threshold_two_tailed: 3.0
+
+rules:
+  - test_name: "高速转速"
+    rule_id: "TPR_高速转速_AND_SLOPE_LEVEL"
+    # 旧：(ma_diff("高速转速", 60) - 0.000156461)/max(0.000156461,1e-9) > 3 AND level(...) > 3
+    # 新：ma_diff 上尾直接用 median + 3*MAD；双尾用 level(...)
+    rule_expression: "( ma_diff(\"高速转速\", 60) > 0.000156461 + 3*0.000156461 ) and ( level(\"高速转速\", 7000, 0.020027) > 3.0 )"
+    weight: 1.0
+    is_online: true
+    description: "趋势与幅值偏离共同异常（稳健）"
+
+  - test_name: "低速转速"
+    rule_id: "TPR_低速转速_LEVEL"
+    # 双尾偏离：用 level
+    rule_expression: "level(\"低速转速\", 0.002918, 2.51621) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "低速位置"
+    rule_id: "TPR_低速位置_LEVEL"
+    rule_expression: "level(\"低速位置\", 96.9303, 6.93993) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "+12V遥测"
+    rule_id: "TPR_+12V遥测_LEVEL"
+    rule_expression: "level(\"+12V遥测\", 3.35938, 0) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "+5V遥测"
+    rule_id: "TPR_+5V遥测_OR_LEVEL_ROLLSTD"
+    # 旧：rollstd 用 (x - med)/max(mad,1e-9) > 3
+    # 新：rollstd 上尾 → x > med + 3*MAD
+    rule_expression: "( level(\"+5V遥测\", 3.67188, 0) > 3.0 ) or ( rollstd(\"+5V遥测\", 120) > 0.00486349 + 3*0.00141086 )"
+    weight: 1.0
+    is_online: true
+    description: "任一指标显著异常即判异常（敏感）"
+
+  - test_name: "+45V遥测"
+    rule_id: "TPR_+45V遥测_LEVEL"
+    rule_expression: "level(\"+45V遥测\", 4.14062, 0) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "100V遥测"
+    rule_id: "TPR_100V遥测_SLOPE"
+    # 旧：(ma_diff("100V遥测", 60) - 0) / max(0,1e-9) > 3.0  —— 分母非法
+    # 新：请用经验阈值 / 基线MAD：ma_diff > med + 3*MAD；若无MAD记录，先给工程阈值再校准
+    rule_expression: "ma_diff(\"100V遥测\", 60) > 3.0e-4"   # ← 占位示例：请替换为你的经验阈值或 (med + 3*MAD)
+    weight: 1.0
+    is_online: true
+    description: "趋势漂移（上尾），建议根据基线MAD或工程经验修正阈值"
+
+  - test_name: "高速电机电压"
+    rule_id: "TPR_高速电机电压_ROLLSTD"
+    rule_expression: "rollstd(\"高速电机电压\", 120) > 0.013633 + 3*0.00527085"
+    weight: 1.0
+    is_online: true
+    description: "局部波动增强（上尾）"
+
+  - test_name: "高速电机电流"
+    rule_id: "TPR_高速电机电流_AND_LEVEL_SLOPE"
+    # 旧：level(...) AND (ma_diff - med)/max(MAD,1e-9) > 3
+    # 新：ma_diff 上尾用 > med + 3*MAD
+    rule_expression: "( level(\"高速电机电流\", 0.862334, 0.031035) > 3.0 ) and ( ma_diff(\"高速电机电流\", 60) > 0.000207828 + 3*0.000138547 )"
+    weight: 1.0
+    is_online: true
+    description: "幅值与趋势共同异常"
+
+  - test_name: "低速A相电流"
+    rule_id: "TPR_低速A相电流_LEVEL"
+    rule_expression: "level(\"低速A相电流\", 0.054688, 0.027344) > 3.0"
+    weight: 1.0
+    is_online: true
+    description: "幅值偏离（双尾）"
+
+  - test_name: "低速C相电流"
+    rule_id: "TPR_低速C相电流_DIFF"
+    # 旧： (adiff(name,2) - med) / max(MAD,1e-9) > 3
+    # 新：用差分标准差替代 adiff，并用 > med + 3*MAD
+    rule_expression: "diffstd(\"低速C相电流\", 2) > 0.013672 + 3*0.013672"
+    weight: 1.0
+    is_online: true
+    description: "瞬时波动增强（上尾）"
+
+  - test_name: "定角锁定精度"
+    rule_id: "TPR_定角锁定精度_MEAN_LEVEL_DIFF"
+    # 旧：((level(...) > 3) + ((adiff - med)/max(MAD,1e-9) > 3)) / 2
+    # 新：保持 “平均评分” 语义，但把 adiff→diffstd，且不再用除法归一化
+    rule_expression: "( (level(\"定角锁定精度\", 2.42155, 2.37228) > 3.0) + ( diffstd(\"定角锁定精度\", 2) > 0.05802 + 3*0.05578 ) ) / 2"
+    weight: 1.0
+    is_online: true
+    description: "综合幅值与瞬时波动，取平均评分"
+
+  - test_name: "高速转速控制精度"
+    rule_id: "TPR_高速转速控制精度_SLOPE"
+    # 旧：(ma_diff("高速转速控制精度", 60) - 0) / max(0, 1e-9) > 3.0 —— 非法
+    # 新：建议用经验或基线MAD设阈值
+    rule_expression: "ma_diff(\"高速转速控制精度\", 60) > 1.0e-4"  # ← 占位示例：请替换为 (med + 3*MAD) 或工程阈值
+    weight: 1.0
+    is_online: true
+    des

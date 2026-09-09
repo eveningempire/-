@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年5月14日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSCB003"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "SiT 1552 MEMS TCXO"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "高稳定度振荡器"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "这款温度补偿振荡器的尺寸是石英器件的20%，功耗仅为50%，稳定性可以提升2到3倍，可靠性可提高15倍，是目前业界体积最小（1508）、功耗最低的32kHz TCXO（温度补偿振荡器）"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "1.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.3 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "3.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.1 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

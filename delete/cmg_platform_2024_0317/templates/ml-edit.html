@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/echarts-5.3.1/dist/echarts.js"></script>
+
+  <!-- 样式设置 -->
+  <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #ml-edit {
+      height: 100%;
+      width: 100%;
+    }
+    .el-dialog {
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="ml-edit">
+    <el-row>
+      <el-col :span="14" style="padding: 0.5rem 1rem;">
+        <el-row>
+          <el-button-group style="float: left;">
+            <el-button plain type="success" size="mini" @click="importConfig">导入模型</el-button>
+            <el-button plain type="success" size="mini" @click="dataDialogVisible=true">训练模型</el-button>
+          </el-button-group>
+        </el-row>
+        <el-row>
+          <el-button-group style="float: left;">
+            <el-button plain type="warning" size="mini" @click="exportConfig">导出模型</el-button>
+            <el-button plain type="warning" size="mini" @click="trainModels(true)">强化模型</el-button>
+    
+          </el-button-group>
+        </el-row>
+      </el-col>
+      <el-col :span="10" style="padding: 0.5rem 1rem;">
+        <el-row>
+          <el-button-group style="float: right;">
+            <el-button plain type="success" size="mini" @click="onlineMdlPage">上线所有模型</el-button>
+            <el-button plain type="warning" size="mini" @click="offlineMdlPage">下线所有模型</el-button>
+            <el-button plain type="primary" size="mini" @click="configMdl">配置所有模型</el-button>
+          </el-button-group>
+        </el-row>
+        <el-row>
+          <el-button-group style="float: right;">
+            <el-button plain type="success" size="mini" @click="addLine(pageSize-2)">添加单个模型</el-button>
+            <el-button plain type="warning" size="mini" @click="delPage">删除本页模型</el-button>
+   
+          </el-button-group>
+        </el-row>
+      </el-col>
+    </el-row>
+
+    <div style="width: 100%; display: flex; flex-direction: row; justify-content: space-between; padding: 0.5rem 1rem 0 1rem; box-sizing: border-box;">
+      <el-form :inline="true" :model="searchBox" label-width="auto" size="mini">
+        <el-form-item label="模型名称">
+          <el-input
+            v-model="searchBox.modelName"
+            placeholder="请输入待查询的模型名称"
+            clearable
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item label="模型算法">
+          <el-select
+            v-model="searchBox.modelAlgo"
+          >
+            <el-option label="显示全部" value="all"></el-option>
+            <el-option
+              v-for="label, key in mlColConfig[1].options"
+              :key="key"
+              :label="label"
+              :value="key"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="涉及参数">
+          <el-select
+            v-model="searchBox.relatParas"
+            multiple
+            collapse-tags
+            placeholder="请选择待查询的涉及参数"
+            clearable
+          >
+            <el-option
+              v-for="label, key in mlColConfig[2].options"
+              :key="key"
+              :label="label"
+              :value="key"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+      
+
+        <el-form-item label="模型状态">
+          <el-select
+            v-model="searchBox.mdlOnline"
+          >
+            <el-option label="显示全部" value="all"></el-option>
+            <el-option label="上线" :value="true"></el-option>
+            <el-option label="下线" :value="false"></el-option>
+          </el-select>
+        </el-form-item>
+
+      </el-form>
+
+      <div>
+        <el-button plain type="primary" size="mini" @click="filterSearch">筛选</el-button>
+      </div>
+    </div>
+
+    <el-table
+      :data="dataShowInfo.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+      size="small"
+      :height="484"
+      style="padding: 0rem 1rem; box-sizing: border-box;"
+    >
+      <el-table-column label="序号" :show-overflow-tooltip="true" :width="60">
+        <template slot-scope="scope">
+          {{ showId[(currentPage-1)*pageSize+scope.$index]+1 }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="模型名称" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+          {{ scope.row.modelName }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="模型算法" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+          {{ mlColConfig[1].options[scope.row.modelAlgo] }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="涉及参数" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+          <el-tag
+            v-for="it of scope.row.relatParas.slice(0, 5)"
+            :key="it"
+            size="mini"
+            type="primary"
+          >
+            {{ mlColConfig[2].options[it] }}
+          </el-tag>
+          <el-tag size="mini" type="info" v-if="scope.row.relatParas.length > 5">+{{scope.row.relatParas.length - 5}}</el-tag>
+        </template>
+      </el-table-column>
+
+  
+
+      <el-table-column label="模型状态" :width="80">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.mdlOnline"
+            size="mini"
+            :active-color="scope.row.mdlOnline ? '#13ce66' : '#ff4949'"
+            :inactive-color="scope.row.mdlOnline ? '#13ce66' : '#ff4949'"
+          ></el-switch>
+        </template>
+      </el-table-column>
+     
+
+      <el-table-column label="操作" :width="200">
+        <template slot-scope="scope">
+          <el-button icon="el-icon-edit" type="primary" size="mini" circle :disabled="scope.row.editable"
+            title="编辑模型"
+            @click="editLine(scope.$index)">
+          </el-button>
+          <el-button icon="el-icon-plus" type="success" size="mini" circle plain
+            title="在下一行添加模型"
+            @click="addLine(scope.$index)">
+          </el-button>
+          <el-button icon="el-icon-delete" type="danger" size="mini" circle plain
+            title="删除模型"
+            @click="delLine(scope.$index)">
+          </el-button>
+        
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-pagination
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      layout="total, prev, pager, next, jumper"
+      :total="showId.length"
+      v-if="showId.length > pageSize"
+      style="display: flex; justify-content: center;"
+    ></el-pagination>
+
+    <!-- 模型编辑页面 -->
+    <el-dialog :title="modelDialogTitle" width="60%" :visible.sync="dialogVisible">
+      <el-form :model="editBox" label-width="100px" ref="innerEditDialog" size="mini">
+        <el-form-item label="模型名称" prop="modelName">
+          <el-input v-model="editBox.modelName" placeholder="请输入模型名称" clearable></el-input>
+        </el-form-item>
+
+        <el-form-item label="模型算法" prop="modelAlgo">
+          <el-select v-model="editBox.modelAlgo" placeholder="请选择模型算法">
+            <el-option v-for="label, key in mlColConfig[1].options" :key="key" :label="label" :value="key">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="涉及参数" prop="relatParas">
+          <el-select v-model="editBox.relatParas" multiple filterable collapse-tags placeholder="请选择涉及参数">
+            <el-option v-for="label, key in mlColConfig[2].options" :key="key" :label="label" :value="key">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+      
+      </el-form>
+      <template v-slot:footer>
+        <el-button type="primary" size="mini" @click="confirmEdit">提交</el-button>
+        <el-button type="primary" size="mini" plain @click="dialogVisible=false;">取消</el-button>
+      </template>
+    </el-dialog>
+    <el-dialog title='选择训练数据' width="60%"  :visible.sync="dataDialogVisible">
+      <el-table
+      :data="dataInfo">
+      <el-table-column
+        prop="dataName"
+        label="数据名称"
+        width="150">
+      </el-table-column>
+      <el-table-column
+        prop="dataDescript"
+        label="数据描述"
+        width="250">
+      </el-table-column>
+      <el-table-column
+        prop="source"
+        label="数据来源"
+        width="100">
+      </el-table-column>
+      <el-table-column>
+        <template v-slot="scope">
+          <el-button type="primary" size="mini" @click="test(scope.row.dataUuid)">
+            选择数据
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+      <el-button type="primary" size="mini" plain @click="dataDialogVisible=false;">取消</el-button>
+    </el-dialog>
+    
+  </div>
+</body>
+
+<script type="text/javascript">
+  function setDefault(val, val_default) {
+    if (val === null || val === undefined) {
+      return val_default;
+    } else {
+      return val;
+    }
+  }
+
+  function downloadFile(vm, url, mlColConfig, mlData, defaultFilename) {
+    let loading = vm.$loading({
+      lock: true,
+      text: '加载中，请稍候...',
+      spinner: 'el-icon-loading',
+      background: 'rgba(0, 10, 0, 0.5)'
+    });
+
+    let formData = new FormData();
+    formData.append("colConfig", JSON.stringify(mlColConfig))
+    formData.append("tableData", JSON.stringify(mlData))
+    formData.append("filename", defaultFilename)
+
+    // P.S. while send blob-stream file, add option `{responseType:'blob'}`
+    //         to cancel default response-decode process
+    axios.post(url, formData, { responseType: 'blob' }).then(response => {
+      let fileBlob = new Blob([response.data],
+        { type: response.headers["content-type"] });
+      const link = document.createElement('a');
+      let filename = decodeURI(response.headers["content-disposition"]).split("filename");
+      filename = filename[filename.length - 1].split("=")[1].split('\'');
+      link.download = setDefault(defaultFilename, filename[filename.length - 1].split(";")[0]);
+      link.href = window.URL.createObjectURL(fileBlob);
+      link.click();
+      window.URL.revokeObjectURL(link.href);
+      loading.close();
+    }).catch(error => {
+      vm.$message.error("文件下载失败");
+      loading.close();
+    })
+  }
+
+  var vm = new Vue({
+    el: "#ml-edit",
+    data() {
+      return {
+        obj: window.parent.vm.obj,
+        admin: window.parent.vm.admin,
+        showId: [],
+        dataShowInfo: [],
+        searchBox: {
+          modelName: "",
+          modelAlgo: "",
+          relatParas: [],
+          component: "",
+          mdlOnline: "",
+ 
+        },
+        editBox: {
+          isNew: true,
+          index: 0,
+          trueIndex: 0,
+          modelName: "",
+          modelAlgo: "",
+          relatParas: [],
+          component: "",
+          suppLabel: "",
+          suppValues: [],
+          scores: [],
+        },
+        
+        currentPage: 1,
+        pageSize: 10,
+        dialogVisible: false,
+        dataDialogVisible: false,
+
+        faultName: "",
+        planDescript: "",
+
+        // Table Configuration
+        mlColConfig: [
+          {//0
+            name: "模型名称",
+            key: "modelName",
+            inputType: "input",
+            placeholder: "请输入模型名称",
+          },
+          {//1
+            name: "模型算法",
+            key: "modelAlgo",
+            inputType: "select",
+            options: {},
+            placeholder: "请输入模型算法",
+          },
+          {//2
+            name: "涉及参数",
+            key: "relatParas",
+            multiple: true,
+            inputType: "select",
+            options: {},
+            placeholder: "请输入涉及参数",
+            outputType: "tag",
+          },
+          
+          {//4
+            name: "模型状态",
+            key: "mdlOnline",
+            inputType: "switch",
+            trueLabel: "上线",
+            falseLabel: "下线",
+            default: false,
+          },
+          
+  
+          {//Append-1
+            name: "uuid",
+            key: "modelUuid",
+            showable: false,
+            default: null,
+            editable: false,
+            searchable: false,
+          },
+        ],
+
+
+        // Data Log
+        mlData: [],
+        dataInfo: [],
+
+        // RIGHT: Anormal Score Chart Configurations
+        markLineData: [30, 60, 90],
+        visualConfig: [
+          {
+            gte: 90,
+            lt: 100,
+            color: '#93CE07'
+          },
+          {
+            gte: 60,
+            lt: 90,
+            color: '#FBDB0F'
+          },
+          {
+            gte: 30,
+            lt: 60,
+            color: '#FC7D02'
+          },
+          {
+            gte: 0,
+            lt: 30,
+            color: '#FD0100'
+          },
+        ],
+
+        // Chart Log
+        echartsLog: {},
+
+        dataStorage: {},
+
+      }
+    },
+
+    created() {
+      this.searchConfigInit();
+
+      const formData = new FormData();
+      formData.append("obj", this.obj);
+
+      axios.post("/ml-edit/get-config", formData)
+      .then(res => {
+        this.mlColConfig[1].options = res.data.algoNames;
+        this.mlColConfig[2].options = res.data.paraNames;
+        this.dataInfo = res.data.dataInfo;
+        console.log(this.dataInfo)
+      })
+      .catch(err => { })
+
+      axios.post("/ml-edit/init-all-ml", formData)
+      .then(res => {
+        this.mlData = res.data;
+        this.showId = this.mlData.map((itm,itmId)=>itmId);
+        this.dataShowInfo = this.showId.map(itm => this.mlData[itm]);
+      })
+      .catch(err => { })
+    },
+    
+    computed: {
+      modelDialogTitle() {
+        return this.editBox.isNew
+          ? "添加模型"
+          : "编辑模型[" + this.editBox.modelName + "]";
+      },
+    },
+
+    methods: {
+      setDefault,
+      test(val){
+        console.log(val)
+      },
+      searchConfigInit() {
+        this.mlColConfig.forEach(itm => {
+          if (this.setDefault(itm.searchable, true)) {
+            if (itm.multiple) {
+              this.searchBox[itm.key] = [];
+            } else if (['select', 'switch'].includes(itm.inputType)) {
+              this.searchBox[itm.key] = 'all';
+            } else {
+              this.searchBox[itm.key] = '';
+            }
+          }
+        })
+      },
+      clearEditBox(ind, indTrue) {
+        let defaultLine = { index: ind, trueIndex: indTrue, isNew: true };
+        this.mlColConfig.forEach(itm => {
+          if (itm.multiple) {
+            defaultLine[itm.key] = [];
+          } else if (itm.inputType == 'select') {
+            defaultLine[itm.key] = itm.default || '';
+          } else if (itm.inputType == 'switch') {
+            defaultLine[itm.key] = itm.default || false;
+          } else {
+            defaultLine[itm.key] = itm.default || '';
+          }
+        })
+        this.editBox = defaultLine;
+      },
+
+      // dependent Functions of table
+      lineInit() {
+        let defaultLine = {};
+        this.mlColConfig.forEach(itm => {
+          if (itm.multiple) {
+            defaultLine[itm.key] = [];
+          } else if (itm.inputType == 'select') {
+            defaultLine[itm.key] = itm.default || '';
+          } else if (itm.inputType == 'switch') {
+            defaultLine[itm.key] = itm.default || false;
+          } else {
+            defaultLine[itm.key] = itm.default || '';
+          }
+        })
+        defaultLine.editable = true;
+        return defaultLine;
+      },
+      arrFullIn(a, b) {
+        return b.findIndex(itm => !a.includes(itm)) == -1;
+      },
+      arrPartialIn(a, b) {
+        return b.findIndex(itm => a.includes(itm)) != -1;
+      },
+      handleCurrentChange(currentPage) {
+        this.currentPage = Math.max(1, currentPage);
+      },
+      refleshDataShowInfo() {
+        this.dataShowInfo = this.showId.map(itm => this.mlData[itm]);
+      },
+
+      // Methods of table
+      filterSearch() {
+        let showId = this.mlData.map((_, k) => k);
+        this.mlColConfig.forEach(itm => {
+          // searchHow = 'fullIn'/'partialIn'/'equal'
+          if (this.searchBox[itm.key] && this.searchBox[itm.key] !== 'all' && (!itm.multiple || this.searchBox[itm.key].length !== 0)) {
+            if (itm.multiple && itm.searchHow == 'fullIn') {
+              showId = showId.filter(infoId => this.arrFullIn(this.mlData[infoId][itm.key], this.searchBox[itm.key]));
+            } else if (itm.searchHow == 'fullIn') {
+              showId = showId.filter(infoId => this.mlData[infoId][itm.key].includes(this.searchBox[itm.key]));
+            } else if (itm.multiple && itm.searchHow == 'partialIn') {
+              showId = showId.filter(infoId => this.arrPartialIn(this.mlData[infoId][itm.key], this.searchBox[itm.key]));
+            } else if (itm.multiple) {
+              showId = showId.filter(infoId => this.mlData[infoId][itm.key].sort().join(';') == this.searchBox[itm.key].sort().join(';'));
+            } else {
+              showId = showId.filter(infoId => this.mlData[infoId][itm.key] == this.searchBox[itm.key]);
+            }
+          }
+        })
+        this.showId = showId;
+        this.refleshDataShowInfo();
+        this.handleCurrentChange(1);
+      },
+      getIndexInShowId(index) {
+        return (this.currentPage - 1) * this.pageSize + index;
+      },
+      editLine(_index) {
+        const index = this.getIndexInShowId(_index);
+        let defaultLine = {};
+        Object.keys(this.dataShowInfo[index]).forEach(itm => {
+          defaultLine[itm] = this.dataShowInfo[index][itm];
+        })
+        this.editBox = {
+          ...defaultLine,
+          index: index,
+          trueIndex: this.showId[index],
+          isNew: false,
+        };
+        this.dialogVisible = true;
+      },
+      addLine(_index) {
+        const index = this.getIndexInShowId(_index);
+        let ind = index;
+        if (this.showId.length <= index) {
+          if (this.showId.length) {
+            ind = this.showId.length - 1;
+          } else {
+            ind = -1;
+          }
+        }
+        let indTrue = -1;
+        if (ind !== -1) {
+          indTrue = this.showId[ind];
+        }
+        this.clearEditBox(ind + 1, indTrue + 1);
+        this.dialogVisible = true;
+        this.$refs.innerEditDialog.clearValidate();
+      },
+      delLine(_index) {
+        const index = this.getIndexInShowId(_index);
+        this.mlData.splice(this.showId[index], 1);
+        this.showId = this.showId.map((_, sId) => sId > index ? this.showId[sId] - 1 : this.showId[sId]);
+        this.showId.splice(index, 1);
+        this.refleshDataShowInfo();
+      },
+
+      
+
+      delPage() {
+        this.showId.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize).forEach((ind, count) => {
+          let index = ind - count;
+          this.mlData.splice(this.showId[index], 1);
+          this.showId = this.showId.map((_, sId) => sId > index ? this.showId[sId] - 1 : this.showId[sId]);
+          this.showId.splice(index, 1);
+        })
+        this.refleshDataShowInfo();
+        this.handleCurrentChange(this.currentPage - 1);
+      },
+
+      setModelOnlineStatusInPage(status) {
+        this.showId.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize).forEach((index) => {
+          this.mlData[index].mdlOnline = status;
+        });
+        this.refleshDataShowInfo();
+      },
+     
+      onlineMdlPage() {
+        this.setModelOnlineStatusInPage(true);
+      },
+      offlineMdlPage() {
+        this.setModelOnlineStatusInPage(false);
+      },
+
+      configMdl() {
+        const formData = new FormData();
+        formData.append("colConfig", JSON.stringify(this.mlColConfig));
+        formData.append("tableData", JSON.stringify(this.mlData));
+        formData.append("obj", this.obj);
+
+        axios.post("/ml-edit/config-model", formData).then(res => {
+          // TODO: complete this function
+          this.$message.success("模型配置成功");
+        }).catch(err => {
+          this.$message.error("模型配置失败");
+        })
+      },
+      selectionChange(val) {
+        console.log(val)
+      },
+      
+      confirmEdit() {
+        this.$refs.innerEditDialog.validate((valid) => {
+          if (valid) {
+            if (this.editBox.isNew) {
+              this.mlData.splice(this.editBox.trueIndex, 0, this.editBox);
+              this.showId = this.showId.map((_, sId) => sId >= this.editBox.index ? this.showId[sId] + 1 : this.showId[sId])
+              this.showId.splice(this.editBox.index, 0, this.editBox.trueIndex)
+            } else {
+              this.mlData[this.editBox.trueIndex] = this.editBox;
+            }
+            this.refleshDataShowInfo();
+            this.dialogVisible = false;
+            this.clearEditBox();
+          } else {
+            this.$message.warning("条目编辑有误！")
+          }
+        })
+      },
+    
+
+      // draw Function
+      initZone(refName, title, timeData, data, dataName, markLineData, visualConfig) {
+        let itemZone;
+        if (Array.isArray(this.$refs[refName])) {
+          if (Object.keys(this.echartsLog).includes(this.$refs[refName][0])) {
+            itemZone = this.echartsLog[this.$refs[refName][0]];
+          } else {
+            itemZone = echarts.init(this.$refs[refName][0]);
+            this.echartsLog[this.$refs[refName][0]] = itemZone;
+          }
+        } else {
+          if (Object.keys(this.echartsLog).includes(this.$refs[refName])) {
+            itemZone = this.echartsLog[this.$refs[refName]];
+          } else {
+            itemZone = echarts.init(this.$refs[refName]);
+            this.echartsLog[this.$refs[refName]] = itemZone;
+          }
+        }
+        let options = {
+          title: {
+            text: title,
+            textStyle: {
+              color: "black",
+              fontSize: 18,
+            },
+            left: '1%'
+          },
+          legend: {
+            orient: 'vertical'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          grid: {
+            left: '10%',
+            right: '25%',
+            bottom: '25%'
+          },
+          toolbox: {
+            right: 10,
+            feature: {
+              dataZoom: {
+                yAxisIndex: 'none'
+              },
+              restore: {},
+              saveAsImage: {}
+            }
+          },
+          dataZoom: [
+            {},
+            {
+              type: 'inside'
+            }
+          ],
+        }
+        if (dataName) {
+          options.series = {
+            name: dataName,
+            type: 'line',
+            data: data,
+          };
+          options.xAxis = {
+            name: '测试日期',
+            data: timeData,
+            axisLabel: {
+              color: 'black',
+            },
+            axisLine: {
+              lineStyle: {
+                color: "black",
+              }
+            }
+          };
+          options.yAxis = {
+            name: '健康状态',
+            type: 'value',
+            min: 0,
+            max: 100,
+            axisLabel: {
+              color: 'black',
+            },
+            axisLine: {
+              lineStyle: {
+                color: "black",
+              }
+            }
+          };
+        } else {
+          options.series = data;
+          options.xAxis = {
+            name: '测试时间',
+            data: timeData,
+            axisLabel: {
+              color: 'black',
+            },
+            axisLine: {
+              lineStyle: {
+                color: "black",
+              }
+            }
+          };
+          options.yAxis = {
+            name: '参数数值',
+            type: 'value',
+            axisLabel: {
+              color: 'black',
+            },
+            axisLine: {
+              lineStyle: {
+                color: "black",
+              }
+            }
+          }
+        }
+        if (markLineData) {
+          options.series.markLine = {
+            silent: true,
+            lineStyle: {
+              color: '#333'
+            },
+            data: [],
+          }
+          markLineData.forEach(itm => {
+            options.series.markLine.data.push({
+              yAxis: itm
+            })
+          })
+        }
+        if (visualConfig) {
+          options.visualMap = {
+            top: 50,
+            right: 10,
+            pieces: visualConfig,
+          }
+        }
+        itemZone.setOption(options);
+      },
+      initItemZone(refName, pname, timeData, paraData, supportData, supportLabel) {
+        let itemData = [{
+          name: pname + '|参数曲线',
+          type: 'line',
+          data: paraData,
+        }];
+        if (supportData) {
+          supportData.forEach((paraItem, count) => {
+            itemData.push({
+              name: supportLabel ? supportLabel[count] : '辅助线' + count,
+              type: 'line',
+              data: supportData[count],
+            })
+          })
+        }
+        this.initZone(refName + pname, pname, timeData, itemData, null);
+      },
+
+      
+
+      importConfig() {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        input.onchange = () => {
+          const file = input.files[0];
+          if (file) {
+            let loading = this.$loading({
+              lock: true,
+              text: '加载中，请稍候...',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 10, 0, 0.5)'
+            })
+            let formData = new FormData();
+            formData.append("tableDataFile", file);
+            formData.append("colConfig", JSON.stringify(this.mlColConfig));
+
+            axios.post("/ml-edit/import-data-file-default", formData)
+              .then(res => {
+                this.mlData = res.data.data;
+                loading.close();
+                this.$nextTick(() => {
+                  this.searchConfigInit();
+                  this.filterSearch();
+                })
+              })
+              .catch(err => {
+                this.$message.error("文件解析失败");
+                loading.close();
+              })
+          } else {
+            this.$message.error("未上传配置文件")
+          }
+        };
+        input.click();
+      },
+
+      exportConfig() {
+        downloadFile(
+          this, "/ml-edit/export-data-file-default", this.mlColConfig, this.mlData, "数据驱动模型配置"
+        );
+      },
+
+  
+
+
+      trainModels(rt_cnt) {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', '.csv');
+        input.onchange = () => {
+          const file = input.files[0];
+          if (file) {
+            let loading = this.$loading({
+              lock: true,
+              text: '加载中，请稍候...',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 10, 0, 0.5)'
+            });
+
+            let formData = new FormData();
+            formData.append("obj", this.obj);
+            formData.append("dataFile", file);
+            formData.append("mlConfig", JSON.stringify(this.mlData));
+            formData.append("paranames", JSON.stringify(this.mlColConfig[2].options));
+            formData.append("algonames", JSON.stringify(this.mlColConfig[1].options));
+            formData.append("rt", rt_cnt);
+
+            axios.post("/ml-edit/train-model", formData).then(res => {
+              this.mlData = res.data.mlData;
+              this.searchConfigInit();
+              this.filterSearch();
+              loading.close();
+            }).catch(error => {
+              this.$message.error("文件解析失败");
+              loading.close();
+            })
+          } else {
+            this.$message.error("未上传配置文件")
+          }
+        };
+        input.click();
+      },
+
+      validModels(rt_cnt) {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', '.csv');
+        input.onchange = () => {
+          const file = input.files[0];
+          if (file) {
+            let loading = this.$loading({
+              lock: true,
+              text: '加载中，请稍候...',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 10, 0, 0.5)'
+            });
+
+            let formData = new FormData();
+            formData.append("obj", this.obj);
+            formData.append("dataFile", file);
+            formData.append("mlConfig", JSON.stringify(this.mlData));
+            formData.append("paranames", JSON.stringify(this.mlColConfig[2].options));
+            formData.append("algonames", JSON.stringify(this.mlColConfig[1].options));
+
+            axios.post("/ml-edit/valid-model", formData).then(res => {
+              this.mlData = res.data.mlData;
+              this.dataStorage = res.data.dataStorage;
+              this.searchConfigInit();
+              this.filterSearch();
+              loading.close();
+            }).catch(error => {
+              this.$message.error("文件解析失败");
+              loading.close();
+            })
+          } else {
+            this.$message.error("未上传配置文件")
+          }
+        };
+        input.click();
+      }
+    },
+  })
+</script>
+
+</html>

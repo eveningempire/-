@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/echarts-5.3.1/dist/echarts.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/core/dist/logic-flow.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Menu.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Group.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/DndPanel.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Snapshot.js"></script>
+    <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/SelectionSelect.js"></script>
+    <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/@logicflow/core/dist/style/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/@logicflow/extension/lib/style/index.css">
+    <link rel="stylesheet" href="/static/jsscripts/msfgComponent/msfgCss/index.css">
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        #app {
+            width: 100%; 
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .progress-bar {
+            margin-top: 20px;
+        }
+        .chart-container {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-form label-width="150px">
+        <el-form-item>
+            <el-button type="primary" @click="clickTrainData">训练数据</el-button>
+            <el-button type="success" @click="clickTestData">测试数据</el-button>
+        </el-form-item>
+
+        <!-- Training Options -->
+        <div v-if="showTrainOptions">
+            <el-form-item label="选择数据">
+                <el-select v-model="trainingDataPath" placeholder="请选择训练数据">
+                    <el-option
+                        v-for="file in trainingFiles"
+                        :key="file"
+                        :label="file"
+                        :value="file">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="选择算法">
+                <el-select v-model="selectedAlgorithm" placeholder="请选择算法">
+                    <el-option v-for="item in algorithms" :key="item" :label="item" :value="item"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="训练轮数">
+                <el-input-number v-model="trainingEpochs" :min="1" :max="1000" :step="1" style="width: 225px;"></el-input-number>
+            </el-form-item>            
+            <el-form-item label="模型名称">
+                <el-input v-model="trainingModelName" placeholder="请输入模型名称" style="width: 225px;"></el-input>
+                <div style="margin-top: 8px; font-size: 12px; color: #909399;">
+                    系统将自动为您的模型添加时间戳和格式后缀
+                </div>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" @click="handleTrainingSubmit">开始训练</el-button>
+            </el-form-item>
+        </div>
+
+        <!-- Training Progress -->
+        <div v-if="trainingInProgress">
+            <p>训练中...</p>
+            <el-progress :percentage="trainingProgressPercentage" :show-text="true"></el-progress>
+        </div>
+
+        <!-- Training Result -->
+        <div v-if="trainingResult">
+            <!-- <p>训练结果：{{ trainingResult }}</p> -->
+            <p>训练成功</p>
+            <div class="chart-container" v-if="showTrainingChart">
+                <div id="training-chart" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+
+        <!-- Testing Options -->
+        <div v-if="showTestOptions">
+            <el-form-item label="选择测试数据">
+                <el-select v-model="testingDataPath" placeholder="请选择测试数据">
+                    <el-option
+                        v-for="file in testingFiles"
+                        :key="file"
+                        :label="file"
+                        :value="file">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="选择测试模型">
+                <el-select v-model="testingModelName" placeholder="请选择测试模型">
+                    <el-option
+                        v-for="m in modelFiles"
+                        :key="m"
+                        :label="m"
+                        :value="m">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            
+            <!-- 新增测试算法选择 -->
+            <el-form-item label="选择测试算法">
+                <el-select v-model="testingAlgorithm" placeholder="请选择测试算法">
+                    <el-option v-for="item in algorithms" :key="item" :label="item" :value="item"></el-option>
+                </el-select>
+            </el-form-item>
+            
+            <el-form-item>
+                <el-button type="primary" @click="handleTestingSubmit">开始测试</el-button>
+            </el-form-item>
+        </div>
+
+        <!-- Testing Progress -->
+        <div v-if="testingInProgress">
+            <p>测试中...</p>
+        </div>
+
+        <!-- Testing Result -->
+        <div v-if="testingResult">
+            <p>测试结果：</p>
+            <div class="chart-container">
+                <div id="chart" style="width: 100%; height: 400px;"></div>
+            </div>
+            <div class="table-container">
+                <el-table :data="tableData" border>
+                    <el-table-column prop="metric" label="指标"></el-table-column>
+                    <el-table-column prop="value" label="值"></el-table-column>
+                </el-table>
+            </div>
+        </div>
+    </el-form>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                algorithms: ["Transfer", "Transfer Physics"],  // 使用Transfer系列算法
+                selectedAlgorithm: "",
+                showTrainOptions: false,
+                showTestOptions: false,
+                trainingFiles: [],
+                testingFiles: [],
+                modelFiles: [],
+                trainingDataPath: "",
+                trainingModelName: '',
+                trainingEpochs: 1, // 默认训练轮数为1
+                trainingInProgress: false,
+                trainingProgressPercentage: 0,
+                trainingResult: '',
+                showTrainingChart: false,
+                testingDataPath: "",
+                testingModelName: '',
+                testingAlgorithm: "",  // 新增测试算法字段
+                testingInProgress: false,
+                testingResult: false,
+                trueData: [],
+                predictedData: [],
+                tableData: []
+            };
+        },
+        created() {
+            // 动态加载训练数据、测试数据和模型文件列表
+            axios.get('/predict/list-files')
+                .then(res => {
+                    this.trainingFiles = res.data.traindata || []; 
+                    this.testingFiles = res.data.testdata || []; 
+                    this.modelFiles = res.data.models || [];
+                })
+                .catch(err => {
+                    console.error("获取文件列表失败", err);
+                    this.$message.error("获取文件列表失败");
+                });
+        },
+        methods: {
+            clickTrainData() {
+                this.showTrainOptions = true;
+                this.showTestOptions = false;
+            },
+            clickTestData() {
+                this.showTrainOptions = false;
+                this.showTestOptions = true;
+            },
+            handleTrainingSubmit() {
+                if (!this.trainingDataPath) {
+                    this.$message.error('请选择训练数据');
+                    return;
+                }
+                if (!this.selectedAlgorithm) {
+                    this.$message.error('请选择训练算法');
+                    return;
+                }
+                if (!this.trainingModelName) {
+                    this.$message.error('请输入模型名称');
+                    return;
+                }
+                if (!this.trainingEpochs || this.trainingEpochs < 1) {
+                    this.$message.error('请输入有效的训练轮数');
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append('train_or_test', 'train');
+                formData.append('algorithm', this.selectedAlgorithm);
+                formData.append('trainingData', this.trainingDataPath);
+                formData.append('testingData', this.testingDataPath);
+                formData.append('epochs', this.trainingEpochs);  // 确保epochs参数被传递
+                formData.append('modelName', this.trainingModelName);
+                this.trainingInProgress = true;
+                this.trainingProgressPercentage = 0;
+
+                // 模拟训练进度更新（实际应用中可通过WebSocket或轮询获取）
+                const progressInterval = setInterval(() => {
+                    if (this.trainingProgressPercentage < 90) {
+                        this.trainingProgressPercentage += 10;
+                    }
+                }, 1000);
+
+                axios.post('/api/train_auto', formData)  // 修改为使用train_auto端点
+                    .then(response => {
+                        this.trainingInProgress = false;
+                        clearInterval(progressInterval);
+                        this.trainingProgressPercentage = 100;
+                        
+                        // 打印原始响应数据帮助调试
+                        console.log("训练响应数据:", response.data);
+                        
+                        // 修复训练结果显示问题
+                        if (response.data && response.data.result !== undefined) {
+                            let result = response.data.result;
+                            
+                            // 如果结果是数组，连接为字符串
+                            if (Array.isArray(result)) {
+                                this.trainingResult = result.join("");
+                                console.log("数组结果:", this.trainingResult);
+                            } 
+                            // 如果结果是字符串但可能包含特殊编码
+                            else if (typeof result === 'string') {
+                                try {
+                                    // 尝试处理可能的编码问题
+                                    this.trainingResult = decodeURIComponent(escape(result));
+                                } catch (e) {
+                                    console.log("字符串解码失败，使用原始字符串");
+                                    this.trainingResult = result;
+                                }
+                                console.log("字符串结果:", this.trainingResult);
+                            } 
+                            // 其他类型，转为字符串
+                            else {
+                                this.trainingResult = String(result);
+                                console.log("其他类型结果:", this.trainingResult);
+                            }
+                        } else {
+                            this.trainingResult = "训练完成，无详细结果";
+                            console.log("无结果数据");
+                        }
+                        
+                        // 如果返回了训练过程数据，可以展示训练曲线
+                        if (response.data.trainingHistory) {
+                            this.showTrainingChart = true;
+                            this.$nextTick(() => {
+                                this.renderTrainingChart(response.data.trainingHistory);
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        this.trainingInProgress = false;
+                        clearInterval(progressInterval);
+                        this.$message.error('训练失败: ' + (error.response && error.response.data ? 
+                            error.response.data.result || JSON.stringify(error.response.data) : error.message || '未知错误'));
+                        console.error('训练错误详情:', error);
+                    });
+            },
+
+            renderTrainingChart(trainingHistory) {
+                // 预留接口用于渲染训练过程曲线图
+                const chartDom = document.getElementById('training-chart');
+                if (!chartDom) {
+                    return;
+                }
+                
+                const chart = echarts.init(chartDom);
+                // 这里是预留的图表配置，实际应用中根据返回数据结构进行调整
+                const option = {
+                    title: {
+                        text: '训练过程',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['损失值', '精确度'],
+                        bottom: 10
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: trainingHistory.epochs || [],
+                        name: '训练轮数',
+                        nameLocation: 'middle',
+                        nameGap: 30
+                    },
+                    yAxis: [
+                        {
+                            type: 'value',
+                            name: '损失值',
+                            position: 'left',
+                            nameLocation: 'middle',
+                            nameGap: 50
+                        },
+                        {
+                            type: 'value',
+                            name: '精确度',
+                            position: 'right',
+                            nameLocation: 'middle',
+                            nameGap: 50,
+                            min: 0,
+                            max: 1
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '损失值',
+                            type: 'line',
+                            data: trainingHistory.loss || [],
+                            yAxisIndex: 0,
+                            smooth: true,
+                            color: '#5470c6'
+                        },
+                        {
+                            name: '精确度',
+                            type: 'line',
+                            data: trainingHistory.accuracy || [],
+                            yAxisIndex: 1,
+                            smooth: true,
+                            color: '#91cc75'
+                        }
+                    ]
+                };
+
+                chart.setOption(option);
+            },
+
+            handleTestingSubmit() {
+                if (!this.testingDataPath) {
+                    this.$message.error('请选择测试数据');
+                    return;
+                }
+                if (!this.testingModelName) {
+                    this.$message.error('请选择测试模型');
+                    return;
+                }
+                if (!this.testingAlgorithm) {
+                    this.$message.error('请选择测试算法');
+                    return;
+                }
+                
+                let formData = new FormData();
+                formData.append('train_or_test', 'test');
+                formData.append('algorithm', this.testingAlgorithm);  // 使用测试算法
+                formData.append('testingData', this.testingDataPath);
+                formData.append('modelName', this.testingModelName);
+                this.testingInProgress = true;
+
+                axios.post('/api/test_auto', formData)  // 修改为使用test_auto端点
+                    .then(response => {
+                        if (response.status === 200) {
+                            this.testingInProgress = false;
+                            this.testingResult = true;
+                            this.trueData = response.data.test_label;
+                            this.predictedData = response.data.test_output;
+                            this.tableData = [
+                                { metric: 'RMSE', value: response.data.RMSE },
+                                { metric: 'MAE', value: response.data.MAE }
+                            ],
+                            this.xlogo = response.data.xlogo+'数',
+                            this.ylogo = '剩余'+response.data.xlogo+'数'
+
+                            this.$nextTick(() => {
+                                this.renderChart();
+                            });
+                        } else {
+                            throw new Error('Unexpected status code: ' + response.status);
+                        }
+                    })
+                    .catch((error) => {
+                        this.testingInProgress = false;
+                        this.$message.error('测试失败');
+                    });
+            },
+
+            renderChart() {
+                const chartDom = document.getElementById('chart');
+                if (!chartDom) {
+                    console.error('Chart DOM element not found');
+                    return;
+                }
+
+                let chart = echarts.getInstanceByDom(chartDom);
+                if (!chart) {
+                    chart = echarts.init(chartDom);
+                }
+
+                const option = {
+                    title: {
+                        text: '剩余寿命预测',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['测试标签 (test_label)', '预测值 (test_output)'],
+                        bottom: 10
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: Array.from({ length: this.trueData.length }, (_, i) => i + 1),
+                        name: this.xlogo,
+                        nameLocation: 'middle',
+                        nameGap: 30
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: this.ylogo,
+                        nameLocation: 'middle',
+                        nameGap: 50
+                    },
+                    series: [
+                        {
+                            name: '测试标签 (test_label)',
+                            type: 'line',
+                            data: this.trueData,
+                            smooth: true,
+                            color: '#5470c6'
+                        },
+                        {
+                            name: '预测值 (test_output)',
+                            type: 'line',
+                            data: this.predictedData,
+                            smooth: true,
+                            color: '#91cc75'
+                        }
+                    ]
+                };
+
+                chart.setOption(option, true);
+            }
+        },
+    });
+</script>
+</body>
+</html>

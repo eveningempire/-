@@ -1,0 +1,340 @@
+﻿#!/usr/bin/env python
+"""
+璋冭瘯MSFG娴嬬偣-閮ㄤ欢鏄犲皠鎻愬彇閫昏緫
+妫€鏌est_names鏄惁姝ｇ‘鎻愬彇锛宎vailable_components鏄惁姝ｇ‘鑾峰彇
+妫€鏌SFG瀹氫箟涓殑test_names鍜宑omponent_names瀛楁鏄惁姝ｇ‘濉厖
+楠岃瘉ensure_msfg_component_mappings鍑芥暟鏄惁鍦ㄦ纭殑鏃舵満琚皟鐢?
+淇鏄犲皠鐢熸垚閫昏緫锛岀‘淇濊兘姝ｇ‘鍒涘缓TestPointComponentMapping璁板綍
+"""
+
+import os
+import sys
+import django
+import logging
+from typing import Dict, List, Any
+
+print("馃殌 寮€濮嬪垵濮嬪寲璋冭瘯鑴氭湰...")
+
+# 璁剧疆Django鐜
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'phm_backend.settings')
+print("馃搵 璁剧疆Django鐜鍙橀噺...")
+
+try:
+    django.setup()
+    print("鉁?Django鐜璁剧疆鎴愬姛")
+except Exception as e:
+    print(f"鉂?Django鐜璁剧疆澶辫触: {e}")
+    sys.exit(1)
+
+try:
+    from data_management.models import PHMModel
+    from msfg_analysis.models import MSFGDefinition, TestPointComponentMapping, MSFGNode, MSFGEdge
+    from msfg_analysis.algorithms.msfg.component_integration import (
+        ensure_msfg_component_mappings, 
+        extract_components_from_msfg,
+        get_active_msfg_for_cmg_model
+    )
+    from msfg_analysis.algorithms.msfg.auto_mapping import (
+        update_msfg_mappings_from_structure,
+        auto_extract_msfg_mappings
+    )
+    print("鉁?鎵€鏈夋ā鍧楀鍏ユ垚鍔?)
+except Exception as e:
+    print(f"鉂?妯″潡瀵煎叆澶辫触: {e}")
+    sys.exit(1)
+
+# 璁剧疆鏃ュ織
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def debug_msfg_data_extraction():
+    """璋冭瘯MSFG鏁版嵁鎻愬彇閫昏緫"""
+    print("=" * 60)
+    print("馃攳 璋冭瘯MSFG鏁版嵁鎻愬彇閫昏緫")
+    print("=" * 60)
+    
+    # 鑾峰彇鎵€鏈塁MG妯″瀷
+    cmg_models = PHMModel.objects.all()
+    print(f"鎵惧埌 {cmg_models.count()} 涓狢MG妯″瀷")
+    
+    for cmg_model in cmg_models:
+        print(f"\n馃搵 妫€鏌MG妯″瀷: {cmg_model.model_name}")
+        
+        # 鑾峰彇婵€娲荤殑MSFG瀹氫箟
+        active_msfg = get_active_msfg_for_cmg_model(cmg_model)
+        if not active_msfg:
+            print(f"  鉂?娌℃湁婵€娲荤殑MSFG瀹氫箟")
+            continue
+        
+        print(f"  鉁?婵€娲荤殑MSFG: {active_msfg.name} (ID: {active_msfg.id})")
+        
+        # 妫€鏌est_names瀛楁
+        test_names = active_msfg.test_names or []
+        print(f"  馃搳 test_names瀛楁: {len(test_names)} 涓祴璇曠偣")
+        if test_names:
+            print(f"     娴嬭瘯鐐瑰垪琛? {test_names[:5]}{'...' if len(test_names) > 5 else ''}")
+        
+        # 妫€鏌omponent_names瀛楁
+        component_names = active_msfg.component_names or []
+        print(f"  馃敡 component_names瀛楁: {len(component_names)} 涓儴浠?)
+        if component_names:
+            print(f"     閮ㄤ欢鍒楄〃: {component_names}")
+        
+        # 妫€鏌ヨ妭鐐规暟鎹?
+        nodes = MSFGNode.objects.filter(msfg_definition=active_msfg)
+        print(f"  馃彈锔? 鑺傜偣鏁版嵁: {nodes.count()} 涓妭鐐?)
+        
+        # 鎸夌被鍨嬬粺璁¤妭鐐?
+        node_types = {}
+        for node in nodes:
+            node_type = node.node_type
+            if node_type not in node_types:
+                node_types[node_type] = []
+            node_types[node_type].append(node.name)
+        
+        for node_type, names in node_types.items():
+            print(f"     {node_type}: {len(names)} 涓?- {names[:3]}{'...' if len(names) > 3 else ''}")
+        
+        # 妫€鏌ヨ竟鏁版嵁
+        edges = MSFGEdge.objects.filter(msfg_definition=active_msfg)
+        print(f"  馃敆 杈规暟鎹? {edges.count()} 鏉¤竟")
+        
+        # 妫€鏌ョ幇鏈夋槧灏?
+        existing_mappings = TestPointComponentMapping.objects.filter(msfg_definition=active_msfg)
+        print(f"  馃椇锔? 鐜版湁鏄犲皠: {existing_mappings.count()} 涓槧灏?)
+
+def debug_component_extraction():
+    """璋冭瘯閮ㄤ欢鎻愬彇閫昏緫"""
+    print("\n" + "=" * 60)
+    print("馃敡 璋冭瘯閮ㄤ欢鎻愬彇閫昏緫")
+    print("=" * 60)
+    
+    cmg_models = PHMModel.objects.all()
+    
+    for cmg_model in cmg_models:
+        print(f"\n馃搵 妫€鏌MG妯″瀷: {cmg_model.model_name}")
+        
+        active_msfg = get_active_msfg_for_cmg_model(cmg_model)
+        if not active_msfg:
+            continue
+        
+        print(f"  鉁?MSFG: {active_msfg.name}")
+        
+        # 娴嬭瘯extract_components_from_msfg鍑芥暟
+        try:
+            extracted_components = extract_components_from_msfg(active_msfg)
+            print(f"  馃攳 鎻愬彇鐨勯儴浠? {len(extracted_components)} 涓?)
+            if extracted_components:
+                print(f"     閮ㄤ欢鍒楄〃: {extracted_components}")
+            
+            # 姣旇緝鎻愬彇鐨勯儴浠跺拰MSFG瀹氫箟鐨勯儴浠?
+            msfg_components = active_msfg.component_names or []
+            print(f"  馃搳 MSFG瀹氫箟鐨勯儴浠? {len(msfg_components)} 涓?)
+            if msfg_components:
+                print(f"     瀹氫箟閮ㄤ欢: {msfg_components}")
+            
+            # 妫€鏌ュ樊寮?
+            extracted_set = set(extracted_components)
+            msfg_set = set(msfg_components)
+            
+            only_extracted = extracted_set - msfg_set
+            only_defined = msfg_set - extracted_set
+            common = extracted_set & msfg_set
+            
+            if only_extracted:
+                print(f"  鈿狅笍  浠呮彁鍙栫殑閮ㄤ欢: {list(only_extracted)}")
+            if only_defined:
+                print(f"  鈿狅笍  浠呭畾涔夌殑閮ㄤ欢: {list(only_defined)}")
+            if common:
+                print(f"  鉁?鍏卞悓閮ㄤ欢: {list(common)}")
+                
+        except Exception as e:
+            print(f"  鉂?閮ㄤ欢鎻愬彇澶辫触: {e}")
+
+def debug_mapping_generation():
+    """璋冭瘯鏄犲皠鐢熸垚閫昏緫"""
+    print("\n" + "=" * 60)
+    print("馃椇锔? 璋冭瘯鏄犲皠鐢熸垚閫昏緫")
+    print("=" * 60)
+    
+    cmg_models = PHMModel.objects.all()
+    
+    for cmg_model in cmg_models:
+        print(f"\n馃搵 妫€鏌MG妯″瀷: {cmg_model.model_name}")
+        
+        active_msfg = get_active_msfg_for_cmg_model(cmg_model)
+        if not active_msfg:
+            continue
+        
+        print(f"  鉁?MSFG: {active_msfg.name}")
+        
+        # 妫€鏌ョ幇鏈夋槧灏?
+        existing_mappings = TestPointComponentMapping.objects.filter(msfg_definition=active_msfg)
+        print(f"  馃搳 鐜版湁鏄犲皠鏁伴噺: {existing_mappings.count()}")
+        
+        if existing_mappings.exists():
+            # 缁熻鏄犲皠鎯呭喌
+            test_points = set()
+            components = set()
+            for mapping in existing_mappings:
+                test_points.add(mapping.test_point_name)
+                components.add(mapping.component_name)
+            
+            print(f"  馃攳 鏄犲皠鐨勬祴璇曠偣: {len(test_points)} 涓?)
+            print(f"  馃敡 鏄犲皠鐨勯儴浠? {len(components)} 涓?)
+            
+            # 妫€鏌ユ槸鍚︽湁鏈槧灏勭殑娴嬭瘯鐐?
+            test_names = active_msfg.test_names or []
+            unmapped_tests = set(test_names) - test_points
+            if unmapped_tests:
+                print(f"  鈿狅笍  鏈槧灏勭殑娴嬭瘯鐐? {list(unmapped_tests)}")
+        
+        # 娴嬭瘯鑷姩鏄犲皠鎻愬彇
+        try:
+            print(f"  馃攧 娴嬭瘯鑷姩鏄犲皠鎻愬彇...")
+            auto_mappings = auto_extract_msfg_mappings(active_msfg)
+            print(f"  馃搱 鑷姩鎻愬彇鐨勬槧灏? {len(auto_mappings)} 涓祴璇曠偣")
+            
+            if auto_mappings:
+                total_mappings = sum(len(mappings) for mappings in auto_mappings.values())
+                print(f"  馃搳 鎬绘槧灏勫叧绯? {total_mappings} 涓?)
+                
+                # 鏄剧ず鍓嶅嚑涓槧灏?
+                for i, (test_name, mappings) in enumerate(auto_mappings.items()):
+                    if i >= 3:  # 鍙樉绀哄墠3涓?
+                        break
+                    print(f"     {test_name}: {len(mappings)} 涓儴浠舵槧灏?)
+                    
+        except Exception as e:
+            print(f"  鉂?鑷姩鏄犲皠鎻愬彇澶辫触: {e}")
+
+def test_ensure_mappings_function():
+    """娴嬭瘯ensure_msfg_component_mappings鍑芥暟"""
+    print("\n" + "=" * 60)
+    print("馃И 娴嬭瘯ensure_msfg_component_mappings鍑芥暟")
+    print("=" * 60)
+    
+    cmg_models = PHMModel.objects.all()
+    
+    for cmg_model in cmg_models:
+        print(f"\n馃搵 娴嬭瘯PHM妯″瀷: {cmg_model.model_name}")
+        
+        active_msfg = get_active_msfg_for_cmg_model(cmg_model)
+        if not active_msfg:
+            continue
+        
+        print(f"  鉁?MSFG: {active_msfg.name}")
+        
+        # 璁板綍鎵ц鍓嶇殑鏄犲皠鏁伴噺
+        before_count = TestPointComponentMapping.objects.filter(msfg_definition=active_msfg).count()
+        print(f"  馃搳 鎵ц鍓嶆槧灏勬暟閲? {before_count}")
+        
+        try:
+            # 鎵ц鏄犲皠纭繚鍑芥暟
+            print(f"  馃攧 鎵цensure_msfg_component_mappings...")
+            ensure_msfg_component_mappings(active_msfg)
+            
+            # 璁板綍鎵ц鍚庣殑鏄犲皠鏁伴噺
+            after_count = TestPointComponentMapping.objects.filter(msfg_definition=active_msfg).count()
+            print(f"  馃搳 鎵ц鍚庢槧灏勬暟閲? {after_count}")
+            
+            if after_count > before_count:
+                print(f"  鉁?鎴愬姛鍒涘缓浜?{after_count - before_count} 涓柊鏄犲皠")
+                
+                # 鏄剧ず鏂板垱寤虹殑鏄犲皠
+                new_mappings = TestPointComponentMapping.objects.filter(
+                    msfg_definition=active_msfg
+                ).order_by('-created_at')[:5]  # 鏄剧ず鏈€鏂扮殑5涓?
+                
+                for mapping in new_mappings:
+                    print(f"     {mapping.test_point_name} -> {mapping.component_name} ({mapping.mapping_type})")
+                    
+            elif after_count == before_count:
+                print(f"  鈩癸笍  鏄犲皠鏁伴噺鏈彉鍖?)
+            else:
+                print(f"  鈿狅笍  鏄犲皠鏁伴噺鍑忓皯: {before_count - after_count}")
+                
+        except Exception as e:
+            print(f"  鉂?鎵ц澶辫触: {e}")
+
+def test_auto_mapping_update():
+    """娴嬭瘯鑷姩鏄犲皠鏇存柊鍔熻兘"""
+    print("\n" + "=" * 60)
+    print("馃攧 娴嬭瘯鑷姩鏄犲皠鏇存柊鍔熻兘")
+    print("=" * 60)
+    
+    cmg_models = PHMModel.objects.all()
+    
+    for cmg_model in cmg_models:
+        print(f"\n馃搵 娴嬭瘯PHM妯″瀷: {cmg_model.model_name}")
+        
+        active_msfg = get_active_msfg_for_cmg_model(cmg_model)
+        if not active_msfg:
+            continue
+        
+        print(f"  鉁?MSFG: {active_msfg.name}")
+        
+        # 璁板綍鎵ц鍓嶇殑鏄犲皠鏁伴噺
+        before_count = TestPointComponentMapping.objects.filter(msfg_definition=active_msfg).count()
+        print(f"  馃搳 鎵ц鍓嶆槧灏勬暟閲? {before_count}")
+        
+        try:
+            # 鎵ц鑷姩鏄犲皠鏇存柊
+            print(f"  馃攧 鎵цupdate_msfg_mappings_from_structure...")
+            success = update_msfg_mappings_from_structure(active_msfg)
+            
+            if success:
+                # 璁板綍鎵ц鍚庣殑鏄犲皠鏁伴噺
+                after_count = TestPointComponentMapping.objects.filter(msfg_definition=active_msfg).count()
+                print(f"  馃搳 鎵ц鍚庢槧灏勬暟閲? {after_count}")
+                
+                if after_count > 0:
+                    print(f"  鉁?鑷姩鏄犲皠鏇存柊鎴愬姛锛屽垱寤轰簡 {after_count} 涓槧灏?)
+                    
+                    # 鏄剧ず鏄犲皠缁熻
+                    mappings = TestPointComponentMapping.objects.filter(msfg_definition=active_msfg)
+                    test_points = set()
+                    components = set()
+                    for mapping in mappings:
+                        test_points.add(mapping.test_point_name)
+                        components.add(mapping.component_name)
+                    
+                    print(f"  馃搱 鏄犲皠缁熻:")
+                    print(f"     娴嬭瘯鐐? {len(test_points)} 涓?)
+                    print(f"     閮ㄤ欢: {len(components)} 涓?)
+                    print(f"     鏄犲皠鍏崇郴: {after_count} 涓?)
+                    
+                else:
+                    print(f"  鈿狅笍  鑷姩鏄犲皠鏇存柊鎴愬姛浣嗘湭鍒涘缓浠讳綍鏄犲皠")
+            else:
+                print(f"  鉂?鑷姩鏄犲皠鏇存柊澶辫触")
+                
+        except Exception as e:
+            print(f"  鉂?鎵ц澶辫触: {e}")
+
+def main():
+    """涓诲嚱鏁?""
+    print("馃殌 寮€濮嬭皟璇昅SFG娴嬬偣-閮ㄤ欢鏄犲皠鎻愬彇閫昏緫")
+    
+    # 1. 璋冭瘯MSFG鏁版嵁鎻愬彇
+    debug_msfg_data_extraction()
+    
+    # 2. 璋冭瘯閮ㄤ欢鎻愬彇閫昏緫
+    debug_component_extraction()
+    
+    # 3. 璋冭瘯鏄犲皠鐢熸垚閫昏緫
+    debug_mapping_generation()
+    
+    # 4. 娴嬭瘯ensure_msfg_component_mappings鍑芥暟
+    test_ensure_mappings_function()
+    
+    # 5. 娴嬭瘯鑷姩鏄犲皠鏇存柊鍔熻兘
+    test_auto_mapping_update()
+    
+    print("\n" + "=" * 60)
+    print("鉁?璋冭瘯瀹屾垚")
+    print("=" * 60)
+
+if __name__ == "__main__":
+    main()
+

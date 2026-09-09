@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年2月6日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSAB001"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4294967298"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "燃烧室"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "燃烧室是推进剂雾化、蒸发、混合和燃烧的容腔，承受高温燃气压力。其头部装有喷注器，末端与喷管连为一体。燃烧室主要的结构形式有球形、圆筒形和环形，其中圆筒形应用最为广泛。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "60.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

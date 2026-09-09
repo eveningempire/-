@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSFG结构与检测流程查看</title>
+  <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+  <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+  <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+  <style>
+    body { margin: 0; font-family: 'Microsoft YaHei', sans-serif; }
+    .container { padding: 16px; }
+    .section { background: #fff; padding: 16px; margin-bottom: 16px; border-radius: 6px; border: 1px solid #ebeef5; }
+    .title { font-weight: 600; margin-bottom: 12px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+</head>
+<body>
+  {% verbatim %}
+  <div id="app" class="container">
+    <div class="section">
+      <div class="title">选择MSFG配置</div>
+      <el-row :gutter="10">
+        <el-col :span="6">
+          <el-select v-model="cmgModel" placeholder="选择CMG型号" filterable @change="loadMsfgList" style="width:100%">
+            <el-option v-for="m in cmgModels" :key="m.id" :label="m.model_name" :value="m.id" />
+          </el-select>
+        </el-col>
+        <el-col :span="10">
+          <el-select v-model="msfgId" placeholder="选择MSFG配置" filterable style="width:100%">
+            <el-option v-for="m in msfgList" :key="m.id" :label="m.name" :value="m.id" />
+          </el-select>
+        </el-col>
+        <el-col :span="8">
+          <el-button type="primary" @click="fetchInspect" :disabled="!msfgId">载入结构</el-button>
+          <el-button @click="openPreview" :disabled="!msfgId">预览检测流程</el-button>
+        </el-col>
+      </el-row>
+    </div>
+
+    <div class="section" v-if="inspect">
+      <div class="title">结构概览</div>
+      <el-descriptions :column="3" border>
+        <el-descriptions-item label="配置">{{ inspect.msfg_name }}</el-descriptions-item>
+        <el-descriptions-item label="测试点数">{{ inspect.tests.length }}</el-descriptions-item>
+        <el-descriptions-item label="故障点数">{{ inspect.faults.length }}</el-descriptions-item>
+      </el-descriptions>
+
+      <el-row :gutter="12" style="margin-top:12px;">
+        <el-col :span="8">
+          <div class="title">测试点</div>
+          <el-table :data="inspect.tests.map(t=>({name:t}))" size="mini" height="260" border>
+            <el-table-column prop="name" label="Test" />
+          </el-table>
+        </el-col>
+        <el-col :span="8">
+          <div class="title">故障点</div>
+          <el-table :data="inspect.faults.map(t=>({name:t}))" size="mini" height="260" border>
+            <el-table-column prop="name" label="Fault" />
+          </el-table>
+        </el-col>
+        <el-col :span="8">
+          <div class="title">测试→故障映射</div>
+          <el-table :data="mappingRows" size="mini" height="260" border>
+            <el-table-column prop="test" label="Test" width="160" />
+            <el-table-column prop="faults" label="Faults" />
+          </el-table>
+        </el-col>
+      </el-row>
+    </div>
+
+    <el-dialog title="检测流程预览" :visible.sync="previewVisible" width="90%">
+      <div v-if="preview">
+        <el-collapse>
+          <el-collapse-item title="图结构" name="graph">
+            <pre class="mono">{{ formatPreview(preview.pipeline.graph) }}</pre>
+          </el-collapse-item>
+          <el-collapse-item title="D矩阵" name="dmatrix">
+            <pre class="mono">{{ formatPreview(preview.pipeline.d_matrix) }}</pre>
+          </el-collapse-item>
+          <el-collapse-item title="测点评分" name="tests">
+            <pre class="mono">{{ formatPreview(preview.pipeline.test_scores) }}</pre>
+          </el-collapse-item>
+          <el-collapse-item title="故障推理" name="faults">
+            <pre class="mono">{{ formatPreview(preview.pipeline.fault_inference) }}</pre>
+          </el-collapse-item>
+          <el-collapse-item title="诊断结构（可检测/可隔离/模糊集）" name="diagnostic">
+            <pre class="mono">{{ formatPreview(preview.pipeline.diagnostic) }}</pre>
+          </el-collapse-item>
+          <el-collapse-item title="部件健康" name="components">
+            <pre class="mono">{{ formatPreview(preview.pipeline.components) }}</pre>
+          </el-collapse-item>
+          <el-collapse-item title="系统健康" name="system">
+            <pre class="mono">{{ formatPreview(preview.pipeline.system) }}</pre>
+          </el-collapse-item>
+          <el-collapse-item title="汇总结果（对照）" name="result">
+            <pre class="mono">{{ formatPreview(preview.result) }}</pre>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="previewVisible=false">关 闭</el-button>
+      </span>
+    </el-dialog>
+  </div>
+  {% endverbatim %}
+
+  <script>
+  new Vue({
+    el: '#app',
+    data(){
+      return {
+        cmgModels: [],
+        cmgModel: null,
+        msfgList: [],
+        msfgId: null,
+        inspect: null,
+        previewVisible: false,
+        preview: null,
+      }
+    },
+    computed: {
+      mappingRows(){
+        if(!this.inspect || !this.inspect.test_to_fault) return [];
+        return Object.entries(this.inspect.test_to_fault).map(([k, v])=>({ test: k, faults: (v||[]).join(', ') }))
+      }
+    },
+    async mounted(){
+      try{
+        const resp = await axios.get('/api/v1/data/cmg-models/');
+        this.cmgModels = resp.data.results || resp.data;
+      }catch(e){ this.$message.error('加载CMG型号失败'); }
+    },
+    methods:{
+      async loadMsfgList(){
+        this.msfgList = [];
+        this.msfgId = null;
+        if(!this.cmgModel) return;
+        try{
+          const resp = await axios.get('/api/v1/msfg/msfg-definitions/', { params: { cmg_model_id: this.cmgModel } });
+          this.msfgList = resp.data.results || resp.data;
+        }catch(e){ this.$message.error('加载MSFG定义失败'); }
+      },
+      async fetchInspect(){
+        try{
+          const url = `/api/v1/msfg/msfg-definitions/${this.msfgId}/graph-inspect/`;
+          const resp = await axios.get(url);
+          this.inspect = resp.data;
+          this.$message.success('结构已载入');
+        }catch(e){ this.$message.error('载入结构失败'); }
+      },
+      async openPreview(){
+        try{
+          const url = `/api/v1/msfg/msfg-definitions/${this.msfgId}/analysis/preview/`;
+          const resp = await axios.post(url, { test_scores: {} });
+          this.preview = resp.data;
+          this.previewVisible = true;
+        }catch(e){ this.$message.error('预览失败'); }
+      },
+      formatPreview(obj){
+        try{ return JSON.stringify(obj, null, 2); }catch(e){ return String(obj); }
+      }
+    }
+  });
+  </script>
+</body>
+</html>
+
+

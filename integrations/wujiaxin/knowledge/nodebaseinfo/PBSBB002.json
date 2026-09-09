@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年1月1日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSBB002"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204967588"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "电池充电调节器"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "电池充电调节器可以调节大范围的电池电压，并且可以通过监控温度，电压和充电时间实现最佳电池快速充电控制。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "4.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "1440.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "120.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "12.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

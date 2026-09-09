@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2017年4月5日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSBA004"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4294968296"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "模式控制单元"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "模式控制单元用于控制太阳电池阵的工作模式，根据太阳能电池组、逆变器、蓄电池充电控制器等的电力载荷情况反馈控制电力的输入驱动器、发电储能驱动器以及电力输出取向驱动器的工作状态实现工作模式的切换。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "40.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "1500.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "220.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "5.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

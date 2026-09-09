@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2016年1月1日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSBA003"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "4204967296"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "控制分流控制器"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "控制分流控制器采用并联型光伏控制器,当蓄电池充满时，利用电子部件把光伏阵列的输出分流到内部并联电阻器或功率模组上去，然后以热的形式消耗掉。并联型光伏控制器一般用于小型、低功率系统，例如电压在12V、20A以内和系统。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "20.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "1200.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "220.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "5.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script type="text/javascript" src="/static/jsscripts/vue.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/axios.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/d3.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/d3-sankey.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/elementui/lib-master/index.js"></script>
+
+  <script type="text/javascript" src="/static/jsscripts/@logicflow/core/dist/logic-flow.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Menu.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Group.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/DndPanel.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/Snapshot.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/@logicflow/extension/lib/SelectionSelect.js"></script>
+
+  <!-- MSFG组件 - 需要先设置全局变量 -->
+  <script>
+    // 预定义一些必要的全局变量和函数
+    window.LogicFlow = LogicFlow;
+    window.Menu = Menu;
+    window.Group = Group;
+    window.DndPanel = DndPanel;
+    window.Snapshot = Snapshot;
+    window.SelectionSelect = SelectionSelect;
+  </script>
+  <script type="text/javascript" src="/static/jsscripts/msfgComponent/msfgDetail/common/methods.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/msfgComponent/msfgDetail/msfgMethods.js"></script>
+  <script type="text/javascript" src="/static/jsscripts/msfgComponent/index.js"></script>
+
+  <!-- 样式设置 -->
+  <link rel="stylesheet" href="/static/jsscripts/elementui/lib-master/theme-chalk/index.css">
+  <link rel="stylesheet" href="/static/jsscripts/@logicflow/core/dist/style/index.css">
+  <!--LogicFlow extension包css-->
+  <link rel="stylesheet" href="/static/jsscripts/@logicflow/extension/lib/style/index.css">
+  <link rel="stylesheet" href="/static/jsscripts/msfgComponent/msfgCss/index.css">
+  
+  <style>
+    .msfg-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #666;
+      background: #f9f9f9;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+    }
+    .msfg-placeholder h3 {
+      margin: 0 0 10px 0;
+      color: #409EFF;
+    }
+    .msfg-placeholder p {
+      margin: 0;
+      font-size: 14px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="msfg-panel" style="height: 100%; width: 100%;">
+    <ate-multi-signal-flow-graph :editable="true" :obj="obj" :analyse="false" />
+  </div>
+</body>
+<script>
+  var vm = new Vue({
+    el: "#msfg-panel",
+    data: {
+      obj: 'cmg',
+    },
+    components: {
+      'ate-multi-signal-flow-graph': window.msfgComp || {
+        template: '<div class="msfg-placeholder"><h3>多信号流图编辑器</h3><p>组件加载失败，请检查JavaScript文件</p></div>'
+      },
+    },
+    mounted() {
+    }
+  })
+</script>
+
+</html>

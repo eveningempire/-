@@ -1,0 +1,58 @@
+[
+    {
+        "baseinfo": "生产厂家",
+        "attribute": "中国航天运载火箭技术研究院"
+    },
+    {
+        "baseinfo": "生产时间",
+        "attribute": "2018年1月2日"
+    },
+    {
+        "baseinfo": "产品代号",
+        "attribute": "PBSDB005"
+    },
+    {
+        "baseinfo": "产品编号",
+        "attribute": "3204967296"
+    },
+    {
+        "baseinfo": "产品名称",
+        "attribute": "储液器"
+    },
+    {
+        "baseinfo": "产品描述",
+        "attribute": "安储液器是配装在空调蒸发器和压缩机吸气管部位，是防止液体制冷剂流入压缩机而产生液击的保护部件。"
+    },
+    {
+        "baseinfo": "重量",
+        "attribute": "40.0 kg"
+    },
+    {
+        "baseinfo": "功耗",
+        "attribute": "0.0 W"
+    },
+    {
+        "baseinfo": "工作电压",
+        "attribute": "0.0 V"
+    },
+    {
+        "baseinfo": "工作电流",
+        "attribute": "0.0 A"
+    },
+    {
+        "baseinfo": "工作环境",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "研制阶段",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "舱位",
+        "attribute": "默认"
+    },
+    {
+        "baseinfo": "占位",
+        "attribute": "默认"
+    }
+]
