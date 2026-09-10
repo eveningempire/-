@@ -6,6 +6,7 @@ import FmecaKnowledge from '../views/FmecaKnowledge.vue';
 import ComponentLibrary from '../views/ComponentLibrary.vue';
 import IntegrationAssets from '../views/IntegrationAssets.vue';
 import SimulationDataset from '../views/SimulationDataset.vue';
+import PermissionManagement from '../views/PermissionManagement.vue';
 
 const page = (path, title, description, features) => ({ path, component: CapabilityPlaceholder, meta: { title, description, features } });
 
@@ -27,7 +28,7 @@ const routes = [{ path: '/', component: PhmLayout, children: [
   page('maintenance-decision','维修辅助决策','根据诊断、健康度与寿命结果形成维修建议。',['维修策略生成','备件与资源约束','决策依据追溯']),
   { path:'integration-assets', component:IntegrationAssets },
   { path:'simulation-dataset', component:SimulationDataset },
-  page('users','用户与权限','通过角色控制数据和功能访问权限。',['角色权限','用户管理','访问审计'])
+  { path:'users', component:PermissionManagement }
 ] }];
 
 export default createRouter({ history: createWebHistory(), routes });

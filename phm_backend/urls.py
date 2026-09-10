@@ -13,11 +13,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
+from .permission_views import PermissionProfileView, RoleCatalogView, GroupRoleView
 
 urlpatterns = [
     path("api/v1/phm/", include("phm.urls")),
     path("api/v1/integrations/wujiaxin/", include("wujiaxin_integration.urls")),
     path("api/v1/simulation-dataset/", include("simulation_dataset.urls")),
+    path("api/v1/permissions/profile/", PermissionProfileView.as_view()),
+    path("api/v1/permissions/roles/", RoleCatalogView.as_view()),
+    path("api/v1/permissions/assign-role/", GroupRoleView.as_view()),
     path("admin/", admin.site.urls),
     # Favicon route to prevent 404 errors
     path("favicon.ico", RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
