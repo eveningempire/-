@@ -224,9 +224,9 @@ CACHES = {
     }
 }
 
-# Session Configuration - use Redis for sessions
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+# Session storage uses the local database so login remains available when
+# Redis is not running. Redis is optional for cache/realtime workloads.
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 # Django REST framework settings
 REST_FRAMEWORK = {
