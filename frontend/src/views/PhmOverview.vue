@@ -8,7 +8,7 @@
       <div v-for="item in metrics" :key="item.label" class="metric"><div class="metric-icon" :style="{background:item.bg,color:item.color}"><el-icon><component :is="item.icon" /></el-icon></div><div><small>{{item.label}}</small><strong>{{item.value}}</strong><span>{{item.note}}</span></div></div>
     </div>
     <div class="grid">
-      <section class="panel span2"><header><div><h3>PHM能力链</h3><p>平台核心业务闭环</p></div><el-tag type="info">接口占位</el-tag></header><div class="chain"><div v-for="(c,i) in capabilities" :key="c.name" class="chain-item"><div class="step">0{{i+1}}</div><strong>{{c.name}}</strong><span>{{c.desc}}</span><el-tag size="small" :type="c.type">{{c.status}}</el-tag></div></div></section>
+      <section class="panel span2"><header><div><h3>PHM能力链</h3><p>平台核心业务闭环</p></div><el-tag type="info">能力链状态</el-tag></header><div class="chain"><div v-for="(c,i) in capabilities" :key="c.name" class="chain-item"><div class="step">0{{i+1}}</div><strong>{{c.name}}</strong><span>{{c.desc}}</span><el-tag size="small" :type="c.type">{{c.status}}</el-tag></div></div></section>
       <section class="panel"><header><div><h3>系统运行状态</h3><p>基础服务连通性</p></div><span class="online">● 在线</span></header><div class="services"><div><span>Django API</span><b class="ok">正常</b></div><div><span>算法服务</span><b>待接入</b></div><div><span>仿真数据</span><b>待接入</b></div><div><span>数据库</span><b class="ok">SQLite</b></div></div></section>
       <section class="panel span2"><header><div><h3>重点监测对象</h3><p>材料要求对应的典型分系统</p></div><el-button text type="primary">结构管理 →</el-button></header><div class="systems"><div v-for="s in systems" :key="s.name"><i :class="s.level"></i><div><strong>{{s.name}}</strong><span>{{s.detail}}</span></div><em>{{s.state}}</em></div></div></section>
       <section class="panel"><header><div><h3>近期告警</h3><p>实时异常与处置状态</p></div><el-badge :value="0" /></header><div class="empty"><el-icon><CircleCheck /></el-icon><strong>暂无告警</strong><span>仿真/遥测数据接入后显示</span></div></section>
@@ -17,8 +17,8 @@
 </template>
 <script setup>
 import { ref } from 'vue'; import { ElMessage } from 'element-plus'; import { Refresh, Monitor, Warning, TrendCharts, Timer, CircleCheck } from '@element-plus/icons-vue';
-const metrics=[{label:'部件档案',value:'49',note:'吴嘉欣成果已接入',icon:Monitor,bg:'#e7f2ff',color:'#287bea'},{label:'FMECA记录',value:'13',note:'典型故障模式',icon:Warning,bg:'#fff3e5',color:'#ee8a24'},{label:'综合健康度',value:'—',note:'等待在线评估',icon:TrendCharts,bg:'#e8fbf4',color:'#16a678'},{label:'模型资产',value:'202',note:'已登记、待验证',icon:Timer,bg:'#f0ebff',color:'#7654d8'}];
-const capabilities=[{name:'状态监测',desc:'多源遥测与趋势',status:'框架就绪',type:'success'},{name:'故障诊断',desc:'规则、MSFG与智能诊断',status:'算法待接入',type:'warning'},{name:'健康评估',desc:'部件HI与系统健康度',status:'算法待接入',type:'warning'},{name:'寿命预测',desc:'RUL及不确定性区间',status:'算法待接入',type:'warning'}];
+const metrics=[{label:'部件档案',value:'49',note:'已接入部件档案',icon:Monitor,bg:'#e7f2ff',color:'#287bea'},{label:'FMECA记录',value:'13',note:'典型故障模式',icon:Warning,bg:'#fff3e5',color:'#ee8a24'},{label:'综合健康度',value:'—',note:'等待在线评估',icon:TrendCharts,bg:'#e8fbf4',color:'#16a678'},{label:'模型资产',value:'202',note:'已登记、待验证',icon:Timer,bg:'#f0ebff',color:'#7654d8'}];
+const capabilities=[{name:'状态监测',desc:'多源遥测与趋势',status:'框架就绪',type:'success'},{name:'故障诊断',desc:'规则、MSFG与智能诊断',status:'算法服务未启用',type:'warning'},{name:'健康评估',desc:'部件HI与系统健康度',status:'算法服务未启用',type:'warning'},{name:'寿命预测',desc:'RUL及不确定性区间',status:'算法服务未启用',type:'warning'}];
 const systems=[{name:'推进系统',detail:'发动机、泵阀与管路',state:'未接入',level:'blue'},{name:'电源系统',detail:'电池、配电与供电链路',state:'未接入',level:'green'},{name:'航电系统',detail:'飞控、导航与通信设备',state:'未接入',level:'purple'}];
 const refresh=async()=>{try{await fetch('/api/v1/phm/status/');ElMessage.success('平台服务正常')}catch{ElMessage.error('平台服务不可用')}};
 </script>

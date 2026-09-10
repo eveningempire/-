@@ -37,12 +37,12 @@
         <el-menu-item index="/integration-assets"><el-icon><Box /></el-icon><span>整合资产中心</span></el-menu-item>
         <el-menu-item index="/users"><el-icon><User /></el-icon><span>用户与权限</span></el-menu-item>
       </el-menu>
-      <div class="sidebar-status"><span class="pulse"></span><div>平台服务正常<small>骨架环境 · 数据未接入</small></div></div>
+      <div class="sidebar-status"><span class="pulse"></span><div>平台服务正常<small>本地数据服务正常</small></div></div>
     </el-aside>
     <el-container>
       <el-header class="topbar">
         <div><h1>可重复使用航天器故障预测与健康管理平台</h1><p>状态监测 · 故障诊断 · 健康评估 · 寿命预测</p></div>
-        <div class="top-actions"><el-tag type="warning" effect="plain">框架阶段</el-tag><span class="clock">{{ now }}</span><el-avatar :size="34">管</el-avatar></div>
+        <div class="top-actions"><el-tag type="warning" effect="plain">开发验证版</el-tag><span class="clock">{{ now }}</span><el-avatar :size="34">管</el-avatar></div>
       </el-header>
       <el-main class="content"><router-view /></el-main>
     </el-container>
