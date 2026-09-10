@@ -5,8 +5,6 @@ from rest_framework.permissions import BasePermission
 
 ROLE_PERMISSIONS = {
     "admin": {"view", "manage_users", "manage_structure", "submit_simulation", "run_analysis", "publish"},
-    "engineer": {"view", "manage_structure", "submit_simulation", "run_analysis", "publish"},
-    "operator": {"view", "submit_simulation", "run_analysis"},
     "viewer": {"view"},
 }
 
@@ -16,7 +14,7 @@ def user_role(user):
         return "anonymous"
     if user.is_superuser or user.is_staff or user.groups.filter(name="PHM-管理员").exists():
         return "admin"
-    for group_name, role in (("PHM-工程师", "engineer"), ("PHM-操作员", "operator"), ("PHM-查看者", "viewer")):
+    for group_name, role in (("PHM-查看者", "viewer"),):
         if user.groups.filter(name=group_name).exists():
             return role
     return "viewer"

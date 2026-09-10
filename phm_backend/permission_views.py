@@ -52,7 +52,7 @@ class GroupRoleView(APIView):
         if not has_permission(request.user, "manage_users"):
             return Response({"detail": "只有管理员可以调整角色"}, status=status.HTTP_403_FORBIDDEN)
         user_id, role = request.data.get("user_id"), request.data.get("role")
-        if role not in {"admin", "engineer", "operator", "viewer"}:
+        if role not in {"admin", "viewer"}:
             return Response({"detail": "不支持的角色"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             target = User.objects.get(pk=user_id)
@@ -65,6 +65,6 @@ class GroupRoleView(APIView):
             target.is_staff = False
         target.save(update_fields=["is_staff"])
         if role != "admin":
-            group, _ = Group.objects.get_or_create(name={"engineer":"PHM-工程师", "operator":"PHM-操作员", "viewer":"PHM-查看者"}[role])
+            group, _ = Group.objects.get_or_create(name="PHM-查看者")
             target.groups.add(group)
         return Response({"user_id": target.id, "role": role})
