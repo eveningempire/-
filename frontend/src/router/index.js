@@ -7,10 +7,11 @@ import ComponentLibrary from '../views/ComponentLibrary.vue';
 import IntegrationAssets from '../views/IntegrationAssets.vue';
 import SimulationDataset from '../views/SimulationDataset.vue';
 import PermissionManagement from '../views/PermissionManagement.vue';
+import Login from '../views/Login.vue';
 
 const page = (path, title, description, features) => ({ path, component: CapabilityPlaceholder, meta: { title, description, features } });
 
-const routes = [{ path: '/', component: PhmLayout, children: [
+const routes = [{ path: '/login', component: Login, meta: { public: true } }, { path: '/', component: PhmLayout, children: [
   { path: '', name: 'Overview', component: PhmOverview },
   page('telemetry','遥测数据监测','接入飞行与地面试验遥测，展示参数趋势和工况。',['实时/历史遥测查询','参数阈值与趋势监视','数据刷新延迟监控']),
   page('alarms','异常告警管理','汇总异常事件并跟踪确认、处置与闭环。',['分级告警','告警确认与处置','历史告警检索']),
@@ -31,4 +32,10 @@ const routes = [{ path: '/', component: PhmLayout, children: [
   { path:'users', component:PermissionManagement }
 ] }];
 
-export default createRouter({ history: createWebHistory(), routes });
+const router = createRouter({ history: createWebHistory(), routes });
+router.beforeEach(async (to) => {
+  if (to.meta.public) return true;
+  try { const r = await fetch('/api/v1/permissions/profile/', { credentials: 'include' }); if (r.ok) return true; } catch {}
+  return { path: '/login', query: { redirect: to.fullPath } };
+});
+export default router;
