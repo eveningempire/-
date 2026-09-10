@@ -51,13 +51,22 @@ class GroupRoleView(APIView):
     def post(self, request):
         if not has_permission(request.user, "manage_users"):
             return Response({"detail": "只有管理员可以调整角色"}, status=status.HTTP_403_FORBIDDEN)
-        user_id, role = request.data.get("user_id"), request.data.get("role")
+        user_id, role = request.data.get("user_id"), request.data.get("role", "viewer")
         if role not in {"admin", "viewer"}:
             return Response({"detail": "不支持的角色"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            target = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response({"detail": "用户不存在"}, status=status.HTTP_404_NOT_FOUND)
+        if not user_id:
+            username, password = request.data.get("username"), request.data.get("password")
+            if not username or not password:
+                return Response({"detail": "创建查看者需要用户名和密码"}, status=status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(username=username).exists():
+                return Response({"detail": "用户名已存在"}, status=status.HTTP_400_BAD_REQUEST)
+            target = User.objects.create_user(username=username, password=password, is_active=True)
+            user_id = target.id
+        else:
+            try:
+                target = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return Response({"detail": "用户不存在"}, status=status.HTTP_404_NOT_FOUND)
         target.groups.remove(*Group.objects.filter(name__startswith="PHM-"))
         if role == "admin":
             target.is_staff = True
