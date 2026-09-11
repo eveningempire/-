@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from django.conf import settings
 
-ROOT = settings.BASE_DIR / "integrations" / "wujiaxin"
+ROOT = settings.BASE_DIR / "integrations" / "algorithm_assets"
 
 def _json(path: Path, default):
     try:
@@ -41,4 +41,4 @@ def asset_catalog():
 
 def integration_summary():
     assets = asset_catalog()
-    return {"source": "吴嘉欣_SY2424110", "mode": "adapter", "fmeca_count": len(fmeca_records()), "component_count": len(node_catalog()), "model_count": assets["model"]["count"], "simulation_count": assets["simulation"]["count"], "algorithm_reference_count": assets["algorithm"]["count"]}
+    return {"source": "算法资产包", "mode": "adapter", "fmeca_count": len(fmeca_records()), "component_count": len(node_catalog()), "model_count": assets["model"]["count"], "simulation_count": assets["simulation"]["count"], "algorithm_reference_count": assets["algorithm"]["count"]}

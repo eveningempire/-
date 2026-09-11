@@ -5,6 +5,9 @@ import App from './App.vue';
 import router from './router';
 import axios from 'axios';
 
+// 每次重新打开前端都要求重新登录；登录成功后仅在当前页面会话中有效。
+sessionStorage.removeItem('user');
+
 // 引入统一设计系统样式
 import './styles/design-tokens.css';
 import './styles/global.css';

@@ -64,9 +64,23 @@ INSTALLED_APPS = [
     "corsheaders",  # 添加 CORS 支持
     # Local apps
     "phm",
-    "wujiaxin_integration",
+    "algorithm_integration",
     "simulation_dataset",
+    "platform_health",
+    "fault_diagnosis",
+      "rul_service",
+      "simulation_demo",
 ]
+
+# Optional external algorithm handoff bundle. The adapter is loaded lazily so
+# Django can still start when scientific dependencies are not installed.
+PHM_PLATFORM_HANDOFF_DIR = Path(os.environ.get(
+    "PHM_PLATFORM_HANDOFF_DIR",
+    str(BASE_DIR.parent.parent / "platform_handoff_20260911_v1"),
+))
+PHM_HEALTH_ASSESSMENT_ENABLED = os.environ.get(
+    "PHM_HEALTH_ASSESSMENT_ENABLED", "true"
+).lower() in {"1", "true", "yes"}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -292,4 +306,5 @@ LOGGING = {
 import os
 logs_dir = BASE_DIR / 'logs'
 logs_dir.mkdir(exist_ok=True)
+
 

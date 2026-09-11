@@ -17,8 +17,12 @@ from .permission_views import PermissionProfileView, RoleCatalogView, GroupRoleV
 
 urlpatterns = [
     path("api/v1/phm/", include("phm.urls")),
-    path("api/v1/integrations/wujiaxin/", include("wujiaxin_integration.urls")),
+    path("api/v1/integrations/algorithm-assets/", include("algorithm_integration.urls")),
     path("api/v1/simulation-dataset/", include("simulation_dataset.urls")),
+    path("api/v1/health-assessment/", include("platform_health.urls")),
+    path("api/v1/fault-diagnosis/", include("fault_diagnosis.urls")),
+    path("api/v1/rul/", include("rul_service.urls")),
+    path("api/v1/simulation-demo/", include("simulation_demo.urls")),
     path("api/v1/permissions/profile/", PermissionProfileView.as_view()),
     path("api/v1/permissions/roles/", RoleCatalogView.as_view()),
     path("api/v1/permissions/assign-role/", GroupRoleView.as_view()),
@@ -31,3 +35,4 @@ urlpatterns = [
     path("<path:path>", TemplateView.as_view(template_name="index.html"), name="frontend-route"),
     # API version 1 endpoints
 ] + (static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) if settings.DEBUG else [])
+

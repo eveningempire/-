@@ -7,13 +7,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 from .permissions import ROLE_PERMISSIONS, user_role, has_permission
 
 User = get_user_model()
 
+@method_decorator(csrf_exempt, name="dispatch")
 class LoginView(APIView):
     permission_classes = []
+    authentication_classes = []
     def post(self, request):
         username = request.data.get("username", "")
         password = request.data.get("password", "")
@@ -21,10 +25,13 @@ class LoginView(APIView):
         if not user or not user.is_active:
             return Response({"detail": "用户名或密码错误"}, status=status.HTTP_401_UNAUTHORIZED)
         login(request, user)
-        return Response({"username": user.username, "role": user_role(user)})
+        role = user_role(user)
+        return Response({"username": user.username, "role": role, "role_label": "管理员" if role == "admin" else "用户"})
 
+@method_decorator(csrf_exempt, name="dispatch")
 class LogoutView(APIView):
     permission_classes = []
+    authentication_classes = []
     def post(self, request):
         logout(request)
         return Response({"detail": "已退出登录"})
