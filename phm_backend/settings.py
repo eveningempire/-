@@ -3,7 +3,7 @@ Django settings for phm_backend project.
 
 These settings configure the core framework, installed applications and
 middleware, database connections and other system behaviour. They are kept
-minimal intentionally 鈥?many values should be overridden via environment
+minimal intentionally; many values should be overridden via environment
 variables when deploying to production. See the README for details.
 """
 
@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     # Third party apps
     "rest_framework",
     "channels",
-    "corsheaders",  # 娣诲姞CORS鏀寔
+    "corsheaders",  # 添加 CORS 支持
     # Local apps
     "phm",
     "wujiaxin_integration",
@@ -72,7 +72,8 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # 娣诲姞CORS涓棿浠?    "django.middleware.common.CommonMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # 添加 CORS 中间件
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -116,11 +117,11 @@ DATABASES = {
         "OPTIONS": {
             # Charset ensures proper storage of Chinese characters
             "charset": "utf8mb4",
-            # 澧炲姞杩炴帴瓒呮椂鏃堕棿锛岄槻姝?Server has gone away"閿欒
+            # 增加连接超时时间，避免出现 "Server has gone away" 错误
             "connect_timeout": 60,
             "read_timeout": 60,
             "write_timeout": 60,
-            # 鑷姩閲嶈繛璁剧疆
+            # 自动重连设置
             "autocommit": True,
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
         },
@@ -220,7 +221,7 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
         "KEY_PREFIX": "cmg_platform",
-        "TIMEOUT": 300,  # 榛樿5鍒嗛挓杩囨湡
+        "TIMEOUT": 300,  # 默认 5 分钟过期
     }
 }
 

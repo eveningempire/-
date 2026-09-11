@@ -2,8 +2,8 @@
 URL configuration for the 航天器PHM backend.
 
 This module routes incoming HTTP requests to the appropriate views. API
-endpoints are grouped by application 鈥?data management, health management
-and user management 鈥?and exposed at versioned paths (e.g. /api/v1/). You
+endpoints are grouped by application (data management, health management
+and user management) and exposed at versioned paths (e.g. /api/v1/). You
 can adjust the URL prefixes to suit your deployment architecture.
 """
 

@@ -28,10 +28,10 @@ application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter([
-            # 瀹炴椂鏁版嵁WebSocket
+            # 实时数据 WebSocket
             re_path(r"^ws/realtime/(?P<cmg_id>[^/]+)/$", RealtimeDataConsumer.as_asgi()),
             re_path(r"^ws/realtime/$", RealtimeDataConsumer.as_asgi()),
-            # 鏂囦欢瀵煎叆杩涘害WebSocket
+            # 文件导入进度 WebSocket
             re_path(r"^ws/import-progress/(?P<session_id>\d+)/$", ImportProgressConsumer.as_asgi()),
             re_path(r"^ws/batch-progress/$", BatchProgressConsumer.as_asgi()),
         ])
