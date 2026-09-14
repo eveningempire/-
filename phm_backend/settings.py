@@ -69,7 +69,9 @@ INSTALLED_APPS = [
     "platform_health",
     "fault_diagnosis",
       "rul_service",
-      "simulation_demo",
+    "simulation_demo",
+    "datasets",
+    "fault_models",
 ]
 
 # Optional external algorithm handoff bundle. The adapter is loaded lazily so

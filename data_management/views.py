@@ -1,4 +1,4 @@
-﻿"""
+"""
 View definitions for the data_management application.
 
 These views expose RESTful endpoints for creating and retrieving PHMs,
@@ -121,14 +121,18 @@ class ImportSessionViewSet(viewsets.ModelViewSet):
         # If a file was uploaded, start async processing
         if session.method == ImportSession.Method.FILE and session.file:
             try:
-                # 浣跨敤鏂扮殑寮傛鎵归噺澶勭悊鍣?                batch_processor.process_import_session_async(session.id)
-            except Exception as e:
-                # 濡傛灉寮傛澶勭悊鍚姩澶辫触锛屽洖閫€鍒板悓姝ュ鐞?                try:
+                from .batch_processing import batch_processor
+                batch_processor.process_import_session_async(session.id)
+            try:
+                from .batch_processing import batch_processor
+                batch_processor.process_import_session_async(session.id)
+            except Exception:
+                try:
                     self._handle_file_import(session)
                 except Exception:
-                    # 鏍囪涓哄け璐ョ姸鎬?                    session.processing_status = ImportSession.ProcessingStatus.FAILED
-                    session.error_message = f"澶勭悊鍚姩澶辫触: {str(e)}"
-                    session.save(update_fields=['processing_status', 'error_message'])
+                    session.processing_status = ImportSession.ProcessingStatus.FAILED
+                    session.error_message = str(e)
+                    session.save(update_fields=["processing_status", "error_message"])
 
     def _handle_file_import(self, session: ImportSession) -> None:
         """Reads an uploaded file and stores its records.
@@ -349,7 +353,7 @@ class ImportSessionViewSet(viewsets.ModelViewSet):
             if batch_processor.is_session_active(session.id):
                 return Response({"detail": "浼氳瘽姝ｅ湪澶勭悊涓?}, status=400)
             
-            # 閲嶇疆鐘舵€?            session.processing_status = ImportSession.ProcessingStatus.PENDING
+            session.processing_status = ImportSession.ProcessingStatus.PENDING
             session.processing_progress = 0.0
             session.processed_records = 0
             session.failed_records = 0
@@ -2516,4 +2520,7 @@ class RealtimeDetectionView(APIView):
             return Response({
                 'error': str(e)
             }, status=500)
+
+
+
 

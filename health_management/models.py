@@ -1,4 +1,4 @@
-﻿"""
+"""
 Models for the health_management application.
 
 These models store outputs of anomaly detection, rule judgement, fault
@@ -180,62 +180,23 @@ class LifePrediction(models.Model):
 
 
 class IMSModel(models.Model):
-    """瀛樺偍IMS寮傚父妫€娴嬫ā鍨嬩俊鎭?""
-    
-    cmg_model = models.ForeignKey(
-        PHMModel,
-        on_delete=models.CASCADE,
-        related_name="ims_models",
-        help_text="PHM妯″瀷"
-    )
-    name = models.CharField(max_length=128, help_text="妯″瀷鍚嶇О")
-    parameters = models.JSONField(help_text="鐩戞祴鍙傛暟鍒楄〃")
-    model_config = models.JSONField(help_text="妯″瀷閰嶇疆")
-    model_data = models.BinaryField(help_text="搴忓垪鍖栫殑妯″瀷鏁版嵁")
-    threshold = models.FloatField(help_text="寮傚父闃堝€?)
-    is_active = models.BooleanField(default=True, help_text="鏄惁婵€娲?)
+    cmg_model = models.ForeignKey(PHMModel, on_delete=models.CASCADE, related_name="ims_models")
+    name = models.CharField(max_length=128)
+    parameters = models.JSONField(default=list)
+    model_config = models.JSONField(default=dict)
+    model_data = models.BinaryField(default=b"")
+    threshold = models.FloatField(default=0.5)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = "IMS妯″瀷"
-        verbose_name_plural = "IMS妯″瀷"
-    
-    def __str__(self) -> str:
-        return f"IMSModel({self.cmg_model}, {self.name})"
-
 
 class IMSDetectionResult(models.Model):
-    """瀛樺偍IMS妫€娴嬬粨鏋?""
-    
-    data_point = models.OneToOneField(
-        PHMData,
-        on_delete=models.CASCADE,
-        related_name="ims_result",
-        help_text="瀵瑰簲鐨勬暟鎹偣"
-    )
-    ims_model = models.ForeignKey(
-        IMSModel,
-        on_delete=models.CASCADE,
-        related_name="detection_results",
-        help_text="浣跨敤鐨処MS妯″瀷"
-    )
-    is_anomaly = models.BooleanField(help_text="鏄惁寮傚父")
-    anomaly_score = models.FloatField(help_text="寮傚父鍒嗘暟")
-    parameter_scores = models.JSONField(
-        default=dict,
-        help_text="鍚勫弬鏁板紓甯稿垎鏁?
-    )
-    detection_details = models.JSONField(
-        default=dict,
-        help_text="妫€娴嬭缁嗕俊鎭?
-    )
+    data_point = models.OneToOneField(PHMData, on_delete=models.CASCADE, related_name="ims_result")
+    ims_model = models.ForeignKey(IMSModel, on_delete=models.CASCADE, related_name="detection_results")
+    is_anomaly = models.BooleanField(default=False)
+    anomaly_score = models.FloatField(default=0.0)
+    parameter_scores = models.JSONField(default=dict)
+    detection_details = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
-    
     class Meta:
-        verbose_name = "IMS妫€娴嬬粨鏋?
-        verbose_name_plural = "IMS妫€娴嬬粨鏋?
         ordering = ["-created_at"]
-    
-    def __str__(self) -> str:
-        return f"IMSResult({self.data_point}, anomaly={self.is_anomaly}, score={self.anomaly_score:.3f})"

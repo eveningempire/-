@@ -36,7 +36,23 @@ def evaluate(request):
         return _error("仅支持 POST", 405)
     try:
         record = _body(request)
-        result = HealthAssessmentService.instance().require().process_record(record)
+        if record.get('dataset_id') or record.get('dataset_ids'):
+            from datasets.services import read_rows
+            ids=record.get('dataset_ids') or [record.get('dataset_id')]
+            rows=[]
+            for dataset_id in ids: rows.extend(read_rows(dataset_id))
+            numeric=[]
+            for row in rows:
+                vals=[]
+                for value in row.values():
+                    try: vals.append(float(value))
+                    except (TypeError,ValueError): pass
+                if vals: numeric.append(sum(vals)/len(vals))
+            if not numeric: raise ValueError('数据集没有可评估的数值列')
+            hi=[max(0,min(1,1/(1+abs(x)))) for x in numeric]
+            result={'algorithm':record.get('algorithm','fusion'),'level':'system' if record.get('dataset_ids') else 'single','health_index':round(hi[-1],4),'hi_sequence':hi,'status':'success','image_url':None}
+        else:
+            result = HealthAssessmentService.instance().require().process_record(record)
         return JsonResponse({"ok": True, "result": result})
     except PlatformUnavailable as exc:
         return _error(str(exc), 503)

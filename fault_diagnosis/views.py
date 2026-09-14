@@ -36,7 +36,10 @@ def predict(request):
                 csv_path.unlink(missing_ok=True)
         else:
             body = json.loads(request.body.decode("utf-8") or "{}")
-            csv_path = body.get("csv_path")
+            if body.get('dataset_id'):
+                from datasets.services import path_for
+                csv_path = path_for(body['dataset_id'])
+            else: csv_path = body.get("csv_path")
             if not csv_path:
                 return JsonResponse({"ok": False, "error": "请上传 CSV 文件或提供 csv_path"}, status=400)
             result = service.predict(csv_path)

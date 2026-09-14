@@ -1,4 +1,4 @@
-﻿"""
+"""
 Custom user model for the PHM platform.
 
 We extend Django's AbstractUser to add a ``role`` field which allows us
@@ -17,8 +17,8 @@ class CustomUser(AbstractUser):
     """Extends Django's AbstractUser with a role field."""
 
     class Role(models.TextChoices):
-        ADMIN = "admin", "绠＄悊鍛?
-        USER = "user", "鏅€氱敤鎴?
+        ADMIN = "admin", "管理员"
+        USER = "user", "普通用户"
 
     role = models.CharField(
         max_length=16,
@@ -46,7 +46,7 @@ class UserAccessRecord(models.Model):
     user_agent = models.TextField(blank=True, verbose_name="鐢ㄦ埛浠ｇ悊")
     session_key = models.CharField(max_length=40, blank=True, verbose_name="浼氳瘽瀵嗛挜")
     device_info = models.JSONField(default=dict, blank=True, verbose_name="璁惧淇℃伅")
-    access_duration = models.IntegerField(default=0, verbose_name="璁块棶鏃堕暱(绉?")
+    access_duration = models.IntegerField(default=0, verbose_name="访问时长(秒)")
     
     class Meta:
         verbose_name = "鐢ㄦ埛璁块棶璁板綍"
@@ -63,18 +63,12 @@ class UserAccessRecord(models.Model):
     
     @property
     def duration_display(self):
-        """鏍煎紡鍖栨樉绀鸿闂椂闀?""
         if self.access_duration <= 0:
-            return "鏈煡"
-        
-        hours = self.access_duration // 3600
-        minutes = (self.access_duration % 3600) // 60
-        seconds = self.access_duration % 60
-        
-        if hours > 0:
-            return f"{hours}灏忔椂{minutes}鍒嗛挓"
-        elif minutes > 0:
-            return f"{minutes}鍒嗛挓{seconds}绉?
-        else:
-            return f"{seconds}绉?
-
+            return "未知"
+        hours, rem = divmod(self.access_duration, 3600)
+        minutes, seconds = divmod(rem, 60)
+        if hours:
+            return f"{hours}小时{minutes}分钟"
+        if minutes:
+            return f"{minutes}分钟{seconds}秒"
+        return f"{seconds}秒"

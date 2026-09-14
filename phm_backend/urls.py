@@ -23,6 +23,8 @@ urlpatterns = [
     path("api/v1/fault-diagnosis/", include("fault_diagnosis.urls")),
     path("api/v1/rul/", include("rul_service.urls")),
     path("api/v1/simulation-demo/", include("simulation_demo.urls")),
+    path("api/v1/datasets/", include("datasets.urls")),
+    path("api/v1/knowledge/", include("fault_models.urls")),
     path("api/v1/permissions/profile/", PermissionProfileView.as_view()),
     path("api/v1/permissions/roles/", RoleCatalogView.as_view()),
     path("api/v1/permissions/assign-role/", GroupRoleView.as_view()),

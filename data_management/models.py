@@ -1,4 +1,4 @@
-﻿"""
+"""
 Models related to data ingestion and storage.
 
 These models provide a thin abstraction over the PHM data stored in the
@@ -90,16 +90,16 @@ class ImportSession(models.Model):
         FILE = "FILE", "鏈湴鏂囦欢瀵煎叆"
 
     class ProcessingStatus(models.TextChoices):
-        PENDING = "PENDING", "寰呭鐞?
-        PARSING = "PARSING", "瑙ｆ瀽涓?
-        STORING = "STORING", "瀛樺偍涓?
+        PENDING = "PENDING", "待处理"
+        PARSING = "PARSING", "解析中"
+        STORING = "STORING", "存储中"
         DETECTING = "DETECTING", "妫€娴嬩腑"
-        COMPLETED = "COMPLETED", "宸插畬鎴?
+        COMPLETED = "COMPLETED", "已完成"
         FAILED = "FAILED", "澶辫触"
 
     class ImportMode(models.TextChoices):
-        IMPORT_AND_DETECT = "IMPORT_AND_DETECT", "瀵煎叆骞舵娴?
-        IMPORT_ONLY = "IMPORT_ONLY", "浠呭鍏?
+        IMPORT_AND_DETECT = "IMPORT_AND_DETECT", "导入并检测"
+        IMPORT_ONLY = "IMPORT_ONLY", "仅导入"
 
     cmg = models.ForeignKey(PHM, on_delete=models.CASCADE, related_name="import_sessions")
     method = models.CharField(max_length=10, choices=Method.choices)
@@ -117,22 +117,22 @@ class ImportSession(models.Model):
         max_length=20,
         choices=ProcessingStatus.choices,
         default=ProcessingStatus.PENDING,
-        help_text="鏂囦欢澶勭悊鐘舵€?
+        help_text="文件处理状态",
     )
     total_records = models.IntegerField(default=0, help_text="鎬昏褰曟暟")
     processed_records = models.IntegerField(default=0, help_text="宸插鐞嗚褰曟暟")
-    failed_records = models.IntegerField(default=0, help_text="澶辫触璁板綍鏁?)
-    processing_progress = models.FloatField(default=0.0, help_text="澶勭悊杩涘害鐧惧垎姣?)
+    failed_records = models.IntegerField(default=0, help_text="失败记录数")
+    processing_progress = models.FloatField(default=0.0, help_text="处理进度百分比")
     error_message = models.TextField(blank=True, null=True, help_text="閿欒淇℃伅")
-    detection_summary = models.JSONField(default=dict, blank=True, help_text="妫€娴嬬粨鏋滄憳瑕?)
-    started_at = models.DateTimeField(null=True, blank=True, help_text="寮€濮嬪鐞嗘椂闂?)
+    detection_summary = models.JSONField(default=dict, blank=True, help_text="检测结果摘要")
+    started_at = models.DateTimeField(null=True, blank=True, help_text="处理时间")
     completed_at = models.DateTimeField(null=True, blank=True, help_text="瀹屾垚鏃堕棿")
     max_rows = models.IntegerField(null=True, blank=True, help_text="鏈€澶у鐞嗚鏁帮紝null琛ㄧず澶勭悊鏁翠釜鏂囦欢")
     import_mode = models.CharField(
         max_length=20,
         choices=ImportMode.choices,
         default=ImportMode.IMPORT_AND_DETECT,
-        help_text="瀵煎叆妯″紡锛氫粎瀵煎叆鎴栧鍏ュ苟妫€娴?
+        help_text="导入模式：仅导入或导入并检测",
     )
     add_milliseconds = models.BooleanField(
         default=True,
@@ -189,28 +189,28 @@ class DatabaseStatistics(models.Model):
     """鏁版嵁搴撶粺璁′俊鎭〃 - 缁存姢鍚勭鏁版嵁鐨勬€绘暟"""
     
     class Meta:
-        verbose_name = "鏁版嵁搴撶粺璁?
-        verbose_name_plural = "鏁版嵁搴撶粺璁?
+        verbose_name = "数据库统计"
+        verbose_name_plural = "数据库统计"
     
     # 缁熻绫诲瀷
     STAT_TYPE_CHOICES = [
         ('cmg_data', 'PHM閬ユ祴鏁版嵁'),
-        ('ims_results', 'IMS妫€娴嬬粨鏋?),
-        ('rule_results', '瑙勫垯妫€娴嬬粨鏋?),
-        ('msfg_results', 'MSFG妫€娴嬬粨鏋?),
-        ('anomaly_frames', '寮傚父甯?),
-        ('total_frames', '鎬诲抚鏁?),
+        ('ims_results', 'IMS检测结果'),
+        ('rule_results', '规则检测结果'),
+        ('msfg_results', 'MSFG检测结果'),
+        ('anomaly_frames', '异常帧'),
+        ('total_frames', '总帧数'),
     ]
     
     stat_type = models.CharField(max_length=20, choices=STAT_TYPE_CHOICES, verbose_name="缁熻绫诲瀷")
     cmg = models.ForeignKey(PHM, on_delete=models.CASCADE, null=True, blank=True, verbose_name="PHM")
     count = models.BigIntegerField(default=0, verbose_name="鏁伴噺")
-    last_updated = models.DateTimeField(auto_now=True, verbose_name="鏈€鍚庢洿鏂版椂闂?)
+    last_updated = models.DateTimeField(auto_now=True, verbose_name="最后更新时间")
     
     class Meta:
         unique_together = ['stat_type', 'cmg']
-        verbose_name = "鏁版嵁搴撶粺璁?
-        verbose_name_plural = "鏁版嵁搴撶粺璁?
+        verbose_name = "数据库统计"
+        verbose_name_plural = "数据库统计"
     
     def __str__(self):
         cmg_name = self.cmg.name if self.cmg else "鍏ㄥ眬"
@@ -250,7 +250,8 @@ class DatabaseStatistics(models.Model):
             elif stat_type == 'total_frames':
                 count = PHMData.objects.filter(cmg=cmg).count() if cmg else PHMData.objects.count()
         
-        # 鏇存柊鎴栧垱寤虹粺璁¤褰?        stat, created = cls.objects.get_or_create(
+        # 更新或创建统计记录
+        stat, created = cls.objects.get_or_create(
             stat_type=stat_type,
             cmg=cmg,
             defaults={'count': count}
@@ -276,29 +277,12 @@ class DatabaseStatistics(models.Model):
     
     @classmethod
     def refresh_all_statistics(cls):
-        """鍒锋柊鎵€鏈夌粺璁′俊鎭?""
-        try:
-            from health_management.models import IMSDetectionResult
-            from rule_detection.models import RuleDetectionResult
-            from msfg_analysis.models import MSFGAnalysisResult
-            
-            # 鏇存柊鍏ㄥ眬缁熻
-            cls.update_statistics('cmg_data')
-            cls.update_statistics('ims_results')
-            cls.update_statistics('rule_results')
-            cls.update_statistics('msfg_results')
-            cls.update_statistics('anomaly_frames')
-            cls.update_statistics('total_frames')
-            
-            # 鏇存柊姣忎釜PHM鐨勭粺璁?            for cmg in PHM.objects.all():
-                cls.update_statistics('cmg_data', cmg)
-                cls.update_statistics('ims_results', cmg)
-                cls.update_statistics('rule_results', cmg)
-                cls.update_statistics('msfg_results', cmg)
-                cls.update_statistics('anomaly_frames', cmg)
-                cls.update_statistics('total_frames', cmg)
-        except ImportError as e:
-            print(f"瀵煎叆妯″瀷澶辫触: {e}")
-        except Exception as e:
-            print(f"鍒锋柊缁熻淇℃伅澶辫触: {e}")
-
+        cls.update_statistics("cmg_data")
+        cls.update_statistics("ims_results")
+        cls.update_statistics("rule_results")
+        cls.update_statistics("msfg_results")
+        cls.update_statistics("anomaly_frames")
+        cls.update_statistics("total_frames")
+        for cmg in PHM.objects.all():
+            for kind in ("cmg_data", "ims_results", "rule_results", "msfg_results", "anomaly_frames", "total_frames"):
+                cls.update_statistics(kind, cmg)
