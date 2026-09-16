@@ -47,6 +47,11 @@ class DiagnosisService:
             sys.modules[spec.name] = module
             spec.loader.exec_module(module)
             self.predictor = module
+            # Load the real runtime at service startup so /status reflects
+            # missing weights/dependencies immediately instead of failing on
+            # the first user prediction.
+            if hasattr(module, "_load_runtime"):
+                module._load_runtime()
         except Exception as exc:
             self.error = f"{type(exc).__name__}: {exc}"
 

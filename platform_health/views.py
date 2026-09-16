@@ -40,13 +40,17 @@ def evaluate(request):
         return _error("仅支持 POST", 405)
     try:
         record = _body(request)
+        algorithm = str(record.get('algorithm', 'cdpca_ga')).lower().replace('-', '_')
+        if algorithm in {'gcn', 'gcn_rbd', 'system'}:
+            dataset_ids = record.get('dataset_ids')
+            if not isinstance(dataset_ids, list) or not dataset_ids:
+                raise ValueError('系统级评估必须先选择至少一个数据集')
         if record.get('dataset_id') or record.get('dataset_ids'):
             from datasets.services import read_rows
             from .algorithms import ae_gmm, cdpca_ga, gcn_rbd
 
             ids = record.get('dataset_ids') or [record.get('dataset_id')]
             datasets_rows = [(dataset_id, read_rows(dataset_id)) for dataset_id in ids]
-            algorithm = str(record.get('algorithm', 'cdpca_ga')).lower().replace('-', '_')
             if algorithm in {'fusion', 'cdpca', 'cdpca_ga', 'feature_fusion'}:
                 method = cdpca_ga
                 algorithm_name = 'CDPCA-GA'

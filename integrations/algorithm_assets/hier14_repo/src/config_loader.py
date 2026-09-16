@@ -231,8 +231,15 @@ def load_config(name_or_path: Optional[str] = None, base_cls: Optional[Type[Conf
 
     if name_or_path in _DEFAULT_YAML_BY_PROFILE and not os.path.sep in name_or_path:
         yaml_name = _DEFAULT_YAML_BY_PROFILE[name_or_path]
-        yaml_path = _resolve_config_file(yaml_name)
         inferred_base = base_cls or _PROFILE_BASE_CLASSES.get(name_or_path, Config)
+        try:
+            yaml_path = _resolve_config_file(yaml_name)
+        except FileNotFoundError:
+            # Deployment bundles may intentionally contain only inference
+            # source, checkpoint metadata and the built-in Config classes.
+            # Those defaults are the training configuration for Hier14, so a
+            # missing optional YAML must not make the deployed model unusable.
+            return build_config_class(inferred_base, {})
     else:
         yaml_path = _resolve_config_file(name_or_path)
         merged = _merge_yaml(yaml_path)

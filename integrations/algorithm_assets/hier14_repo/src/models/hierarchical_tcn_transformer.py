@@ -7,7 +7,6 @@ from typing import Dict
 import torch
 import torch.nn as nn
 
-from ..fault_hier13_labels import fault_hier13_logits_to_flat
 from ..hierarchical_labels import hierarchical_logits_to_flat
 from .tcn_transformer import TCNTransformerDiagnosis
 
@@ -71,6 +70,11 @@ class HierarchicalTCNTransformer(TCNTransformerDiagnosis):
     def to_flat_logits(self, heads: Dict[str, torch.Tensor]) -> torch.Tensor:
         coarse_dim = self.coarse_head[-1].out_features
         if coarse_dim == 2:
+            # Fault-Hier13 is an optional two-stage experiment.  Import its
+            # label adapter only when that model is actually selected; the
+            # deployed Hier14 model has a three-class coarse head and must not
+            # depend on the external ``experiments`` training package.
+            from ..fault_hier13_labels import fault_hier13_logits_to_flat
             return fault_hier13_logits_to_flat(heads["coarse"], heads["prop"], heads["gnc"])
         return hierarchical_logits_to_flat(heads["coarse"], heads["prop"], heads["gnc"])
 
@@ -94,5 +98,10 @@ def build_model(config) -> nn.Module:
 
 
 def is_hierarchical_model(model: nn.Module) -> bool:
-    from experiments.two_stage.a4.model import GatedHierTransformer
-    return isinstance(model, (HierarchicalTCNTransformer, GatedHierTransformer))
+    if isinstance(model, HierarchicalTCNTransformer):
+        return True
+    try:
+        from experiments.two_stage.a4.model import GatedHierTransformer
+    except ModuleNotFoundError:
+        return False
+    return isinstance(model, GatedHierTransformer)

@@ -347,9 +347,12 @@ function initThree() {
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000)
   camera.position.set(6, 5, 7)
 
-  renderer = new THREE.WebGLRenderer({ antialias: true })
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.setSize(width, height)
+  renderer.outputColorSpace = THREE.SRGBColorSpace
+  renderer.toneMapping = THREE.ACESFilmicToneMapping
+  renderer.toneMappingExposure = 1.12
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   container.appendChild(renderer.domElement)
@@ -389,13 +392,23 @@ function addLights() {
 }
 
 function addSceneHelpers() {
-  const grid = new THREE.GridHelper(10, 20, 0x8aa0bb, 0xd5dde8)
+  const grid = new THREE.GridHelper(18, 36, 0x6e8eaf, 0xd5dde8)
   grid.position.y = -0.02
+  grid.material.transparent = true
+  grid.material.opacity = 0.42
   scene.add(grid)
 
-  const axes = new THREE.AxesHelper(2.2)
-  axes.position.set(-4.4, 0.05, -4.4)
+  const axes = new THREE.AxesHelper(2.8)
+  axes.position.set(-6.8, 0.05, -6.8)
   scene.add(axes)
+
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(2.1, 2.16, 96),
+    new THREE.MeshBasicMaterial({ color: 0x55a8ff, transparent: true, opacity: 0.22, side: THREE.DoubleSide }),
+  )
+  ring.rotation.x = -Math.PI / 2
+  ring.position.y = 0.03
+  scene.add(ring)
 }
 
 function selectUnit(unitKey) {
@@ -484,6 +497,9 @@ function createRocketModel() {
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x223146, metalness: 0.45, roughness: 0.36 })
   const accentMat = new THREE.MeshStandardMaterial({ color: 0x2b78c6, metalness: 0.2, roughness: 0.5 })
   const heatMat = new THREE.MeshStandardMaterial({ color: 0xd46b3d, metalness: 0.18, roughness: 0.55 })
+  const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf4f7fb, metalness: 0.2, roughness: 0.32 })
+  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x142a43, metalness: 0.2, roughness: 0.18, clearcoat: 0.8, clearcoatRoughness: 0.12 })
+  const nozzleMat = new THREE.MeshStandardMaterial({ color: 0x8a9caf, metalness: 0.78, roughness: 0.28 })
 
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.86, 7.4, 48), bodyMat)
   body.name = 'vehicle-body'
@@ -500,6 +516,26 @@ function createRocketModel() {
   band1.position.y = 3.25
   group.add(band1)
 
+  const interstage = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.42, 48), darkMat)
+  interstage.name = 'vehicle-body'
+  interstage.position.y = -1.98
+  group.add(interstage)
+
+  for (const y of [-2.38, 0.15, 3.08]) {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.77, 0.045, 12, 48), whiteMat)
+    ring.name = 'vehicle-body'
+    ring.rotation.x = Math.PI / 2
+    ring.position.y = y
+    group.add(ring)
+  }
+
+  for (const y of [2.15, 2.52]) {
+    const windowBand = new THREE.Mesh(new THREE.CylinderGeometry(0.735, 0.735, 0.18, 48), glassMat)
+    windowBand.name = 'vehicle-body'
+    windowBand.position.y = y
+    group.add(windowBand)
+  }
+
   const thermal = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.92, 0.82, 48), heatMat)
   thermal.name = 'thermal-shield'
   thermal.position.y = -2.92
@@ -507,7 +543,7 @@ function createRocketModel() {
 
   for (let i = 0; i < 4; i += 1) {
     const angle = (Math.PI / 2) * i
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.8, 0.48), darkMat)
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.92, 0.62), darkMat)
     fin.name = 'grid-fins'
     fin.position.set(Math.cos(angle) * 0.84, 3.82, Math.sin(angle) * 0.84)
     fin.rotation.y = -angle
@@ -523,10 +559,27 @@ function createRocketModel() {
 
   for (let i = 0; i < 3; i += 1) {
     const angle = (Math.PI * 2 * i) / 3
-    const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.28, 0.55, 32), darkMat)
+    const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.28, 0.55, 32), nozzleMat)
     engine.name = 'main-engines'
     engine.position.set(Math.cos(angle) * 0.38, -3.65, Math.sin(angle) * 0.38)
     group.add(engine)
+    const throat = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.32, 32), darkMat)
+    throat.name = 'main-engines'
+    throat.position.set(Math.cos(angle) * 0.38, -3.94, Math.sin(angle) * 0.38)
+    throat.rotation.x = Math.PI
+    group.add(throat)
+  }
+
+  // 两个外挂推进剂舱，提升总体构型辨识度。
+  for (const side of [-1, 1]) {
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 5.8, 32), whiteMat)
+    tank.name = 'vehicle-body'
+    tank.position.set(side * 0.98, 0.78, 0)
+    group.add(tank)
+    const tankNose = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.65, 32), whiteMat)
+    tankNose.name = 'vehicle-body'
+    tankNose.position.set(side * 0.98, 3.98, 0)
+    group.add(tankNose)
   }
 
   const flame = new THREE.Mesh(
@@ -712,9 +765,9 @@ function fitCameraToModel(target = model) {
   const center = box.getCenter(new THREE.Vector3())
   const size = box.getSize(new THREE.Vector3())
   const maxDim = Math.max(size.x, size.y, size.z) || 1
-  const distance = maxDim * 1.8
+  const distance = maxDim * 1.28
 
-  camera.position.set(center.x + distance, center.y + distance * 0.8, center.z + distance)
+  camera.position.set(center.x + distance * 0.95, center.y + distance * 0.58, center.z + distance * 0.95)
   camera.near = Math.max(maxDim / 100, 0.01)
   camera.far = maxDim * 100
   camera.updateProjectionMatrix()
@@ -727,7 +780,7 @@ function focusMesh(mesh) {
   const center = box.getCenter(new THREE.Vector3())
   const size = box.getSize(new THREE.Vector3())
   const maxDim = Math.max(size.x, size.y, size.z) || 1
-  const distance = Math.max(maxDim * 5, 2)
+  const distance = Math.max(maxDim * 3.4, 2)
 
   controls.target.copy(center)
   camera.position.set(center.x + distance, center.y + distance * 0.7, center.z + distance)
