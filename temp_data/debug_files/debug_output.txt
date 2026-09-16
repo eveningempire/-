@@ -1,10 +1,10 @@
 ﻿#!/usr/bin/env python
 """
-璋冭瘯MSFG娴嬬偣-閮ㄤ欢鏄犲皠鎻愬彇閫昏緫
+调试MSFG测点-部件映射提取逻辑
 妫€鏌est_names鏄惁姝ｇ‘鎻愬彇锛宎vailable_components鏄惁姝ｇ‘鑾峰彇
 妫€鏌SFG瀹氫箟涓殑test_names鍜宑omponent_names瀛楁鏄惁姝ｇ‘濉厖
 楠岃瘉ensure_msfg_component_mappings鍑芥暟鏄惁鍦ㄦ纭殑鏃舵満琚皟鐢?
-淇鏄犲皠鐢熸垚閫昏緫锛岀‘淇濊兘姝ｇ‘鍒涘缓TestPointComponentMapping璁板綍
+修复映射生成逻辑，确保能正确创建TestPointComponentMapping记录
 """
 
 import os
@@ -120,7 +120,7 @@ def debug_component_extraction():
         
         print(f"  鉁?MSFG: {active_msfg.name}")
         
-        # 娴嬭瘯extract_components_from_msfg鍑芥暟
+        # 测试extract_components_from_msfg函数
         try:
             extracted_components = extract_components_from_msfg(active_msfg)
             print(f"  馃攳 鎻愬彇鐨勯儴浠? {len(extracted_components)} 涓?)
@@ -189,9 +189,9 @@ def debug_mapping_generation():
             if unmapped_tests:
                 print(f"  鈿狅笍  鏈槧灏勭殑娴嬭瘯鐐? {list(unmapped_tests)}")
         
-        # 娴嬭瘯鑷姩鏄犲皠鎻愬彇
+        # 测试自动映射提取
         try:
-            print(f"  馃攧 娴嬭瘯鑷姩鏄犲皠鎻愬彇...")
+            print(f"  🔄 测试自动映射提取...")
             auto_mappings = auto_extract_msfg_mappings(active_msfg)
             print(f"  馃搱 鑷姩鎻愬彇鐨勬槧灏? {len(auto_mappings)} 涓祴璇曠偣")
             
@@ -209,15 +209,15 @@ def debug_mapping_generation():
             print(f"  鉂?鑷姩鏄犲皠鎻愬彇澶辫触: {e}")
 
 def test_ensure_mappings_function():
-    """娴嬭瘯ensure_msfg_component_mappings鍑芥暟"""
+    """测试ensure_msfg_component_mappings函数"""
     print("\n" + "=" * 60)
-    print("馃И 娴嬭瘯ensure_msfg_component_mappings鍑芥暟")
+    print("🧪 测试ensure_msfg_component_mappings函数")
     print("=" * 60)
     
     cmg_models = PHMModel.objects.all()
     
     for cmg_model in cmg_models:
-        print(f"\n馃搵 娴嬭瘯PHM妯″瀷: {cmg_model.model_name}")
+        print(f"\n📋 测试PHM模型: {cmg_model.model_name}")
         
         active_msfg = get_active_msfg_for_cmg_model(cmg_model)
         if not active_msfg:
@@ -230,7 +230,7 @@ def test_ensure_mappings_function():
         print(f"  馃搳 鎵ц鍓嶆槧灏勬暟閲? {before_count}")
         
         try:
-            # 鎵ц鏄犲皠纭繚鍑芥暟
+            # 执行映射确保函数
             print(f"  馃攧 鎵цensure_msfg_component_mappings...")
             ensure_msfg_component_mappings(active_msfg)
             
@@ -252,21 +252,21 @@ def test_ensure_mappings_function():
             elif after_count == before_count:
                 print(f"  鈩癸笍  鏄犲皠鏁伴噺鏈彉鍖?)
             else:
-                print(f"  鈿狅笍  鏄犲皠鏁伴噺鍑忓皯: {before_count - after_count}")
+                print(f"  ⚠️  映射数量减少: {before_count - after_count}")
                 
         except Exception as e:
             print(f"  鉂?鎵ц澶辫触: {e}")
 
 def test_auto_mapping_update():
-    """娴嬭瘯鑷姩鏄犲皠鏇存柊鍔熻兘"""
+    """测试自动映射更新功能"""
     print("\n" + "=" * 60)
-    print("馃攧 娴嬭瘯鑷姩鏄犲皠鏇存柊鍔熻兘")
+    print("🔄 测试自动映射更新功能")
     print("=" * 60)
     
     cmg_models = PHMModel.objects.all()
     
     for cmg_model in cmg_models:
-        print(f"\n馃搵 娴嬭瘯PHM妯″瀷: {cmg_model.model_name}")
+        print(f"\n📋 测试PHM模型: {cmg_model.model_name}")
         
         active_msfg = get_active_msfg_for_cmg_model(cmg_model)
         if not active_msfg:
@@ -305,7 +305,7 @@ def test_auto_mapping_update():
                     print(f"     鏄犲皠鍏崇郴: {after_count} 涓?)
                     
                 else:
-                    print(f"  鈿狅笍  鑷姩鏄犲皠鏇存柊鎴愬姛浣嗘湭鍒涘缓浠讳綍鏄犲皠")
+                    print(f"  ⚠️  自动映射更新成功但未创建任何映射")
             else:
                 print(f"  鉂?鑷姩鏄犲皠鏇存柊澶辫触")
                 
@@ -325,10 +325,10 @@ def main():
     # 3. 璋冭瘯鏄犲皠鐢熸垚閫昏緫
     debug_mapping_generation()
     
-    # 4. 娴嬭瘯ensure_msfg_component_mappings鍑芥暟
+    # 4. 测试ensure_msfg_component_mappings函数
     test_ensure_mappings_function()
     
-    # 5. 娴嬭瘯鑷姩鏄犲皠鏇存柊鍔熻兘
+    # 5. 测试自动映射更新功能
     test_auto_mapping_update()
     
     print("\n" + "=" * 60)

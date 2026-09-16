@@ -4,7 +4,7 @@
 鍒濆鐗堟湰鏄?0241205楠屾敹鐗堟湰
 
 #### 杞欢鏋舵瀯
-杞欢鏋舵瀯璇存槑
+软件架构说明
 
 ## 鐜瀹夎
 
@@ -12,17 +12,17 @@
 
 浠跨湡鍔熻兘闇€瑕佸畨瑁匨ATLAB Engine for Python锛岃鎸変互涓嬫楠ゆ搷浣滐細
 
-1. 棣栧厛纭繚鎮ㄥ凡瀹夎MATLAB锛屽苟涓擯ython鐗堟湰涓嶮ATLAB鍏煎
+1. 首先确保您已安装MATLAB，并且Python版本与MATLAB兼容
 2. 浣跨敤鍔╂墜鑴氭湰鑷姩瀹夎:
    ```
    python matlab_setup.py
    ```
-3. 濡傛灉鑷姩瀹夎澶辫触锛岃鎵嬪姩瀹夎:
+3. 如果自动安装失败，请手动安装:
    ```
    cd "<MATLAB瀹夎鐩綍>\extern\engines\python"
    python setup.py install
    ```
-4. 娴嬭瘯瀹夎鏄惁鎴愬姛:
+4. 测试安装是否成功:
    ```python
    import matlab.engine
    eng = matlab.engine.start_matlab()
@@ -46,7 +46,7 @@ python manage.py
 2.  xxxx
 3.  xxxx
 
-## 浣跨敤璇存槑
+## 使用说明
 
 1. 璁块棶 http://localhost:8005/ 杩涘叆绯荤粺
 2. 浠跨湡鍔熻兘浣嶄簬 http://localhost:8005/sim-model

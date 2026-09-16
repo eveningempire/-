@@ -35,7 +35,7 @@ rule_res.fault_definition.name
 rule_res.fault_definition.fault_name
 ```
 
-### 閿欒4锛歊uleDetectionResult缁撴瀯
+### 错误4：RuleDetectionResult结构
 ```python
 # 鉂?閿欒鐞嗚В锛氬崟涓璞℃湁triggered_rules灞炴€?
 rule_res.triggered_rules

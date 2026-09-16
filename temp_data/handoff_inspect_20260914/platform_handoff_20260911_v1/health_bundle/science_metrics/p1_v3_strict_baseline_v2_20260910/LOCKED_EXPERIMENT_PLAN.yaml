@@ -1,0 +1,100 @@
+# LOCKED_EXPERIMENT_PLAN (v2 2026-09-10)
+# Status: LOCKED before any stage-2 candidate run.
+# Amendments: at most ONE PLAN_AMENDMENT_1.yaml, driven only by inner-validation
+# evidence and runtime errors; never by outer-OOF or test results.
+# Budget per head: <= 2 new candidate families, <= 3 pre-registered configs per
+# family, plus incumbent/fallback.  No further candidates after amendment.
+
+plan_version: locked_experiment_plan_v2_20260910
+locked_at: 2026-09-10
+outer_fold_plan_hash: ae23d3c4c7c10a6c4ad721360679c906507d7a3be51b7dfe1e09d3a1dbab0967
+inner_split: {seed: 20260910, fraction: 0.25, stratification: mode_x_target_component, granularity: whole_run_id}
+data_source: health_assessment/development_inputs/train_only_snapshot_v2_20260910 (snapshot-only reads)
+test_discipline: {test_data_accessed: false, test_predictions_inspected: false, test_evaluation_count: 0}
+
+diagnosis_evidence: outputs/improvements/p1_v3_strict_baseline_v2_20260910/{fault_alarm_baseline_metrics.csv, component_hi_baseline_metrics.csv, strict_baseline_diagnostics.csv, localization_baseline_metrics.csv}
+
+head_2B_fault_alarm:
+  priority: HIGHEST
+  incumbent: exceedance(anomaly_score vs pooled fold-train healthy reference) with rule (>=0.80, 3win)
+  incumbent_baseline:
+    healthy_window_fa: [0.176, 0.215]
+    detection_rate: {lox_pump: 1.000, oxygen_turbine: 0.833, kerosene_pipeline: 1.000, kerosene_valve: 0.833, gas_generator: 0.333, combustion_chamber: 0.667, nozzle: 1.000}
+    median_delay_sec: {worst: 88.9}
+  hypothesis: >
+    The empirical exceedance of a reference against itself is uniform, so the
+    registered 0.80 threshold flags ~20% of healthy windows BY CONSTRUCTION and
+    alarms confirm pre-onset (destroying [onset,end]-bounded detection).  A
+    robust-z reference (median/1.4826*MAD) with a threshold fit on the inner
+    split can satisfy FA<=5% while keeping AE's fast fault response; causal
+    short-window context can stabilize detection for weak components.
+  family_FA1: robust healthy-reference z-score + causal hysteresis state machine
+    fit: per outer fold, per component, on fold-train healthy windows only
+    configs:
+      FA-1a: {channel: anomaly_score, log1p: false, z_grid: [4,5,6,7,8,10,12], persistence_grid: [1,2,3]}
+      FA-1b: {channel: anomaly_score, log1p: true,  z_grid: [4,5,6,7,8,10,12], persistence_grid: [1,2,3]}
+      FA-1c: {channel: reconstruction_error, log1p: false, z_grid: [4,5,6,7,8,10,12], persistence_grid: [1,2,3]}
+  family_FA2: causal short-window robust-z features + L2 logistic risk score
+    fit: per outer fold, per component; window labels = fault-active (t>=onset, component targeted/active) vs all other windows; run-equal sample weights; class_weight balanced
+    features: current z + rolling mean/max over last 3 and 5 windows (causal only), z capped at 15
+    configs:
+      FA-2a: {channels: [anomaly_score], C: 1.0,  prob_grid: [0.3,0.5,0.7,0.9], persistence_grid: [1,2,3]}
+      FA-2b: {channels: [anomaly_score, reconstruction_error], C: 1.0,  prob_grid: [0.3,0.5,0.7,0.9], persistence_grid: [1,2,3]}
+      FA-2c: {channels: [anomaly_score, reconstruction_error], C: 0.1,  prob_grid: [0.3,0.5,0.7,0.9], persistence_grid: [1,2,3]}
+  inner_selection_rule:
+    1: keep configs with inner healthy-window FA <= 0.05 (inner-selection healthy runs)
+    2: among those prefer detection >= 0.90 where the inner fault denominator >= 1, then lower median delay
+    3: tie-break = smaller (threshold x persistence) complexity, then config registration order
+    note: inner fault denominators are ~1 run/component; detection gates evaluated there are UNDETERMINED-often and re-checked at the outer level only as evaluation
+  outer_evaluation: frozen threshold/model per fold applied to held-out; hard gates = healthy window FA <=0.05 AND detection >=0.90 (6/6) AND median delay <=12s
+  raw_score_preserved: anomaly_score emitted verbatim next to any alarm state
+  fallback: component FAILED_GATES -> no alarm head; emit anomaly_score + ABSTAIN (never nearest-pass)
+  package_gate: FAULT_ALARM_DEVELOPMENT_PASS only if all seven components pass
+
+head_2A_component_hi:
+  incumbent: frozen CDPCA mini84 (external frozen; strict by construction)
+  incumbent_baseline_degradation: {gas_generator: {mae: 0.154, r2: 0.637, hit: 0.508, healthy_fa: 0.371}, kerosene_valve: {hit: 0.761}, oxygen_turbine: {hit: 0.833}}
+  diagnosis: gas_generator 11/28 healthy runs collapse (median hi<0.80) -> healthy FA 0.371; worst-decile MAE 0.298 (calibration drift)
+  family_CH1: fold-refit monotonic (isotonic) calibration of the frozen CDPCA channel
+    fit: per outer fold on fold-train active-target windows (run-equal weights)
+    configs:
+      CH-1a: {fit_windows: active_target, healthy_anchor: false}
+      CH-1b: {fit_windows: all_labeled,   healthy_anchor: false}
+      CH-1c: {fit_windows: all_labeled,   healthy_anchor: true}   # healthy windows pinned to hi=1.0 in the fit
+  family_CH2: AE-anchored collapse gate on top of the CH-1b calibration (interpretable ensemble)
+    mechanism: where the fold-train robust-z of anomaly_score < gate_z (AE sees healthy) and hi_iso < 1, replace by max/blend with a fold-fit AE-HI isotonic calibration
+    configs:
+      CH-2a: {gate_z_grid: [3,4,5], combine: max}
+      CH-2b: {gate_z_grid: [3,4,5], combine: blend}
+      CH-2c: {gate: none,          combine: blend}
+  inner_selection_rule: lowest inner-selection MAE among configs passing inner healthy FA<=0.05; tie = higher R2, then registration order
+  upgrade_rule_hard:
+    - healthy window FA <= 0.05 (outer OOF)
+    - paired whole-run bootstrap B=2000 seed=20260910: MAE not worse AND R2 not worse AND hit@0.10 not worse (point), >=1 metric 95%CI strictly better
+    - >= 2/3 outer folds direction-consistent (MAE diff sign)
+    - else fallback to frozen CDPCA per component
+  output: per-fold predictions, full-281 final artifact marked deployment_candidate_only (never backfilled into OOF)
+
+head_2C_localization:
+  incumbent: CDPCA 1-HI exceedance (fold-train healthy reference)
+  incumbent_baseline: {isolated_degradation_top1: 0.680, fault_top1: 0.238, top3: [0.912, 0.548], margins: [0.060, 0.098]}
+  family_LC1: normalized evidence fusion / ranking (robust-z, capped z=15)
+    configs:
+      LC-1a: {fuse: z_cd,   run_agg: mean}
+      LC-1b: {fuse: z_cd,   run_agg: p90}
+      LC-1c: {fuse: max(z_cd, z_ae), run_agg: mean}
+  family_LC2: lightweight supervised window scorer (L2 logistic on [z_cd, z_ae], run-equal weights)
+    labels: window belongs to targeted/active component vs otherwise (training only)
+    configs:
+      LC-2a: {run_agg: mean_top3}
+      LC-2b: {run_agg: mean}
+      LC-2c: {run_agg: p90}
+  inner_selection_rule: highest inner isolated Top-1; tie = higher Top-3, then margin, then registration order; compound threshold frozen on inner Jaccard grid [0.50..0.95 step 0.05]
+  upgrade_rule: isolated Top-1 >= incumbent AND Top-3 not worse AND margin not worse AND >=1 of them with paired run-bootstrap 95%CI strictly better (B=2000, seed=20260910); compound thresholds from inner only
+  status_note: localization has NO registered acceptance thresholds -> outcome stays DEVELOPMENT_ONLY/NOT_FORMALLY_REGISTERED regardless of numbers
+
+resources_and_failure:
+  runtime_budget: each candidate family must complete on this machine; incremental writes every fold/component
+  code_error_budget: max 3 minimal fix rounds per stage, then BLOCKED evidence + platform fallback
+  amendment: PLAN_AMENDMENT_1.yaml allowed once per head, inner-evidence/runtime errors only
+  forbidden: large GA, unbounded search, deep-network training, outer-OOF-driven redesign, deleting unfavourable results

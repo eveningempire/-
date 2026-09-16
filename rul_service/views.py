@@ -38,8 +38,7 @@ def predict(request):
         return JsonResponse({"message":"仅支持 POST"}, status=405)
     try:
         body=json.loads(request.body or b'{}')
-        if body.get('algorithm', 'hi_linear') != 'hi_linear':
-            raise ValueError('此接口当前支持 hi_linear；训练模型需先确认部件与 HI 预处理来源，不能仅凭 HI_norm 列名自动选用。')
+        algorithm=body.get('algorithm', 'health_main_ensemble')
         values=body.get("hi_sequence", [])
         if body.get("dataset_id"):
             from datasets.services import read_rows
@@ -48,16 +47,38 @@ def predict(request):
             if not keys:
                 raise ValueError("该 CSV 没有健康指数列（HI_norm / hi / health_index）。原始压力、温度和时间不能直接换算寿命；请先生成有依据的 HI 数据集。")
             values=[row[keys[0]] for row in rows]
-        result=estimate(values, int(body.get("horizon",100)), float(body.get("threshold",.2)))
+        if algorithm == 'health_main_ensemble':
+            component_id=str(body.get('component_id') or '14')
+            asset_root=Path(__file__).resolve().parent.parent / 'integrations' / 'algorithm_assets' / 'models' / 'life'
+            asset_dir=asset_root / component_id
+            if not asset_dir.is_dir():
+                raise ValueError(f'没有部件 {component_id} 的训练模型，可选 1 到 15')
+            if body.get("dataset_id"):
+                from datasets.models import Dataset
+                dataset=Dataset.objects.get(pk=body["dataset_id"])
+                from .health_main_adapter import predict as trained_predict
+                result=trained_predict(dataset.file.path, asset_dir)
+            else:
+                raise ValueError('训练模型推理需要选择包含至少 51 行 HI 的数据集')
+            result.update({'status':'success','unit':'训练数据RUL单位','development_only':False,'threshold':float(body.get('threshold',.2)),'confidence_interval':None,'limitation':'采用项目组已训练的 health-main 集成模型；输出单位和部件编号须与训练数据定义一致。'})
+        elif algorithm == 'hi_linear':
+            result=estimate(values, int(body.get("horizon",100)), float(body.get("threshold",.2)))
+        else:
+            raise ValueError('不支持的算法')
         result["dataset_id"]=body.get("dataset_id")
         return JsonResponse(result)
     except Exception as exc:
         return JsonResponse({"status":"error","message":str(exc)},status=400)
 
 def status(request):
-    root = Path(__file__).resolve().parent.parent / "integrations" / "algorithm_assets" / "rul" / "life"
+    root = Path(__file__).resolve().parent.parent / "integrations" / "algorithm_assets" / "models" / "life"
     models = sorted(p.name for p in root.glob("*/ensemble.pkl"))
-    return JsonResponse({"available":True,"algorithm":"health-main RUL 集成资产 + HI趋势基线","models":models,"asset_root":str(root)})
+    try:
+        import torch
+        runtime={"available":True,"torch":torch.__version__}
+    except Exception as exc:
+        runtime={"available":False,"error":str(exc)}
+    return JsonResponse({"available":bool(models),"algorithm":"health-main RUL 集成模型","models":models,"asset_root":str(root),"runtime":runtime})
 
 @csrf_exempt
 def demo(request):

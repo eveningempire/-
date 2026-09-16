@@ -1,16 +1,16 @@
 ﻿# MSFG澶氫俊鍙锋祦鍥炬ā鍧椾慨澶嶆€荤粨
 
-## 馃幆 淇姒傝堪
+## 🎯 修复概述
 
 缁忚繃鍏ㄩ潰鍒嗘瀽鍜屼慨澶嶏紝MSFG澶氫俊鍙锋祦鍥炬ā鍧楃幇鍦ㄨ兘澶熸纭湴浠庢祴鐐归厤缃€佽瘎鍒嗘帹瀵煎埌绯荤粺鍋ュ悍鎬诲垎鐨勫畬鏁存祦绋嬨€?
 
-## 馃敡 涓昏淇鍐呭
+## 🔧 主要修复内容
 
 ### 1. 鍒涘缓娴嬬偣璇勫垎鏈嶅姟 鉁?
 
 **鏂囦欢**: `msfg_analysis/services/testpoint_scoring.py`
 
-**淇鍐呭**:
+**修复内容**:
 - 鍒涘缓浜?`TestPointScoringService` 绫?
 - 姝ｇ‘浣跨敤 `TestPointRule` 妯″瀷涓厤缃殑瑙勫垯琛ㄨ揪寮?
 - 瀹炵幇浜嗗畨鍏ㄧ殑琛ㄨ揪寮忔墽琛岀幆澧?
@@ -20,7 +20,7 @@
 **鏍稿績鍔熻兘**:
 ```python
 def calculate_test_scores(self, data_point: PHMData, msfg_definition: MSFGDefinition) -> Dict[str, float]:
-    """鍩轰簬娴嬬偣瑙勫垯璁＄畻娴嬬偣鍒嗘暟"""
+    """基于测点规则计算测点分数"""
     # 1. 鑾峰彇璇SFG鐨勬墍鏈夋椿璺冩祴鐐硅鍒?
     # 2. 鎵ц瑙勫垯琛ㄨ揪寮?
     # 3. 搴旂敤鏉冮噸
@@ -31,11 +31,11 @@ def calculate_test_scores(self, data_point: PHMData, msfg_definition: MSFGDefini
 
 **鏂囦欢**: `msfg_analysis/services/component_mapping.py`
 
-**淇鍐呭**:
+**修复内容**:
 - 鍒涘缓浜?`ComponentMappingService` 绫?
 - 姝ｇ‘浣跨敤 `TestPointComponentMapping` 妯″瀷
 - 閫氳繃MSFG鍥剧粨鏋勫缓绔嬫祴鐐?鏁呴殰-閮ㄤ欢鐨勪紶閫掑叧绯?
-- 瀹炵幇浜嗘櫤鑳界殑鏁呴殰鍒嗛厤绠楁硶
+- 实现了智能的故障分配算法
 - 鎻愪緵浜嗗鐢ㄦ槧灏勬満鍒?
 
 **鏍稿績鍔熻兘**:
@@ -49,22 +49,22 @@ def build_component_mappings(self, msfg_definition: MSFGDefinition) -> Dict[str,
 
 **鏂囦欢**: `data_management/batch_processing.py`
 
-**淇鍐呭**:
+**修复内容**:
 - 閲嶅啓浜?`_run_msfg_detection` 鏂规硶
 - 闆嗘垚浜嗘柊鐨勬祴鐐硅瘎鍒嗘湇鍔?
 - 闆嗘垚浜嗘柊鐨勯儴浠舵槧灏勬湇鍔?
 - 淇浜嗘娴嬪埌鐨勬晠闅滃拰鍏抽敭閮ㄤ欢鐨勬彁鍙栭€昏緫
-- 娣诲姞浜嗚缁嗙殑閿欒鏃ュ織
+- 添加了详细的错误日志
 
 **涓昏鏀硅繘**:
 ```python
-# 馃敡 淇1锛氫娇鐢ㄦ纭殑娴嬬偣璇勫垎鏈嶅姟
+# 🔧 修复1：使用正确的测点评分服务
 test_scores_dict = calculate_msfg_test_scores(record, msfg)
 
-# 馃敡 淇2锛氫娇鐢ㄦ纭殑閮ㄤ欢鏄犲皠鏈嶅姟  
+# 🔧 修复2：使用正确的部件映射服务  
 component_mappings = build_msfg_component_mappings(msfg)
 
-# 馃敡 淇3锛氭纭彁鍙栨娴嬪埌鐨勬晠闅滃拰鍏抽敭閮ㄤ欢
+# 🔧 修复3：正确提取检测到的故障和关键部件
 detected_faults = [fault for fault, data in fault_results.items() 
                   if data.get('fault_probability', 0.0) > 0.7]
 ```
@@ -73,7 +73,7 @@ detected_faults = [fault for fault, data in fault_results.items()
 
 **鏂囦欢**: `msfg_analysis/models.py`
 
-**淇鍐呭**:
+**修复内容**:
 - 淇浜?`TestPointComponentMapping` 鐨勫敮涓€绾︽潫
 - 浠?`["msfg_definition", "test_point_name"]` 鏀逛负 `["msfg_definition", "test_point_name", "component_name"]`
 - 鐜板湪鏀寔涓€涓祴鐐规槧灏勫埌澶氫釜閮ㄤ欢锛堜竴瀵瑰鏄犲皠锛?
@@ -83,22 +83,22 @@ detected_faults = [fault for fault, data in fault_results.items()
 **鏂囦欢**: `msfg_analysis/management/commands/test_msfg_detection.py`
 
 **鍔熻兘**:
-- 鍒涘缓娴嬭瘯鏁版嵁
-- 娴嬭瘯璇勫垎閫昏緫
-- 娴嬭瘯閮ㄤ欢鏄犲皠
-- 娴嬭瘯铻嶅悎绠楁硶
+- 创建测试数据
+- 测试评分逻辑
+- 测试部件映射
+- 测试融合算法
 - 娴嬭瘯瀹屾暣娴佺▼锛堝寘鎷暟鎹簱瀛樺偍锛?
 
 **浣跨敤鏂规硶**:
 ```bash
-# 鍒涘缓娴嬭瘯鏁版嵁
+# 创建测试数据
 python manage.py test_msfg_detection --create-test-data
 
-# 娴嬭瘯瀹屾暣娴佺▼
+# 测试完整流程
 python manage.py test_msfg_detection --test-full-pipeline
 ```
 
-## 馃搳 淇鍓嶅悗瀵规瘮
+## 📊 修复前后对比
 
 ### 淇鍓嶇殑闂 鉂?
 
@@ -123,10 +123,10 @@ python manage.py test_msfg_detection --test-full-pipeline
 ```
 1. 鏁版嵁杈撳叆 (PHMData)
    鈫?
-2. 娴嬬偣璇勫垎鏈嶅姟 (TestPointScoringService)
+2. 测点评分服务 (TestPointScoringService)
    - 璇诲彇 TestPointRule 
    - 鎵ц瑙勫垯琛ㄨ揪寮?
-   - 璁＄畻娴嬬偣鍒嗘暟 (0-1)
+   - 计算测点分数 (0-1)
    鈫?
 3. 閮ㄤ欢鏄犲皠鏈嶅姟 (ComponentMappingService)
    - 璇诲彇 TestPointComponentMapping
@@ -138,20 +138,20 @@ python manage.py test_msfg_detection --test-full-pipeline
    - 鏁呴殰姒傜巼 鈫?閮ㄤ欢鍋ュ悍搴?
    - 閮ㄤ欢鍋ュ悍搴?鈫?绯荤粺鎬诲垎
    鈫?
-5. 缁撴灉瀛樺偍 (MSFGAnalysisResult)
-   - 淇濆瓨瀹屾暣鍒嗘瀽缁撴灉
+5. 结果存储 (MSFGAnalysisResult)
+   - 保存完整分析结果
    - 鍖呭惈娴嬬偣銆佹晠闅溿€侀儴浠躲€佺郴缁熷悇灞傜粨鏋?
 ```
 
 ## 馃И 楠岃瘉鏂规硶
 
-### 1. 杩愯娴嬭瘯鍛戒护
+### 1. 运行测试命令
 
 ```bash
-# 瀹屾暣娴嬭瘯
+# 完整测试
 python manage.py test_msfg_detection --create-test-data --test-full-pipeline
 
-# 鍒嗘娴嬭瘯
+# 分步测试
 python manage.py test_msfg_detection --test-scoring
 python manage.py test_msfg_detection --test-mapping  
 python manage.py test_msfg_detection --test-fusion
@@ -162,7 +162,7 @@ python manage.py test_msfg_detection --test-fusion
 鏌ョ湅鏃ュ織纭锛?
 - 娴嬬偣瑙勫垯琚纭墽琛?
 - 閮ㄤ欢鏄犲皠鍏崇郴姝ｇ‘
-- 鍒嗘瀽缁撴灉鍚堢悊
+- 分析结果合理
 - 鏁版嵁搴撳瓨鍌ㄦ垚鍔?
 
 ### 3. 楠岃瘉鏁版嵁涓€鑷存€?
@@ -194,13 +194,13 @@ python manage.py migrate
 - 澶嶆潅鐨凪SFG鍥惧彲鑳介渶瑕佹洿澶氳绠楁椂闂?
 - 寤鸿鍦ㄧ敓浜х幆澧冧腑鐩戞帶鎬ц兘
 
-## 馃帀 棰勬湡鏁堟灉
+## 🎉 预期效果
 
 淇鍚庣殑MSFG妯″潡搴旇鑳藉锛?
 
 1. **鍑嗙‘璇勫垎**: 鏍规嵁閰嶇疆鐨勮鍒欐纭绠楁祴鐐瑰垎鏁?
-2. **绮剧‘鏄犲皠**: 鍩轰簬閰嶇疆鐨勬槧灏勫叧绯诲噯纭帹瀵奸儴浠跺仴搴峰害
-3. **鍙潬瀛樺偍**: 纭繚鍒嗘瀽缁撴灉瀹屾暣淇濆瓨鍒版暟鎹簱
+2. **精确映射**: 基于配置的映射关系准确推导部件健康度
+3. **可靠存储**: 确保分析结果完整保存到数据库
 4. **绔埌绔竴鑷?*: 浠庢暟鎹緭鍏ュ埌缁撴灉杈撳嚭鐨勫畬鏁存祦绋嬫甯稿伐浣?
 5. **鍙祴璇曢獙璇?*: 閫氳繃娴嬭瘯鍛戒护楠岃瘉鎵€鏈夊姛鑳芥纭€?
 

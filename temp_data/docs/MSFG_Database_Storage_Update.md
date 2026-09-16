@@ -1,16 +1,16 @@
 ﻿# MSFG鏁版嵁搴撳瓨鍌ㄦ洿鏂拌鏄?
 
-## 淇敼鏃ユ湡
+## 修改日期
 2025骞?0鏈?0鏃?
 
-## 淇敼鏂囦欢
+## 修改文件
 `data_management/batch_processing.py`
 
 ---
 
-## 闂鍒嗘瀽
+## 问题分析
 
-### 鍘熸湁闂
+### 原有问题
 鎵瑰鐞嗕唬鐮佷粛鍦ㄤ娇鐢?*鏃х殑MSFG鎺ㄧ悊鏂规硶**锛岃櫧鐒舵垜浠凡缁忓疄鐜颁簡鏍囧噯鏂规硶锛屼絾鏁版嵁搴撲腑瀛樺偍鐨勪粛鏄棫鏂规硶鐨勭粨鏋滐細
 
 ```python
@@ -33,7 +33,7 @@ component_health = fusion.calculate_component_health(
 
 ---
 
-## 淇敼鍐呭
+## 修改内容
 
 ### 1. 鍒囨崲鍒版爣鍑哅SFG鍒嗘瀽鏂规硶
 
@@ -70,7 +70,7 @@ component_results = {
     comp_name: {
         'health_score': float,           # 鉁?涓昏鍒嗘暟
         'status': str,                   # 鍋ュ悍鐘舵€?
-        'fault_probability': float,      # 鏁呴殰姒傜巼锛堟爣鍑嗘柟娉曪級
+        'fault_probability': float,      # 故障概率（标准方法）
         'fuzzy_probability': float,      # 妯＄硦姒傜巼
         'fault_count': int,              # 鏁呴殰鏁伴噺
         'max_fault_prob': float,         # 鏈€澶ф晠闅滄鐜?
@@ -94,7 +94,7 @@ system_results = {
 }
 ```
 
-### 3. 鏇存柊鍒嗘瀽璇︽儏
+### 3. 更新分析详情
 
 **鏂扮殑鍒嗘瀽璇︽儏**锛?
 ```python
@@ -115,7 +115,7 @@ system_results = {
 
 ## 鏁版嵁瀛楁瀵规瘮
 
-### 閮ㄤ欢缁撴灉瀛楁瀵规瘮
+### 部件结果字段对比
 
 | 瀛楁 | 鏃ф柟娉?| 鏂版柟娉?| 璇存槑 |
 |------|--------|--------|------|
@@ -130,7 +130,7 @@ system_results = {
 | `enhanced_impact` | 鉁?| 鉂?| 绉婚櫎锛氭棫绠楁硶浜х墿 |
 | `natural_variation` | 鉁?| 鉂?| 绉婚櫎锛氭棫绠楁硶浜х墿 |
 
-### 绯荤粺缁撴灉瀛楁瀵规瘮
+### 系统结果字段对比
 
 | 瀛楁 | 鏃ф柟娉?| 鏂版柟娉?| 璇存槑 |
 |------|--------|--------|------|
@@ -183,7 +183,7 @@ results = MSFGDetectionResult.objects.filter(
 )
 ```
 
-### 鎻愬彇閮ㄤ欢鍋ュ悍鍒嗘暟
+### 提取部件健康分数
 
 ```python
 # 鑾峰彇鏌愭妫€娴嬬殑閮ㄤ欢鍋ュ悍搴?
@@ -197,7 +197,7 @@ for comp_name, comp_data in result.component_results.items():
     print(f"{comp_name}: {health_score:.2%} (鏂规硶: {method})")
 ```
 
-### 瀵规瘮鏂版棫鏂规硶缁撴灉
+### 对比新旧方法结果
 
 ```python
 # 鏌ヨ鏃ф柟娉曠粨鏋滐紙鏃爉ethod瀛楁锛?
@@ -232,12 +232,12 @@ const healthScore = 1 - componentData.fault_probability;
 
 ```javascript
 if (componentData.method === 'standard_cmatrix') {
-    // 鏂版柟娉曪細鏄剧ず璇︾粏淇℃伅
+    // 新方法：显示详细信息
     console.log('鏁呴殰鏁伴噺:', componentData.fault_count);
     console.log('鏈€澶ф晠闅滄鐜?', componentData.max_fault_prob);
     console.log('骞冲潎鏁呴殰姒傜巼:', componentData.avg_fault_prob);
 } else {
-    // 鏃ф柟娉曪細鏄剧ず浼犵粺淇℃伅
+    // 旧方法：显示传统信息
     console.log('澧炲己褰卞搷:', componentData.enhanced_impact);
     console.log('鑷劧鍙樺寲:', componentData.natural_variation);
 }
@@ -246,7 +246,7 @@ if (componentData.method === 'standard_cmatrix') {
 ### 3. 鏄剧ず鏂规硶鏍囪瘑
 
 ```javascript
-// 鍦║I涓婃爣璇嗕娇鐢ㄧ殑鏂规硶
+// 在UI上标识使用的方法
 const methodLabel = {
     'standard_cmatrix': '鏍囧噯鏂规硶锛堝鏁版鐜?C鐭╅樀锛?,
     'legacy': '浼犵粺鏂规硶',
@@ -281,7 +281,7 @@ const label = methodLabel[componentData.method || undefined];
 ```python
 # 鍏煎鏂版棫涓ょ鏍煎紡
 def get_component_health_score(comp_data):
-    """鑾峰彇閮ㄤ欢鍋ュ悍鍒嗘暟锛堝吋瀹规柊鏃ф牸寮忥級"""
+    """获取部件健康分数（兼容新旧格式）"""
     return float(comp_data.get('health_score', 1.0))
 
 def get_fault_probability(comp_data):
@@ -293,7 +293,7 @@ def is_standard_method(comp_data):
     return comp_data.get('method') == 'standard_cmatrix'
 
 def get_additional_info(comp_data):
-    """鑾峰彇棰濆淇℃伅锛堟牴鎹柟娉曪級"""
+    """获取额外信息（根据方法）"""
     if is_standard_method(comp_data):
         return {
             'fault_count': comp_data.get('fault_count', 0),
@@ -313,7 +313,7 @@ def get_additional_info(comp_data):
 
 ### 1. 妫€鏌ユ棩蹇?
 
-鎵瑰鐞嗚繍琛屾椂浼氳緭鍑猴細
+批处理运行时会输出：
 ```
 INFO: 浣跨敤鏍囧噯MSFG鎺ㄧ悊鏂规硶锛堝鏁版鐜?+ C鐭╅樀锛?
 DEBUG: MSFG妫€娴嬪畬鎴? PHM xxx, 鍋ュ悍鍒嗘暟 x.xxx, ...
@@ -333,12 +333,12 @@ print("绠楁硶:", result.analysis_details.get('algorithm'))
 # 妫€鏌ラ儴浠剁粨鏋?
 for comp_name, comp_data in result.component_results.items():
     print(f"{comp_name}:")
-    print(f"  鍋ュ悍鍒嗘暟: {comp_data['health_score']}")
+    print(f"  健康分数: {comp_data['health_score']}")
     print(f"  鏂规硶: {comp_data.get('method', 'unknown')}")
     print(f"  鏁呴殰鏁伴噺: {comp_data.get('fault_count', 'N/A')}")
 ```
 
-### 3. 瀵规瘮缁撴灉
+### 3. 对比结果
 
 鍙互瀵煎叆鐩稿悓鏁版嵁涓ゆ锛堜竴娆＄敤鏃ф柟娉曪紝涓€娆＄敤鏂版柟娉曪級杩涜瀵规瘮锛?
 ```python
@@ -349,7 +349,7 @@ diff = new_score - old_score
 
 print(f"鏃ф柟娉? {old_score:.4f}")
 print(f"鏂版柟娉? {new_score:.4f}")
-print(f"宸紓: {diff:+.4f} ({diff/old_score*100:+.1f}%)")
+print(f"差异: {diff:+.4f} ({diff/old_score*100:+.1f}%)")
 ```
 
 ---
@@ -369,7 +369,7 @@ print(f"宸紓: {diff:+.4f} ({diff/old_score*100:+.1f}%)")
 **鍏抽敭瑕佺偣**锛?
 - **`health_score`** 鏄富瑕佺殑閮ㄤ欢鍒嗘暟锛?-1鑼冨洿锛?
 - **`method`** 瀛楁鏍囪瘑浣跨敤鐨勭畻娉?
-- 鏂版柟娉曟彁渚涗簡鏇村璇婃柇淇℃伅
+- 新方法提供了更多诊断信息
 - 鍓嶇浠ｇ爜闇€瑕佹牴鎹?`method` 瀛楁閫傞厤鏄剧ず
 
 

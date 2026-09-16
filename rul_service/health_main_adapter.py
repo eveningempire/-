@@ -25,7 +25,7 @@ def predict(path, asset_dir):
  X=np.array([hi[i:i+seq] for i in range(len(hi)-seq)],dtype='float32')[:,:,None]
  preds=[]; device='cpu'
  for name in ('CNN','BiRNN','BiLSTM','BiGRU','SRNN'):
-  prm=joblib.load(asset_dir/f'{name}_best_params.pkl'); h=prm['hidden_dim']; model=_CNN(1,h) if name=='CNN' else _SRNN(1,h) if name=='SRNN' else _BiRNN(1,h,{'BiRNN':'rnn','BiLSTM':'lstm','BiGRU':'gru'}[name]); model.load_state_dict(torch.load(asset_dir/f'{name}_best_model.pt',map_location=device)); model.eval()
+  prm=joblib.load(asset_dir/f'{name}_best_params.pkl'); h=prm['hidden_dim']; model=_CNN(1,h) if name=='CNN' else _SRNN(1,h) if name=='SRNN' else _BiRNN(1,h,{'BiRNN':'rnn','BiLSTM':'lstm','BiGRU':'gru'}[name]); model.load_state_dict(torch.load(asset_dir/f'{name}_best_model.pt',map_location=device,weights_only=True)); model.eval()
   with torch.no_grad(): preds.append(model(torch.from_numpy(X)).numpy().ravel())
  P=np.stack(preds,axis=1); ens=joblib.load(asset_dir/'ensemble.pkl'); rf=ens['rf'].predict(P); ada=ens['ada'].predict(P)
  return {'algorithm':'health-main RUL ensemble (CNN/BiRNN/BiLSTM/BiGRU/SRNN + RF/Ada)','model_source':str(asset_dir),'sample_count':len(hi),'sequence_length':seq,'hi_sequence':hi.tolist(),'ensemble_rul':{'RF':rf.tolist(),'Ada':ada.tolist()},'rul_value':float((rf[-1]+ada[-1])/2),'current_hi':float(hi[-1]),'model_predictions':{n:preds[i].tolist() for i,n in enumerate(('CNN','BiRNN','BiLSTM','BiGRU','SRNN'))}}

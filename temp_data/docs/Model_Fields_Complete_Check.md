@@ -44,7 +44,7 @@ class RuleDetectionResult(models.Model):
 
 **鍏崇郴**锛欶oreignKey - 涓€涓狢MGData鍙互鏈夊涓鍒欐娴嬬粨鏋?
 
-**閲嶈**锛氭病鏈塦triggered_rules`瀛楁锛侀渶瑕佹煡璇㈠涓猔RuleDetectionResult`
+**重要**：没有`triggered_rules`字段！需要查询多个`RuleDetectionResult`
 
 **浣跨敤鏂瑰紡**锛?
 ```python
@@ -98,7 +98,7 @@ if msfg_res:
 
 ## 鉁?淇鍚庣殑_collect_detection_results鏂规硶
 
-### IMS缁撴灉鏀堕泦
+### IMS结果收集
 ```python
 if ims_res:
     ims_result_data = {
@@ -109,7 +109,7 @@ if ims_res:
     }
 ```
 
-### 瑙勫垯缁撴灉鏀堕泦
+### 规则结果收集
 ```python
 rule_res_list = RuleDetectionResult.objects.filter(data_point=record)  # 鉁?鏌ヨ鍒楄〃
 if rule_res_list.exists():
@@ -130,7 +130,7 @@ if rule_res_list.exists():
     }
 ```
 
-### MSFG缁撴灉鏀堕泦
+### MSFG结果收集
 ```python
 if msfg_res:
     msfg_result_data = {
@@ -193,9 +193,9 @@ if msfg_res:
 
 ---
 
-## 馃幆 鏁版嵁缁撴瀯绀轰緥
+## 🎯 数据结构示例
 
-### 鍗曞抚璇︾粏缁撴灉
+### 单帧详细结果
 ```python
 {
     'frame_number': 1,

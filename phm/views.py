@@ -35,6 +35,9 @@ CAPABILITIES = [
     {"key": "health_index", "name": "健康评估/HI", "status": "implemented", "endpoints": ["/api/v1/health-assessment/status/", "evaluate/", "summary/"]},
     {"key": "rul", "name": "寿命/RUL预测", "status": "implemented", "endpoints": ["/api/v1/rul/status/", "predict/"]},
     {"key": "simulation", "name": "故障注入与仿真", "status": "implemented", "endpoints": ["/api/v1/simulation-demo/", "/api/v1/fault-diagnosis/simulate-inject/"]},
+    {"key": "release_assessment", "name": "再飞可行性与发射放行评估", "status": "implemented", "endpoints": ["/api/v1/phm/release-assessments/"]},
+    {"key": "model_governance", "name": "模型目录与工程状态管理", "status": "implemented", "endpoints": ["/api/v1/phm/model-catalog/"]},
+    {"key": "visualization_3d", "name": "三维部件定位", "status": "implemented", "endpoints": ["/model-3d"]},
     {"key": "data_storage", "name": "数据存储与导入", "status": "available_in_legacy_module", "endpoints": ["data_management.urls"]},
     {"key": "permissions", "name": "角色与权限", "status": "implemented", "endpoints": ["/api/v1/auth/login/", "/api/v1/permissions/profile/"]},
 ]

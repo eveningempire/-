@@ -1,6 +1,6 @@
 ﻿# 妫€娴嬮厤缃弬鏁颁娇鐢ㄤ慨澶?
 
-## 馃悰 闂鎻忚堪
+## 🐛 问题描述
 
 **鐢ㄦ埛鍙嶉**锛氬墠绔坊鍔犱簡`鏁版嵁澶勭悊妯″紡`鍜宍鏃堕棿鎴冲鐞哷閫夐」锛屼絾鍚庣娌℃湁鐪熸浣跨敤杩欎簺鍙傛暟銆?
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 馃攳 闂鍒嗘瀽
+## 🔍 问题分析
 
 ### 鍓嶇鍙戦€佺殑鍙傛暟
 ```javascript
@@ -41,7 +41,7 @@ def process_file_for_detection(...):
 ### 淇1锛氬悗绔帴鏀跺弬鏁帮紙views.py锛?
 
 ```python
-# 鑾峰彇鏁版嵁澶勭悊鍙傛暟
+# 获取数据处理参数
 max_rows = request.data.get('max_rows')
 if max_rows:
     try:
@@ -82,7 +82,7 @@ def process_file_for_detection(
 ) -> Dict[str, Any]:
 ```
 
-### 淇4锛氫娇鐢╩ax_rows鍙傛暟
+### 修复4：使用max_rows参数
 
 ```python
 # 瑙ｆ瀽鏂囦欢鏃朵娇鐢╩ax_rows
@@ -99,7 +99,7 @@ for row_num, r in enumerate(rows[1:], 2):
         break  # 鉁?鍦?000琛屾椂鍋滄
 ```
 
-### 淇5锛氫娇鐢╝dd_milliseconds鍙傛暟
+### 修复5：使用add_milliseconds参数
 
 ```python
 # 鏃堕棿鎴冲幓閲嶅鐞?
@@ -110,7 +110,7 @@ if add_milliseconds:
 
 **鏁堟灉**锛?
 ```python
-# 閲嶅鏃堕棿鎴筹細
+# 重复时间戳：
 2022-10-09 15:36:48
 2022-10-09 15:36:48
 2022-10-09 15:36:48
@@ -138,9 +138,9 @@ temp_session = ImportSession.objects.create(
 
 ---
 
-## 馃搳 鍙傛暟娴佽浆瀹屾暣璺緞
+## 📊 参数流转完整路径
 
-### max_rows鍙傛暟
+### max_rows参数
 ```
 鍓嶇UI
   鈫?detectionConfig.maxRows = 1000
@@ -154,11 +154,11 @@ FormData
   鈫?_parse_file_direct(file_path, max_rows=1000)
 瑙ｆ瀽寰幆
   鈫?if max_rows and len(parsed_data) >= max_rows: break
-缁撴灉
+结果
   鉁?鍙В鏋?000琛?
 ```
 
-### add_milliseconds鍙傛暟
+### add_milliseconds参数
 ```
 鍓嶇UI
   鈫?detectionConfig.addMilliseconds = true
@@ -170,13 +170,13 @@ FormData
   鈫?process_file_for_detection(add_milliseconds=True)
 鏃堕棿鎴冲鐞?
   鈫?if add_milliseconds: _add_milliseconds_to_duplicate_timestamps()
-缁撴灉
+结果
   鉁?涓洪噸澶嶆椂闂存埑娣诲姞姣
 ```
 
 ---
 
-## 馃И 娴嬭瘯楠岃瘉
+## 🧪 测试验证
 
 ### 娴嬭瘯鐢ㄤ緥1锛氶檺鍒惰鏁?
 **閰嶇疆**锛?
@@ -190,7 +190,7 @@ INFO: [瀹炴椂妫€娴媇 鏁版嵁鍒涘缓瀹屾垚锛屽叡 1000 鏉MGD
 鉁?鍙鐞?000鏉★紝涓嶆槸鍏ㄩ儴109,511鏉?
 ```
 
-### 娴嬭瘯鐢ㄤ緥2锛氭椂闂存埑鍘婚噸
+### 测试用例2：时间戳去重
 **閰嶇疆**锛?
 - 鏃堕棿鎴冲鐞嗭細鉁?鑷姩娣诲姞姣
 
@@ -202,20 +202,20 @@ INFO: [瀹炴椂妫€娴媇 鏃堕棿鎴冲幓閲嶅畬鎴?
 
 ---
 
-## 馃摑 淇敼鎬荤粨
+## 📝 修改总结
 
 **淇敼鏂囦欢**锛?
 1. `data_management/views.py` - 3澶勪慨鏀?
-   - 鎺ユ敹max_rows鍙傛暟
-   - 鎺ユ敹add_milliseconds鍙傛暟
+   - 接收max_rows参数
+   - 接收add_milliseconds参数
    - 浼犻€掑弬鏁板埌澶勭悊鍣?
 
 2. `data_management/batch_processing.py` - 5澶勪慨鏀?
    - 鏇存柊鍑芥暟绛惧悕锛堟坊鍔?涓弬鏁帮級
-   - 浣跨敤max_rows鍙傛暟
-   - 浣跨敤add_milliseconds鍙傛暟
+   - 使用max_rows参数
+   - 使用add_milliseconds参数
    - 鍦↖mportSession涓褰曞弬鏁?
-   - 淇鏂规硶璋冪敤鍚嶇О
+   - 修正方法调用名称
 
 **鎬昏**锛?澶勪慨鏀?
 
@@ -258,7 +258,7 @@ INFO: [瀹炴椂妫€娴媇 鏃堕棿鎴冲幓閲嶅畬鎴?
 ---
 
 **淇鏃堕棿**锛?025-10-10  
-**淇绫诲瀷**锛氬弬鏁颁紶閫掑拰浣跨敤  
+**修复类型**：参数传递和使用  
 **娴嬭瘯鐘舵€?*锛氣渽 灏辩华
 
 

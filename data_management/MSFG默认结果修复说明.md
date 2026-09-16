@@ -1,143 +1,160 @@
-﻿# MSFG榛樿缁撴灉淇璇存槑
+﻿# MSFG 默认结果修复说明
 
-## 馃敡 鍙戠幇鐨勯棶棰?
+## 发现的问题
 
-鐢ㄦ埛鍙嶉锛?*姝ｅ父甯х殑MSFG缁撴灉涓己灏戜簡涓€浜涙祴鐐瑰垎鏁板拰鏁呴殰鍒嗘暟**
+用户反馈：**正常帧的 MSFG 结果中缺少一些测点分数和故障分数**。
 
-## 馃幆 鏍规湰鍘熷洜
+## 根本原因
 
-### 闂1锛氭祬鎷疯礉瀵艰嚧鏁版嵁鍏变韩 鉂?
+### 问题 1：浅拷贝导致数据共享
 
-**鍘熶唬鐮?*锛堢2503-2506琛岋級锛?
+**原代码**（第 2503-2506 行）：
+
 ```python
-'test_results': default_test_results.copy(),      # 鉂?娴呮嫹璐?
-'fault_results': default_fault_results.copy(),    # 鉂?娴呮嫹璐?
-'system_results': default_system_results.copy(),  # 鉂?娴呮嫹璐?
-'component_results': default_component_results.copy(),  # 鉂?娴呮嫹璐?
+'test_results': default_test_results.copy(),      # 浅拷贝
+'fault_results': default_fault_results.copy(),    # 浅拷贝
+'system_results': default_system_results.copy(),  # 浅拷贝
+'component_results': default_component_results.copy(),  # 浅拷贝
 ```
 
-**闂璇存槑**锛?
-- `.copy()` 鍙槸**娴呮嫹璐?*锛屽鍒跺灞傚瓧鍏?
-- 鍐呭眰瀛楀吀瀵硅薄浠嶇劧琚涓褰曞叡浜?
-- 褰撴煇涓褰曚慨鏀规暟鎹椂锛屼細褰卞搷鍏朵粬鎵€鏈夎褰?
+**问题说明**：
 
-**绀轰緥璇存槑**锛?
+- `.copy()` 只是浅拷贝，只复制外层字典。
+- 内层字典对象仍然会被多个记录共享。
+- 当某个记录修改数据时，会影响其他所有记录。
+
+**示例说明**：
+
 ```python
-# 娴呮嫹璐濈殑闂
+# 浅拷贝的问题
 default_test_results = {
-    '娴嬬偣1': {'test_score': 0.0, 'status': 'normal'},
-    '娴嬬偣2': {'test_score': 0.0, 'status': 'normal'}
+    '测点1': {'test_score': 0.0, 'status': 'normal'},
+    '测点2': {'test_score': 0.0, 'status': 'normal'},
 }
 
 record1_result = default_test_results.copy()
 record2_result = default_test_results.copy()
 
-# 淇敼record1鐨勬祴鐐?
-record1_result['娴嬬偣1']['test_score'] = 0.5
+# 修改 record1 的测点
+record1_result['测点1']['test_score'] = 0.5
 
-# 鉂?record2鐨勬祴鐐?涔熻淇敼浜嗭紒
-print(record2_result['娴嬬偣1']['test_score'])  # 杈撳嚭: 0.5 (閿欒锛?
+# record2 的测点也被修改了
+print(record2_result['测点1']['test_score'])  # 输出: 0.5（错误）
 ```
 
-## 鉁?淇鏂规
+## 修复方案
 
-### 淇1锛氫娇鐢ㄦ繁鎷疯礉
+### 修复 1：使用深拷贝
 
-**淇鍚庝唬鐮?*锛堢2515-2518琛岋級锛?
+**修复后代码**（第 2515-2518 行）：
+
 ```python
 import copy
 
-'test_results': copy.deepcopy(default_test_results),      # 鉁?娣辨嫹璐?
-'fault_results': copy.deepcopy(default_fault_results),    # 鉁?娣辨嫹璐?
-'system_results': copy.deepcopy(default_system_results),  # 鉁?娣辨嫹璐?
-'component_results': copy.deepcopy(default_component_results),  # 鉁?娣辨嫹璐?
+'test_results': copy.deepcopy(default_test_results),      # 深拷贝
+'fault_results': copy.deepcopy(default_fault_results),    # 深拷贝
+'system_results': copy.deepcopy(default_system_results),  # 深拷贝
+'component_results': copy.deepcopy(default_component_results),  # 深拷贝
 ```
 
-**浼樺娍**锛?
-- 鉁?瀹屽叏鐙珛鐨勬暟鎹壇鏈?
-- 鉁?姣忎釜璁板綍淇敼鏁版嵁涓嶄細褰卞搷鍏朵粬璁板綍
-- 鉁?淇濊瘉鏁版嵁瀹屾暣鎬?
+**优势**：
 
-**绀轰緥璇存槑**锛?
+- 每条记录都有完全独立的数据副本。
+- 修改某条记录不会影响其他记录。
+- 保证数据完整性。
+
+**示例说明**：
+
 ```python
-# 娣辨嫹璐濈殑姝ｇ‘琛屼负
+# 深拷贝的正确行为
 import copy
 
 record1_result = copy.deepcopy(default_test_results)
 record2_result = copy.deepcopy(default_test_results)
 
-# 淇敼record1鐨勬祴鐐?
-record1_result['娴嬬偣1']['test_score'] = 0.5
+# 修改 record1 的测点
+record1_result['测点1']['test_score'] = 0.5
 
-# 鉁?record2鐨勬祴鐐?涓嶅彈褰卞搷
-print(record2_result['娴嬬偣1']['test_score'])  # 杈撳嚭: 0.0 (姝ｇ‘锛?
+# record2 的测点不受影响
+print(record2_result['测点1']['test_score'])  # 输出: 0.0（正确）
 ```
 
-### 淇2锛氭坊鍔犺缁嗘棩蹇楅獙璇?
+### 修复 2：添加详细日志验证
 
-**鏂板鏃ュ織**锛堢2443-2558琛岋級锛?
+**新增日志**（第 2443-2558 行）：
 
-#### 2.1 鑺傜偣淇℃伅楠岃瘉
+#### 2.1 节点信息验证
+
 ```python
-logger.info(f"MSFG鑺傜偣淇℃伅: 娴嬬偣鏁?{len(test_nodes)}, 鏁呴殰鏁?{len(fault_nodes)}, 閮ㄤ欢鏁?{len(component_nodes)}")
-logger.info(f"娴嬬偣鍒楄〃: {[node.name for node in test_nodes]}")
-logger.info(f"鏁呴殰鍒楄〃: {[node.name for node in fault_nodes]}")
+logger.info(f"MSFG 节点信息: 测点数 {len(test_nodes)}, 故障数 {len(fault_nodes)}, 部件数 {len(component_nodes)}")
+logger.info(f"测点列表: {[node.name for node in test_nodes]}")
+logger.info(f"故障列表: {[node.name for node in fault_nodes]}")
 ```
 
-**杈撳嚭绀轰緥**锛?
-```
-[INFO] MSFG鑺傜偣淇℃伅: 娴嬬偣鏁?12, 鏁呴殰鏁?8, 閮ㄤ欢鏁?5
-[INFO] 娴嬬偣鍒楄〃: ['杞瓙娓╁害', '妗嗘灦娓╁害', '杞瓙鐢垫祦', '杞瓙杞€?, ...]
-[INFO] 鏁呴殰鍒楄〃: ['杞存壙纾ㄦ崯', '鐢垫満鏁呴殰', '鐢靛帇寮傚父', ...]
+**输出示例**：
+
+```text
+[INFO] MSFG 节点信息: 测点数 12, 故障数 8, 部件数 5
+[INFO] 测点列表: ['转子温度', '框架温度', '转子电流', '转子转速', ...]
+[INFO] 故障列表: ['轴承磨损', '电机故障', '电压异常', ...]
 ```
 
-#### 2.2 鏋勫缓楠岃瘉
+#### 2.2 构建验证
+
 ```python
-logger.info(f"鉁?宸叉瀯寤?{len(default_test_results)} 涓祴鐐圭殑榛樿缁撴灉")
-logger.info(f"鉁?宸叉瀯寤?{len(default_fault_results)} 涓晠闅滅殑榛樿缁撴灉")
+logger.info(f"已构建 {len(default_test_results)} 个测点的默认结果")
+logger.info(f"已构建 {len(default_fault_results)} 个故障的默认结果")
 ```
 
-**杈撳嚭绀轰緥**锛?
-```
-[INFO] 鉁?宸叉瀯寤?12 涓祴鐐圭殑榛樿缁撴灉
-[INFO] 鉁?宸叉瀯寤?8 涓晠闅滅殑榛樿缁撴灉
+**输出示例**：
+
+```text
+[INFO] 已构建 12 个测点的默认结果
+[INFO] 已构建 8 个故障的默认结果
 ```
 
-#### 2.3 缁撴灉楠岃瘉
+#### 2.3 结果验证
+
 ```python
-logger.info(f"鉁?鎴愬姛鐢熸垚 {len(default_results)} 涓粯璁SFG缁撴灉")
-logger.info(f"姣忎釜缁撴灉鍖呭惈: 娴嬬偣鏁?{len(sample_result['test_results'])}, "
-          f"鏁呴殰鏁?{len(sample_result['fault_results'])}, "
-          f"閮ㄤ欢鏁?{len(sample_result['component_results'])}")
+logger.info(f"成功生成 {len(default_results)} 个默认 MSFG 结果")
+logger.info(
+    f"每个结果包含: 测点数 {len(sample_result['test_results'])}, "
+    f"故障数 {len(sample_result['fault_results'])}, "
+    f"部件数 {len(sample_result['component_results'])}"
+)
 ```
 
-**杈撳嚭绀轰緥**锛?
-```
-[INFO] 鉁?鎴愬姛鐢熸垚 800 涓粯璁SFG缁撴灉
-[INFO] 姣忎釜缁撴灉鍖呭惈: 娴嬬偣鏁?12, 鏁呴殰鏁?8, 閮ㄤ欢鏁?5
+**输出示例**：
+
+```text
+[INFO] 成功生成 800 个默认 MSFG 结果
+[INFO] 每个结果包含: 测点数 12, 故障数 8, 部件数 5
 ```
 
-#### 2.4 鏁版嵁鐙珛鎬ч獙璇?
+#### 2.4 数据独立性验证
+
 ```python
 if len(default_results) > 1:
     first_test_results = default_results[0]['test_results']
     second_test_results = default_results[1]['test_results']
     if first_test_results is second_test_results:
-        logger.warning("鈿狅笍 璀﹀憡锛氭娴嬪埌娴呮嫹璐濋棶棰橈紝澶氫釜璁板綍鍏变韩鍚屼竴涓瓧鍏稿璞?)
+        logger.warning("警告：检测到浅拷贝问题，多个记录共享同一个字典对象")
     else:
-        logger.info("鉁?鏁版嵁鐙珛鎬ч獙璇侀€氳繃锛屾瘡涓褰曢兘鏈夌嫭绔嬬殑鏁版嵁鍓湰")
+        logger.info("数据独立性验证通过，每个记录都有独立的数据副本")
 ```
 
-**杈撳嚭绀轰緥**锛?
+**输出示例**：
+
+```text
+[INFO] 数据独立性验证通过，每个记录都有独立的数据副本
 ```
-[INFO] 鉁?鏁版嵁鐙珛鎬ч獙璇侀€氳繃锛屾瘡涓褰曢兘鏈夌嫭绔嬬殑鏁版嵁鍓湰
-```
 
-## 馃攳 楠岃瘉涓€鑷存€?
+## 验证一致性
 
-### 寮傚父甯?vs 姝ｅ父甯х殑鑺傜偣鑾峰彇鏂规硶
+### 异常帧 vs 正常帧的节点获取方法
 
-#### 寮傚父甯э紙瀹為檯妫€娴嬶級- `_run_msfg_detection()` 绗?114琛?
+#### 异常帧（实际检测）- `_run_msfg_detection()` 第 114 行
+
 ```python
 from msfg_analysis.algorithms.msfg.advanced_fusion import AdvancedMSFGFusion
 
@@ -145,7 +162,8 @@ fusion = AdvancedMSFGFusion()
 test_nodes, fault_nodes, component_nodes = fusion.get_unified_nodes(msfg)
 ```
 
-#### 姝ｅ父甯э紙榛樿鍊硷級- `_generate_default_msfg_results()` 绗?441琛?
+#### 正常帧（默认值）- `_generate_default_msfg_results()` 第 441 行
+
 ```python
 from msfg_analysis.algorithms.msfg.advanced_fusion import AdvancedMSFGFusion
 
@@ -153,64 +171,64 @@ fusion = AdvancedMSFGFusion()
 test_nodes, fault_nodes, component_nodes = fusion.get_unified_nodes(msfg_definition)
 ```
 
-**缁撹**锛氣渽 **瀹屽叏涓€鑷?*锛屼娇鐢ㄧ浉鍚岀殑鏂规硶鑾峰彇鑺傜偣
+**结论**：完全一致，异常帧和正常帧使用相同方法获取节点。
 
-## 馃搳 濡備綍楠岃瘉淇鏁堟灉
+## 如何验证修复效果
 
-### 姝ラ1锛氭煡鐪嬫棩蹇楄緭鍑?
+### 步骤 1：查看日志输出
 
-涓婁紶鏂囦欢鍚庯紝妫€鏌ョ粓绔棩蹇椾腑鐨勪互涓嬩俊鎭細
+上传文件后，检查终端日志中的以下信息：
 
+```text
+[INFO] 为 800 个正常帧生成默认 MSFG 结果
+[INFO] MSFG 节点信息: 测点数 12, 故障数 8, 部件数 5
+[INFO] 测点列表: ['转子温度', '框架温度', '转子电流', ...]
+[INFO] 故障列表: ['轴承磨损', '电机故障', '电压异常', ...]
+[INFO] 已构建 12 个测点的默认结果
+[INFO] 已构建 8 个故障的默认结果
+[INFO] 成功生成 800 个默认 MSFG 结果
+[INFO] 每个结果包含: 测点数 12, 故障数 8, 部件数 5
+[INFO] 数据独立性验证通过，每个记录都有独立的数据副本
 ```
-[INFO] 涓?800 涓甯稿抚鐢熸垚榛樿MSFG缁撴灉
-[INFO] MSFG鑺傜偣淇℃伅: 娴嬬偣鏁?12, 鏁呴殰鏁?8, 閮ㄤ欢鏁?5
-[INFO] 娴嬬偣鍒楄〃: ['杞瓙娓╁害', '妗嗘灦娓╁害', '杞瓙鐢垫祦', ...]
-[INFO] 鏁呴殰鍒楄〃: ['杞存壙纾ㄦ崯', '鐢垫満鏁呴殰', '鐢靛帇寮傚父', ...]
-[INFO] 鉁?宸叉瀯寤?12 涓祴鐐圭殑榛樿缁撴灉
-[INFO] 鉁?宸叉瀯寤?8 涓晠闅滅殑榛樿缁撴灉
-[INFO] 鉁?鎴愬姛鐢熸垚 800 涓粯璁SFG缁撴灉
-[INFO] 姣忎釜缁撴灉鍖呭惈: 娴嬬偣鏁?12, 鏁呴殰鏁?8, 閮ㄤ欢鏁?5
-[INFO] 鉁?鏁版嵁鐙珛鎬ч獙璇侀€氳繃锛屾瘡涓褰曢兘鏈夌嫭绔嬬殑鏁版嵁鍓湰
-```
 
-### 姝ラ2锛氭鏌ユ暟鎹簱
+### 步骤 2：检查数据库
 
 ```python
 from msfg_analysis.models import MSFGAnalysisResult
 
-# 鏌ヨ涓€涓甯稿抚鐨凪SFG缁撴灉
+# 查询一个正常帧的 MSFG 结果
 normal_frame = PHMData.objects.filter(
     ims_detectionresult__is_anomaly=False
 ).first()
 
 msfg_result = MSFGAnalysisResult.objects.get(data_point=normal_frame)
 
-# 楠岃瘉娴嬬偣鏁伴噺
+# 验证测点数量
 test_count = len(msfg_result.test_results)
-print(f"娴嬬偣鏁伴噺: {test_count}")
-print(f"娴嬬偣鍒楄〃: {list(msfg_result.test_results.keys())}")
+print(f"测点数量: {test_count}")
+print(f"测点列表: {list(msfg_result.test_results.keys())}")
 
-# 楠岃瘉鏁呴殰鏁伴噺
+# 验证故障数量
 fault_count = len(msfg_result.fault_results)
-print(f"鏁呴殰鏁伴噺: {fault_count}")
-print(f"鏁呴殰鍒楄〃: {list(msfg_result.fault_results.keys())}")
+print(f"故障数量: {fault_count}")
+print(f"故障列表: {list(msfg_result.fault_results.keys())}")
 
-# 楠岃瘉娴嬬偣鍒嗘暟閮戒负0
+# 验证测点分数都为 0
 test_scores = [v['test_score'] for v in msfg_result.test_results.values()]
-print(f"娴嬬偣鍒嗘暟: {test_scores}")  # 搴旇閮芥槸 0.0
+print(f"测点分数: {test_scores}")  # 应该都是 0.0
 
-# 楠岃瘉鏁呴殰姒傜巼閮戒负0
+# 验证故障概率都为 0
 fault_probs = [v['fault_probability'] for v in msfg_result.fault_results.values()]
-print(f"鏁呴殰姒傜巼: {fault_probs}")  # 搴旇閮芥槸 0.0
+print(f"故障概率: {fault_probs}")  # 应该都是 0.0
 
-# 楠岃瘉鍋ュ悍鍒嗘暟涓?.0
-print(f"鏁翠綋鍋ュ悍鍒嗘暟: {msfg_result.overall_health_score}")  # 搴旇鏄?1.0
+# 验证健康分数为 1.0
+print(f"整体健康分数: {msfg_result.overall_health_score}")  # 应该是 1.0
 ```
 
-### 姝ラ3锛氬姣斿紓甯稿抚鍜屾甯稿抚
+### 步骤 3：对比异常帧和正常帧
 
 ```python
-# 鑾峰彇涓€涓紓甯稿抚鐨凪SFG缁撴灉
+# 获取一个异常帧的 MSFG 结果
 anomaly_frame = PHMData.objects.filter(
     ims_detectionresult__is_anomaly=True
 ).first()
@@ -218,96 +236,99 @@ anomaly_frame = PHMData.objects.filter(
 anomaly_msfg = MSFGAnalysisResult.objects.get(data_point=anomaly_frame)
 normal_msfg = MSFGAnalysisResult.objects.get(data_point=normal_frame)
 
-# 瀵规瘮娴嬬偣鏁伴噺
-print(f"寮傚父甯ф祴鐐规暟: {len(anomaly_msfg.test_results)}")
-print(f"姝ｅ父甯ф祴鐐规暟: {len(normal_msfg.test_results)}")
-# 搴旇鐩哥瓑锛?
+# 对比测点数量
+print(f"异常帧测点数: {len(anomaly_msfg.test_results)}")
+print(f"正常帧测点数: {len(normal_msfg.test_results)}")
+# 应该相等
 
-# 瀵规瘮鏁呴殰鏁伴噺
-print(f"寮傚父甯ф晠闅滄暟: {len(anomaly_msfg.fault_results)}")
-print(f"姝ｅ父甯ф晠闅滄暟: {len(normal_msfg.fault_results)}")
-# 搴旇鐩哥瓑锛?
+# 对比故障数量
+print(f"异常帧故障数: {len(anomaly_msfg.fault_results)}")
+print(f"正常帧故障数: {len(normal_msfg.fault_results)}")
+# 应该相等
 
-# 瀵规瘮娴嬬偣鍒楄〃
+# 对比测点列表
 anomaly_tests = set(anomaly_msfg.test_results.keys())
 normal_tests = set(normal_msfg.test_results.keys())
-print(f"娴嬬偣鍒楄〃鏄惁鐩稿悓: {anomaly_tests == normal_tests}")
-# 搴旇涓?True锛?
+print(f"测点列表是否相同: {anomaly_tests == normal_tests}")
+# 应该为 True
 
-# 瀵规瘮鏁呴殰鍒楄〃
+# 对比故障列表
 anomaly_faults = set(anomaly_msfg.fault_results.keys())
 normal_faults = set(normal_msfg.fault_results.keys())
-print(f"鏁呴殰鍒楄〃鏄惁鐩稿悓: {anomaly_faults == normal_faults}")
-# 搴旇涓?True锛?
+print(f"故障列表是否相同: {anomaly_faults == normal_faults}")
+# 应该为 True
 ```
 
-## 馃幆 棰勬湡缁撴灉
+## 预期结果
 
-淇鍚庯紝姝ｅ父甯х殑MSFG缁撴灉搴旇锛?
+修复后，正常帧的 MSFG 结果应该满足以下条件。
 
-### 鉁?鍖呭惈瀹屾暣鐨勬祴鐐瑰垎鏁?
+### 包含完整的测点分数
+
 ```json
 {
   "test_results": {
-    "杞瓙娓╁害": {"test_score": 0.0, "status": "normal"},
-    "妗嗘灦娓╁害": {"test_score": 0.0, "status": "normal"},
-    "杞瓙鐢垫祦": {"test_score": 0.0, "status": "normal"},
-    "杞瓙杞€?: {"test_score": 0.0, "status": "normal"},
-    ... // 鎵€鏈夋祴鐐归兘鍖呭惈
+    "转子温度": {"test_score": 0.0, "status": "normal"},
+    "框架温度": {"test_score": 0.0, "status": "normal"},
+    "转子电流": {"test_score": 0.0, "status": "normal"},
+    "转子转速": {"test_score": 0.0, "status": "normal"}
   }
 }
 ```
 
-### 鉁?鍖呭惈瀹屾暣鐨勬晠闅滄鐜?
+### 包含完整的故障概率
+
 ```json
 {
   "fault_results": {
-    "杞存壙纾ㄦ崯": {"fault_probability": 0.0, "severity": "none"},
-    "鐢垫満鏁呴殰": {"fault_probability": 0.0, "severity": "none"},
-    "鐢靛帇寮傚父": {"fault_probability": 0.0, "severity": "none"},
-    ... // 鎵€鏈夋晠闅滈兘鍖呭惈
+    "轴承磨损": {"fault_probability": 0.0, "severity": "none"},
+    "电机故障": {"fault_probability": 0.0, "severity": "none"},
+    "电压异常": {"fault_probability": 0.0, "severity": "none"}
   }
 }
 ```
 
-### 鉁?姣忎釜璁板綍閮芥湁鐙珛鐨勬暟鎹壇鏈?
+### 每个记录都有独立的数据副本
+
 ```python
-# 淇敼绗竴涓褰曚笉浼氬奖鍝嶇浜屼釜璁板綍
-result1['test_results']['杞瓙娓╁害']['test_score'] = 0.5
-result2['test_results']['杞瓙娓╁害']['test_score']  # 浠嶇劧鏄?0.0
+# 修改第一个记录不会影响第二个记录
+result1['test_results']['转子温度']['test_score'] = 0.5
+result2['test_results']['转子温度']['test_score']  # 仍然是 0.0
 ```
 
-## 馃毃 鍙兘鐨勫叾浠栭棶棰?
+## 可能的其他问题
 
-濡傛灉淇鍚庝粛鐒剁己灏戞祴鐐规垨鏁呴殰锛屽彲鑳芥槸锛?
+如果修复后仍然缺少测点或故障，可能是以下原因。
 
-### 闂1锛歁SFG瀹氫箟涓嶅畬鏁?
-- 妫€鏌SFG瀹氫箟涓殑娴嬬偣鑺傜偣鍜屾晠闅滆妭鐐规槸鍚﹀畬鏁?
-- 浣跨敤Django绠＄悊鍚庡彴鏌ョ湅MSFG瀹氫箟
+### 问题 1：MSFG 定义不完整
 
-### 闂2锛氳妭鐐圭被鍨嬩笉鍖归厤
-- 妫€鏌ヨ妭鐐圭被鍨嬫槸鍚︽纭紙TestNode vs FaultNode锛?
-- 浣跨敤鏃ュ織杈撳嚭鐨勮妭鐐瑰垪琛ㄩ獙璇?
+- 检查 MSFG 定义中的测点节点和故障节点是否完整。
+- 使用 Django 管理后台查看 MSFG 定义。
 
-### 闂3锛氭暟鎹簱鏌ヨ杩囨护
-- 妫€鏌ユ槸鍚︽湁棰濆鐨勮繃婊ゆ潯浠跺鑷撮儴鍒嗚妭鐐硅鎺掗櫎
-- 浣跨敤 `fusion.get_unified_nodes()` 杩斿洖鐨勫師濮嬭妭鐐瑰垪琛?
+### 问题 2：节点类型不匹配
 
-## 馃摑 鎬荤粨
+- 检查节点类型是否正确，例如 `TestNode` 和 `FaultNode`。
+- 使用日志输出的节点列表验证。
 
-鏈淇鐨勬牳蹇冩敼杩涳細
+### 问题 3：数据库查询过滤
 
-1. 鉁?**浣跨敤娣辨嫹璐?*锛氱‘淇濇瘡涓褰曢兘鏈夊畬鍏ㄧ嫭绔嬬殑鏁版嵁鍓湰
-2. 鉁?**娣诲姞璇︾粏鏃ュ織**锛氬府鍔╅獙璇佽妭鐐逛俊鎭€佹瀯寤鸿繃绋嬪拰鏁版嵁瀹屾暣鎬?
-3. 鉁?**鏁版嵁鐙珛鎬ч獙璇?*锛氳繍琛屾椂鑷姩妫€娴嬫祬鎷疯礉闂
-4. 鉁?**鏂规硶涓€鑷存€?*锛氬紓甯稿抚鍜屾甯稿抚浣跨敤瀹屽叏鐩稿悓鐨勮妭鐐硅幏鍙栨柟娉?
+- 检查是否存在额外过滤条件，导致部分节点被排除。
+- 使用 `fusion.get_unified_nodes()` 返回的原始节点列表验证。
 
-杩欐牱鍙互纭繚锛?
-- 鎵€鏈夋祴鐐瑰垎鏁伴兘琚纭啓鍏?
-- 鎵€鏈夋晠闅滄鐜囬兘琚纭啓鍏?
-- 姣忎釜璁板綍鐨勬暟鎹兘鏄嫭绔嬬殑
-- 渚夸簬璇婃柇鍜岄獙璇?
+## 总结
 
-濡傛灉浠嶇劧鍙戠幇缂哄皯鏁版嵁锛岃鏌ョ湅鏃ュ織杈撳嚭鐨勮妭鐐瑰垪琛紝纭MSFG瀹氫箟涓槸鍚﹀寘鍚墍鏈夋湡鏈涚殑娴嬬偣鍜屾晠闅溿€?
+本次修复的核心改进：
 
+1. **使用深拷贝**：确保每条记录都有完全独立的数据副本。
+2. **添加详细日志**：帮助验证节点信息、构建过程和数据完整性。
+3. **增加数据独立性验证**：运行时自动检测浅拷贝问题。
+4. **保持方法一致**：异常帧和正常帧使用相同的节点获取方法。
 
+这样可以确保：
+
+- 所有测点分数都被正确写入。
+- 所有故障概率都被正确写入。
+- 每个记录的数据都是独立的。
+- 便于诊断和验证。
+
+如果仍然发现缺少数据，请查看日志输出的节点列表，确认 MSFG 定义中是否包含所有期望的测点和故障。

@@ -2,9 +2,9 @@
 
 ## 馃搵 褰撳墠閫昏緫鍒嗘瀽
 
-### 鐜版湁娴佺▼锛堝彧璇绘ā寮忥級
+### 现有流程（只读模式）
 ```
-1. 鐢ㄦ埛閫夋嫨PHM鍨嬪彿
+1. 用户选择PHM型号
    鈫?
 2. 鐢ㄦ埛閫夋嫨PHM涓綋
    鈫?
@@ -21,7 +21,7 @@
   - `action=ims_details` - 鑾峰彇IMS妫€娴嬭鎯?
   - `action=rule_details` - 鑾峰彇瑙勫垯妫€娴嬭鎯?
   - `action=msfg_details` - 鑾峰彇MSFG妫€娴嬭鎯?
-  - `action=component_details` - 鑾峰彇閮ㄤ欢璇︾粏淇℃伅
+  - `action=component_details` - 获取部件详细信息
   - `action=telemetry_data` - 鑾峰彇閬ユ祴鏁版嵁
 
 ### 鏁版嵁鏉ユ簮
@@ -29,15 +29,15 @@
   - `PHMData` - 鍘熷閬ユ祴鏁版嵁
   - `IMSResult` - IMS妫€娴嬬粨鏋?
   - `RuleDetectionResult` - 瑙勫垯妫€娴嬬粨鏋?
-  - `MSFGAnalysisResult` - MSFG鍒嗘瀽缁撴灉
+  - `MSFGAnalysisResult` - MSFG分析结果
 
 ---
 
 ## 馃殌 鍗囩骇闇€姹?
 
-### 鏂板娴佺▼锛堝疄鏃舵娴嬫ā寮忥級
+### 新增流程（实时检测模式）
 ```
-1. 鐢ㄦ埛閫夋嫨PHM鍨嬪彿
+1. 用户选择PHM型号
    鈫?
 2. 鐢ㄦ埛閫夋嫨PHM涓綋
    鈫?
@@ -49,7 +49,7 @@
    鈫?
 6. 妫€娴嬪畬鎴愶紝鑷姩鏄剧ず缁撴灉
    鈫?
-7. 缁撴灉淇濆瓨鍒版暟鎹簱锛堝彲閫夛級
+7. 结果保存到数据库（可选）
 ```
 
 ---
@@ -85,7 +85,7 @@
     </el-button>
   </div>
 
-  <!-- 鏂板锛氬疄鏃舵娴嬪璇濇 -->
+  <!-- 新增：实时检测对话框 -->
   <el-dialog
     v-model="realtimeDetectionDialogVisible"
     title="瀹炴椂妫€娴?
@@ -95,9 +95,9 @@
       <!-- 姝ラ鎸囩ず鍣?-->
       <el-steps :active="currentStep" finish-status="success">
         <el-step title="涓婁紶鏂囦欢" />
-        <el-step title="閰嶇疆鍙傛暟" />
+        <el-step title="配置参数" />
         <el-step title="鎵ц妫€娴? />
-        <el-step title="鏌ョ湅缁撴灉" />
+        <el-step title="查看结果" />
       </el-steps>
 
       <!-- 姝ラ1: 鏂囦欢涓婁紶 -->
@@ -131,9 +131,9 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="鏄惁淇濆瓨缁撴灉">
+          <el-form-item label="是否保存结果">
             <el-switch v-model="detectionConfig.saveResults" />
-            <span class="tip-text">淇濆瓨鍒版暟鎹簱浠ヤ究鍚庣画鏌ヨ</span>
+            <span class="tip-text">保存到数据库以便后续查询</span>
           </el-form-item>
         </el-form>
       </div>
@@ -164,7 +164,7 @@
         </div>
       </div>
 
-      <!-- 姝ラ3: 缁撴灉棰勮 -->
+      <!-- 步骤3: 结果预览 -->
       <div v-if="currentStep === 2" class="step-content">
         <el-result 
           icon="success" 
@@ -173,7 +173,7 @@
         >
           <template #extra>
             <el-button type="primary" @click="viewDetectionResults">
-              鏌ョ湅璇︾粏缁撴灉
+              查看详细结果
             </el-button>
             <el-button @click="downloadResults">
               涓嬭浇妫€娴嬫姤鍛?
@@ -394,8 +394,8 @@ function viewDetectionResults() {
     
     // 濡傛灉鏈夐儴浠跺仴搴锋暟鎹紝涔熸洿鏂?
     if (detectionResults.value.component_health) {
-      // 鏇存柊閮ㄤ欢鍋ュ悍鏄剧ず
-      // ... 鏇存柊閫昏緫
+      // 更新部件健康显示
+      // ... 更新逻辑
     }
     
     ElMessage.success('妫€娴嬬粨鏋滃凡鍔犺浇鍒颁富椤甸潰');
@@ -406,7 +406,7 @@ function viewDetectionResults() {
 async function downloadResults() {
   try {
     if (!detectionResults.value?.session_id) {
-      ElMessage.warning('娌℃湁鍙笅杞界殑缁撴灉');
+      ElMessage.warning('没有可下载的结果');
       return;
     }
 
@@ -426,7 +426,7 @@ async function downloadResults() {
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
 
-    ElMessage.success('鎶ュ憡涓嬭浇鎴愬姛');
+    ElMessage.success('报告下载成功');
   } catch (error) {
     console.error('涓嬭浇鎶ュ憡澶辫触:', error);
     ElMessage.error('涓嬭浇鎶ュ憡澶辫触');
@@ -451,10 +451,10 @@ from .batch_processing import RealtimeDetectionProcessor
 def realtime_detection(request):
     """
     瀹炴椂妫€娴婣PI绔偣
-    鎺ユ敹鏂囦欢涓婁紶锛屽垱寤烘娴嬩細璇濓紝杩斿洖浼氳瘽ID
+    接收文件上传，创建检测会话，返回会话ID
     """
     try:
-        # 楠岃瘉鍙傛暟
+        # 验证参数
         if 'file' not in request.FILES:
             return Response({'error': '娌℃湁涓婁紶鏂囦欢'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -600,7 +600,7 @@ class RealtimeDetectionProcessor:
                     detection_mode
                 )
                 
-                # 鏀堕泦缁撴灉
+                # 收集结果
                 if detection_result.get('is_anomaly'):
                     results['anomaly_count'] += 1
                     results['anomaly_frames'].append(detection_result)
@@ -674,7 +674,7 @@ class RealtimeDetectionProcessor:
     
     def generate_report(self, session_id):
         """鐢熸垚妫€娴嬫姤鍛婏紙Excel鏍煎紡锛?""
-        # 瀹炵幇鎶ュ憡鐢熸垚閫昏緫
+        # 实现报告生成逻辑
         # ...
         pass
 ```
@@ -752,7 +752,7 @@ websocket_urlpatterns = [
   鈫?
 妫€娴嬪畬鎴?
   鈫?(WebSocket鎺ㄩ€佺粨鏋?
-鍓嶇鏄剧ず缁撴灉
+前端显示结果
 ```
 
 ---

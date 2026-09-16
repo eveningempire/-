@@ -1,0 +1,8 @@
+﻿component_id,component_hi_chosen,component_hi_status,fault_alarm_status,localization_status
+lox_pump,frozen_cdPCA_mini84,fallback,abstain_failed_gates,development_only_not_registered
+oxygen_turbine,CH-2b@z4.0,qualified,abstain_failed_gates,development_only_not_registered
+kerosene_pipeline,CH-2a@z5.0,qualified,abstain_failed_gates,development_only_not_registered
+kerosene_valve,CH-2a@z5.0,qualified,abstain_failed_gates,development_only_not_registered
+gas_generator,CH-2a@z4.0,qualified,abstain_failed_gates,development_only_not_registered
+combustion_chamber,CH-2a@z5.0,qualified,abstain_failed_gates,development_only_not_registered
+nozzle,CH-2a@z5.0,qualified,abstain_failed_gates,development_only_not_registered

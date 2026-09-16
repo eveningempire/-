@@ -9,14 +9,14 @@
 
 ## 馃搵 UI鏀归€犳柟妗?
 
-### 淇敼鍓嶇殑甯冨眬
+### 修改前的布局
 ```
-[PHM鍨嬪彿閫夋嫨妗哴  [鏃堕棿閫夋嫨鎸夐挳]
+[PHM型号选择框]  [时间选择按钮]
 ```
 
-### 淇敼鍚庣殑甯冨眬
+### 修改后的布局
 ```
-[妯″紡閫夋嫨妗哴     [PHM鍨嬪彿閫夋嫨妗哴
+[模式选择框]     [PHM型号选择框]
 ```
 
 ---
@@ -59,10 +59,10 @@
 
 ## 馃捇 浠ｇ爜瀹炵幇
 
-### 1. 鍓嶇Template淇敼
+### 1. 前端Template修改
 
 ```vue
-<!-- 淇敼actions-container閮ㄥ垎 -->
+<!-- 修改actions-container部分 -->
 <div class="actions-container">
   <!-- 妯″紡閫夋嫨 -->
   <div class="mode-selection">
@@ -73,12 +73,12 @@
       @change="onModeChange"
       size="small"
     >
-      <el-option label="鏌ョ湅鍘嗗彶缁撴灉" value="history" />
+      <el-option label="查看历史结果" value="history" />
       <el-option label="涓婁紶鏂囦欢妫€娴? value="upload" />
     </el-select>
   </div>
   
-  <!-- PHM鍨嬪彿閫夋嫨 -->
+  <!-- PHM型号选择 -->
   <div class="cmg-selection">
     <el-select 
       v-model="selectedCmgModel" 
@@ -98,7 +98,7 @@
   </div>
 </div>
 
-<!-- 淇敼placeholder鎻愮ず -->
+<!-- 修改placeholder提示 -->
 <div v-else class="placeholder-text">
   <div class="placeholder-content">
     <el-icon size="60" color="#c0c4cc"><DataAnalysis /></el-icon>
@@ -118,7 +118,7 @@
     type="datetimerange"
     range-separator="鑷?
     start-placeholder="寮€濮嬫椂闂?
-    end-placeholder="缁撴潫鏃堕棿"
+    end-placeholder="结束时间"
     style="width: 100%;"
   />
   
@@ -130,7 +130,7 @@
   </template>
 </el-dialog>
 
-<!-- 鏂板锛氭枃浠朵笂浼犲璇濇锛堜笂浼犳ā寮忥級 -->
+<!-- 新增：文件上传对话框（上传模式） -->
 <el-dialog
   v-model="fileUploadDialogVisible"
   title="涓婁紶鏂囦欢杩涜妫€娴?
@@ -166,10 +166,10 @@
       </el-select>
     </el-form-item>
 
-    <el-form-item label="鏄惁淇濆瓨缁撴灉">
+    <el-form-item label="是否保存结果">
       <el-switch v-model="detectionConfig.saveResults" />
       <span style="margin-left: 10px; color: #909399; font-size: 12px;">
-        淇濆瓨鍒版暟鎹簱浠ヤ究鍚庣画鏌ヨ
+        保存到数据库以便后续查询
       </span>
     </el-form-item>
   </el-form>
@@ -196,7 +196,7 @@
 </el-dialog>
 ```
 
-### 2. 鍓嶇Script淇敼
+### 2. 前端Script修改
 
 ```javascript
 import { ref, computed } from 'vue';
@@ -236,7 +236,7 @@ function onModeChange() {
   ElMessage.info(`宸插垏鎹㈠埌${selectedMode.value === 'history' ? '鍘嗗彶鏌ヨ' : '鏂囦欢妫€娴?}妯″紡`);
 }
 
-// 淇敼锛欳MG涓綋閫夋嫨
+// 修改：CMG个体选择
 function selectCmg(id) {
   console.log('閫夋嫨PHM涓綋锛宨d:', id, '褰撳墠妯″紡:', selectedMode.value);
   selectedCmgId.value = id;
@@ -246,7 +246,7 @@ function selectCmg(id) {
     // 鍘嗗彶妯″紡锛氬脊鍑烘椂闂撮€夋嫨瀵硅瘽妗?
     openTimeSelectDialog();
   } else if (selectedMode.value === 'upload') {
-    // 涓婁紶妯″紡锛氬脊鍑烘枃浠朵笂浼犲璇濇
+    // 上传模式：弹出文件上传对话框
     openFileUploadDialog();
   } else {
     ElMessage.warning('璇峰厛閫夋嫨鎿嶄綔妯″紡');
@@ -357,7 +357,7 @@ async function startDetection() {
     detectionProgress.value = 90;
     const data = await response.json();
     
-    // 鍏抽敭锛氱洿鎺ヤ娇鐢ㄨ繑鍥炵殑鍐呭瓨缁撴灉
+    // 关键：直接使用返回的内存结果
     memoryDetectionResults.value = data.results;
     
     // 鏇存柊鏄剧ず鏁版嵁锛堜笉浠庢暟鎹簱璇诲彇锛?
@@ -385,7 +385,7 @@ async function startDetection() {
   }
 }
 
-// 鏂板锛氫粠鍐呭瓨缁撴灉鏇存柊鏄剧ず
+// 新增：从内存结果更新显示
 function updateDisplayFromMemory(results) {
   console.log('浠庡唴瀛樻洿鏂版樉绀烘暟鎹?', results);
   
@@ -397,12 +397,12 @@ function updateDisplayFromMemory(results) {
   
   // 鏇存柊閮ㄤ欢鍋ュ悍鐘舵€侊紙濡傛灉鏈夛級
   if (results.component_health) {
-    // 灏嗗唴瀛樹腑鐨勯儴浠跺仴搴锋暟鎹浆鎹负鏄剧ず鏍煎紡
+    // 将内存中的部件健康数据转换为显示格式
     // 娉ㄦ剰锛氶渶瑕佺‘淇濆瓧娈靛悕绉板尮閰?
     // results.component_health 鏍煎紡搴旇涓庝粠鏁版嵁搴撹鍙栫殑鏍煎紡涓€鑷?
   }
   
-  // 鏇存柊鏁翠綋鍋ュ悍搴︼紙濡傛灉鏈夛級
+  // 更新整体健康度（如果有）
   if (results.overall_health !== undefined) {
     // 鏇存柊鏁翠綋鍋ュ悍搴︽樉绀?
   }
@@ -410,12 +410,12 @@ function updateDisplayFromMemory(results) {
   console.log('鏄剧ず鏁版嵁鏇存柊瀹屾垚');
 }
 
-// 淇敼锛氭樉绀哄紓甯稿抚璇︽儏锛堥渶瑕佸吋瀹逛袱绉嶆ā寮忥級
+// 修改：显示异常帧详情（需要兼容两种模式）
 async function showAnomalyDetails(frame) {
   selectedAnomalyFrame.value = frame;
   detailDialogVisible.value = true;
   
-  // 濡傛灉鏄笂浼犳ā寮忥紝鐩存帴浣跨敤鍐呭瓨涓殑鏁版嵁
+  // 如果是上传模式，直接使用内存中的数据
   if (selectedMode.value === 'upload' && memoryDetectionResults.value) {
     // 浠庡唴瀛樼粨鏋滀腑鏌ユ壘瀵瑰簲鐨勮鎯?
     const frameDetails = memoryDetectionResults.value.frame_details?.find(
@@ -431,9 +431,9 @@ async function showAnomalyDetails(frame) {
     }
   }
   
-  // 鍘嗗彶妯″紡锛氳皟鐢ˋPI浠庢暟鎹簱鑾峰彇
+  // 历史模式：调用API从数据库获取
   if (selectedMode.value === 'history') {
-    // 鍘熸湁鐨凙PI璋冪敤閫昏緫
+    // 原有的API调用逻辑
     const [imsResponse, ruleResponse, msfgResponse] = await Promise.all([
       fetch(`/api/v1/data/detection-overview/?action=ims_details&frame_id=${frame.id}`),
       fetch(`/api/v1/data/detection-overview/?action=rule_details&frame_id=${frame.id}`),
@@ -466,7 +466,7 @@ def realtime_detection(request):
     鐩存帴杩斿洖鍐呭瓨涓殑妫€娴嬬粨鏋滐紝涓嶄緷璧朩ebSocket
     """
     try:
-        # 楠岃瘉鍙傛暟
+        # 验证参数
         if 'file' not in request.FILES:
             return Response({'error': '娌℃湁涓婁紶鏂囦欢'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -484,7 +484,7 @@ def realtime_detection(request):
         except PHM.DoesNotExist:
             return Response({'error': 'PHM涓嶅瓨鍦?}, status=status.HTTP_404_NOT_FOUND)
         
-        # 淇濆瓨涓婁紶鐨勬枃浠跺埌涓存椂鐩綍
+        # 保存上传的文件到临时目录
         uploaded_file = request.FILES['file']
         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp_file:
             for chunk in uploaded_file.chunks():
@@ -525,7 +525,7 @@ def realtime_detection(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 ```
 
-### 淇敼batch_processing.py
+### 修改batch_processing.py
 
 ```python
 class BatchFileProcessor:
@@ -546,8 +546,8 @@ class BatchFileProcessor:
             file_path: 鏂囦欢璺緞
             cmg: PHM瀵硅薄
             detection_mode: 妫€娴嬫ā寮?('full', 'ims_only', 'rule_only', 'msfg_only')
-            save_to_db: 鏄惁淇濆瓨鍒版暟鎹簱
-            return_details: 鏄惁杩斿洖璇︾粏缁撴灉
+            save_to_db: 是否保存到数据库
+            return_details: 是否返回详细结果
             
         Returns:
             妫€娴嬬粨鏋滃瓧鍏?
@@ -585,7 +585,7 @@ class BatchFileProcessor:
                 detection_mode=detection_mode
             )
             
-            # 鏀堕泦缁撴灉
+            # 收集结果
             is_anomaly = detection_result.get('is_anomaly', False)
             
             if is_anomaly:
@@ -597,7 +597,7 @@ class BatchFileProcessor:
                     'severity': detection_result.get('severity', 'medium')
                 })
             
-            # 淇濆瓨璇︾粏缁撴灉
+            # 保存详细结果
             if return_details:
                 results['frame_details'].append({
                     'frame_number': idx + 1,
@@ -724,7 +724,7 @@ class BatchFileProcessor:
 ## 馃攽 鍏抽敭鐐?
 
 ### 1. 鏁版嵁瀛楁瀵瑰簲
-纭繚batch_processing杩斿洖鐨勭粨鏋滄牸寮忎笌浠庢暟鎹簱璇诲彇鐨勬牸寮忎竴鑷达細
+确保batch_processing返回的结果格式与从数据库读取的格式一致：
 
 ```python
 # 鏁版嵁搴撴牸寮忥紙鍘嗗彶妯″紡锛?
@@ -750,7 +750,7 @@ class BatchFileProcessor:
     'anomaly_ratio': 0.05,
     'anomaly_frames': [
         {
-            # 'id': None,  # 鏃犳暟鎹簱ID
+            # 'id': None,  # 无数据库ID
             'frame_number': 10,
             'timestamp': '2025-10-10T10:00:00Z',
             'anomaly_type': 'ims',
@@ -762,7 +762,7 @@ class BatchFileProcessor:
 ```
 
 ### 2. 妯″紡鍖哄垎
-鍦ㄦ墍鏈夐渶瑕佹暟鎹殑鍦版柟锛屾鏌ュ綋鍓嶆ā寮忥細
+在所有需要数据的地方，检查当前模式：
 - `selectedMode.value === 'history'` 鈫?璋冪敤API浠庢暟鎹簱璇诲彇
 - `selectedMode.value === 'upload'` 鈫?浣跨敤 `memoryDetectionResults.value`
 
@@ -778,7 +778,7 @@ class BatchFileProcessor:
 1. **浠ｇ爜鏀瑰姩鏈€灏?* - 涓昏鏄疷I閲嶆帓鍜屾暟鎹潵婧愬垏鎹?
 2. **鐢ㄦ埛浣撻獙娓呮櫚** - 妯″紡閫夋嫨浼樺厛锛屾祦绋嬬畝鍗?
 3. **鏃犻渶WebSocket** - 鍚屾澶勭悊锛岀畝鍖栧疄鐜?
-4. **瀹屽叏澶嶇敤閫昏緫** - batch_processing.py鏍稿績閫昏緫涓嶅彉
+4. **完全复用逻辑** - batch_processing.py核心逻辑不变
 
 ---
 

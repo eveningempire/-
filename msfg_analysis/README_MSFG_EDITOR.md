@@ -15,7 +15,7 @@ class MSFGDefinition(models.Model):
         PHMModel,
         on_delete=models.CASCADE,
         related_name="msfg_definitions",
-        help_text="鍏宠仈鐨凜MG妯″瀷"
+        help_text="关联的CMG模型"
     )
     name = models.CharField(max_length=128, help_text="MSFG鍚嶇О")
     description = models.TextField(blank=True, help_text="MSFG鎻忚堪")
@@ -24,7 +24,7 @@ class MSFGDefinition(models.Model):
     detection_matrix = models.JSONField(null=True, blank=True, help_text="妫€娴嬬煩闃?)
     test_names = models.JSONField(default=list, help_text="娴嬭瘯鐐瑰悕绉板垪琛?)
     fault_names = models.JSONField(default=list, help_text="鏁呴殰鍚嶇О鍒楄〃")
-    component_names = models.JSONField(default=list, help_text="缁勪欢鍚嶇О鍒楄〃")
+    component_names = models.JSONField(default=list, help_text="组件名称列表")
     is_active = models.BooleanField(default=True, help_text="鏄惁婵€娲?)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -52,7 +52,7 @@ class MSFGNode(models.Model):
         MSFGDefinition,
         on_delete=models.CASCADE,
         related_name="nodes",
-        help_text="鍏宠仈鐨凪SFG瀹氫箟"
+        help_text="关联的MSFG定义"
     )
     node_id = models.CharField(max_length=64, help_text="鑺傜偣ID")
     node_type = models.CharField(max_length=20, choices=NODE_TYPES, help_text="鑺傜偣绫诲瀷")
@@ -78,7 +78,7 @@ class MSFGEdge(models.Model):
         MSFGDefinition,
         on_delete=models.CASCADE,
         related_name="edges",
-        help_text="鍏宠仈鐨凪SFG瀹氫箟"
+        help_text="关联的MSFG定义"
     )
     edge_id = models.CharField(max_length=64, help_text="杈笽D")
     source_node = models.ForeignKey(
@@ -107,13 +107,13 @@ class MSFGEdge(models.Model):
 
 
 class MSFGAnalysisResult(models.Model):
-    """MSFG鍒嗘瀽缁撴灉妯″瀷"""
+    """MSFG分析结果模型"""
     
     data_point = models.ForeignKey(
         PHMData,
         on_delete=models.CASCADE,
         related_name="msfg_results",
-        help_text="鍏宠仈鐨勬暟鎹偣"
+        help_text="关联的数据点"
     )
     msfg_definition = models.ForeignKey(
         MSFGDefinition,
@@ -123,24 +123,24 @@ class MSFGAnalysisResult(models.Model):
     )
     test_results = models.JSONField(default=dict, help_text="娴嬭瘯鐐圭粨鏋?)
     fault_results = models.JSONField(default=dict, help_text="鏁呴殰鐐圭粨鏋?)
-    system_results = models.JSONField(default=dict, help_text="绯荤粺鍒嗘瀽缁撴灉")
-    component_results = models.JSONField(default=dict, help_text="閮ㄤ欢绾у埆鍒嗘瀽缁撴灉")
-    overall_health_score = models.FloatField(default=1.0, help_text="鎬讳綋鍋ュ悍鍒嗘暟")
+    system_results = models.JSONField(default=dict, help_text="系统分析结果")
+    component_results = models.JSONField(default=dict, help_text="部件级别分析结果")
+    overall_health_score = models.FloatField(default=1.0, help_text="总体健康分数")
     detected_faults = models.JSONField(default=list, help_text="妫€娴嬪埌鐨勬晠闅滃垪琛?)
-    critical_components = models.JSONField(default=list, help_text="鍏抽敭寮傚父閮ㄤ欢鍒楄〃")
+    critical_components = models.JSONField(default=list, help_text="关键异常部件列表")
     analysis_details = models.JSONField(
         default=dict,
-        help_text="鍒嗘瀽璇︾粏淇℃伅"
+        help_text="分析详细信息"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name = "MSFG鍒嗘瀽缁撴灉"
-        verbose_name_plural = "MSFG鍒嗘瀽缁撴灉"
+        verbose_name = "MSFG分析结果"
+        verbose_name_plural = "MSFG分析结果"
         ordering = ["-created_at"]
     
     def __str__(self):
-        return f"{self.data_point.timestamp} - 鍋ュ悍鍒嗘暟: {self.overall_health_score:.3f}"
+        return f"{self.data_point.timestamp} - 健康分数: {self.overall_health_score:.3f}"
 
 
 class TestPointRuleMapping(models.Model):
@@ -153,7 +153,7 @@ class TestPointRuleMapping(models.Model):
         PHMModel,
         on_delete=models.CASCADE,
         related_name="msfg_testpoint_mappings",
-        help_text="鍏宠仈鐨凜MG妯″瀷"
+        help_text="关联的CMG模型"
     )
     rule_definition = models.ForeignKey(
         'rule_detection.RuleDefinition',
@@ -187,7 +187,7 @@ class TestPointRule(models.Model):
         MSFGDefinition,
         on_delete=models.CASCADE,
         related_name="testpoint_rules",
-        help_text="鍏宠仈鐨凪SFG瀹氫箟",
+        help_text="关联的MSFG定义",
         null=True,
         blank=True
     )
@@ -195,11 +195,11 @@ class TestPointRule(models.Model):
         PHMModel,
         on_delete=models.CASCADE,
         related_name="msfg_testpoint_rules",
-        help_text="鍏宠仈鐨凜MG妯″瀷"
+        help_text="关联的CMG模型"
     )
     test_name = models.CharField(max_length=128, help_text="娴嬭瘯鐐瑰悕绉?)
     rule_id = models.CharField(max_length=64, help_text="瑙勫垯ID")
-    rule_expression = models.TextField(help_text="瑙勫垯琛ㄨ揪寮忥紙鍗曠偣琛ㄨ揪寮忥級")
+    rule_expression = models.TextField(help_text="规则表达式（单点表达式）")
     weight = models.FloatField(default=1.0, help_text="鏉冮噸锛?..10锛?)
     is_online = models.BooleanField(default=True, help_text="鏄惁鍚敤")
     description = models.TextField(blank=True, help_text="瑙勫垯鎻忚堪")
@@ -218,9 +218,9 @@ class TestPointRule(models.Model):
 
 
 class TestPointComponentMapping(models.Model):
-    """娴嬭瘯鐐瑰埌閮ㄤ欢鐨勬槧灏勮〃
+    """测试点到部件的映射表
     
-    鐢ㄤ簬灏哅SFG涓殑娴嬭瘯鐐规槧灏勫埌鍏蜂綋鐨勭墿鐞嗛儴浠讹紝
+    用于将MSFG中的测试点映射到具体的物理部件，
     浠ヤ究杩涜鍑嗙‘鐨勯儴浠剁骇鍒晠闅滃畾浣嶃€?
     """
     
@@ -228,7 +228,7 @@ class TestPointComponentMapping(models.Model):
         MSFGDefinition,
         on_delete=models.CASCADE,
         related_name="testpoint_component_mappings",
-        help_text="鍏宠仈鐨凪SFG瀹氫箟"
+        help_text="关联的MSFG定义"
     )
     test_point_name = models.CharField(max_length=128, help_text="娴嬭瘯鐐瑰悕绉?)
     component_name = models.CharField(max_length=128, help_text="閮ㄤ欢鍚嶇О")
@@ -252,7 +252,7 @@ class TestPointComponentMapping(models.Model):
             ('sensor', '浼犳劅鍣ㄧ郴缁?),
             ('control', '鎺у埗绯荤粺'),
             ('power', '鐢垫簮绯荤粺'),
-            ('structural', '缁撴瀯绯荤粺'),
+            ('structural', '结构系统'),
             ('thermal', '鐑鐞嗙郴缁?),
             ('other', '鍏朵粬閮ㄤ欢')
         ],
@@ -283,7 +283,7 @@ class FaultComponentMapping(models.Model):
         MSFGDefinition,
         on_delete=models.CASCADE,
         related_name="fault_component_mappings",
-        help_text="鍏宠仈鐨凪SFG瀹氫箟"
+        help_text="关联的MSFG定义"
     )
     fault_name = models.CharField(max_length=128, help_text="鏁呴殰鍚嶇О")
     component_name = models.CharField(max_length=128, help_text="閮ㄤ欢鍚嶇О")
@@ -322,7 +322,7 @@ class TestPointFaultMapping(models.Model):
         MSFGDefinition,
         on_delete=models.CASCADE,
         related_name="testpoint_fault_mappings",
-        help_text="鍏宠仈鐨凪SFG瀹氫箟"
+        help_text="关联的MSFG定义"
     )
     test_point_name = models.CharField(max_length=128, help_text="娴嬭瘯鐐瑰悕绉?)
     fault_name = models.CharField(max_length=128, help_text="鏁呴殰鍚嶇О")

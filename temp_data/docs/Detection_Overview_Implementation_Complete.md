@@ -13,7 +13,7 @@
 
 ### Phase 1: 鍓嶇UI鏀归€?鉁?
 
-**淇敼鏂囦欢**锛歚frontend/src/views/DetectionOverview.vue`
+**修改文件**：`frontend/src/views/DetectionOverview.vue`
 
 #### 1.1 鏇存柊鎿嶄綔姝ラ鎻愮ず
 - 淇敼姝ラ璇存槑锛氫粠"閫夋嫨鍨嬪彿鍜屼釜浣?鈫?閫夋嫨鏃堕棿娈?鏀逛负"閫夋嫨妯″紡 鈫?閫夋嫨鍨嬪彿鍜屼釜浣?鈫?閫夋嫨鏃堕棿鎴栦笂浼犳枃浠?
@@ -40,7 +40,7 @@
 
 ### Phase 2: 鍓嶇閫昏緫鏀归€?鉁?
 
-**淇敼鏂囦欢**锛歚frontend/src/views/DetectionOverview.vue`
+**修改文件**：`frontend/src/views/DetectionOverview.vue`
 
 #### 2.1 鏂板鐘舵€佸彉閲?
 ```javascript
@@ -56,7 +56,7 @@ const detectionMessage = ref('');
 const memoryDetectionResults = ref(null);
 ```
 
-#### 2.2 鏂板鍑芥暟锛堝叡10涓級
+#### 2.2 新增函数（共10个）
 1. `onModeChange()` - 妯″紡鍒囨崲澶勭悊
 2. `openTimeSelectDialog()` - 鎵撳紑鏃堕棿閫夋嫨瀵硅瘽妗?
 3. `confirmTimeSelection()` - 纭鏃堕棿閫夋嫨
@@ -67,8 +67,8 @@ const memoryDetectionResults = ref(null);
 8. `startDetection()` - 寮€濮嬫娴?
 9. `updateDisplayFromMemory()` - 浠庡唴瀛樻洿鏂版樉绀?
 
-#### 2.3 淇敼鐜版湁鍑芥暟
-- `selectCmg()` - 澧炲姞妯″紡鍒ゆ柇閫昏緫锛屾牴鎹ā寮忓脊鍑轰笉鍚屽璇濇
+#### 2.3 修改现有函数
+- `selectCmg()` - 增加模式判断逻辑，根据模式弹出不同对话框
 
 ---
 
@@ -122,7 +122,7 @@ class RealtimeDetectionView(APIView):
 
 ### Phase 4: batch_processing鎵╁睍 鉁?
 
-**淇敼鏂囦欢**锛歚data_management/batch_processing.py`
+**修改文件**：`data_management/batch_processing.py`
 
 #### 4.1 鏂板鍏叡鏂规硶
 ```python
@@ -155,7 +155,7 @@ def process_file_for_detection(
 ## 馃幆 鍏抽敭璁捐鐗规€?
 
 ### 1. 鍙屾ā寮忔敮鎸?
-- **鍘嗗彶妯″紡**锛氫繚鐣欏師鏈夊姛鑳斤紝浠庢暟鎹簱璇诲彇
+- **历史模式**：保留原有功能，从数据库读取
 - **涓婁紶妯″紡**锛氱洿鎺ヤ娇鐢ㄥ唴瀛樼粨鏋滐紝鏃犻渶鏁版嵁搴?
 
 ### 2. 闃诲閫昏緫
@@ -171,7 +171,7 @@ if (selectedMode.value === 'history') {
 }
 ```
 
-### 4. 鍐呭瓨缁撴灉浣跨敤
+### 4. 内存结果使用
 ```javascript
 // 涓婁紶妯″紡锛氫娇鐢ㄥ唴瀛樼粨鏋?
 memoryDetectionResults.value = data.results;
@@ -189,9 +189,9 @@ await fetchAnomalyResults(selectedCmg.id, startTime, endTime);
 
 ---
 
-## 馃搳 淇敼缁熻
+## 📊 修改统计
 
-### 鍓嶇淇敼
+### 前端修改
 ```
 frontend/src/views/DetectionOverview.vue
   - 鎿嶄綔姝ラ鎻愮ず锛?琛?
@@ -203,7 +203,7 @@ frontend/src/views/DetectionOverview.vue
   鎬昏锛氱害380琛?
 ```
 
-### 鍚庣淇敼
+### 后端修改
 ```
 data_management/views.py
   - 鏂板RealtimeDetectionView锛?0琛?
@@ -221,7 +221,7 @@ data_management/batch_processing.py
 
 ## 鉁?娴嬭瘯娓呭崟
 
-### 鍓嶇娴嬭瘯
+### 前端测试
 - [ ] 妯″紡閫夋嫨涓嬫媺妗嗘甯告樉绀?
 - [ ] 鏈€夋嫨妯″紡鏃讹紝PHM鍨嬪彿閫夋嫨琚鐢?
 - [ ] 鍘嗗彶妯″紡锛氱偣鍑籆MG鍗＄墖寮瑰嚭鏃堕棿閫夋嫨
@@ -230,7 +230,7 @@ data_management/batch_processing.py
 - [ ] 妫€娴嬭繘搴︽潯姝ｅ父鏄剧ず
 - [ ] 妫€娴嬪畬鎴愬悗缁撴灉姝ｇ‘鏄剧ず
 
-### 鍚庣娴嬭瘯
+### 后端测试
 - [ ] `/api/v1/data/realtime-detection/` 绔偣鍙闂?
 - [ ] 鏂囦欢涓婁紶姝ｅ父澶勭悊
 - [ ] CSV鏂囦欢瑙ｆ瀽姝ｇ‘
@@ -240,20 +240,20 @@ data_management/batch_processing.py
 - [ ] MSFG妫€娴嬫甯告墽琛?
 - [ ] 妫€娴嬬粨鏋滄牸寮忔纭?
 
-### 闆嗘垚娴嬭瘯
+### 集成测试
 - [ ] 瀹屾暣妫€娴嬫祦绋嬶紙浠庝笂浼犲埌鏄剧ず锛?
 - [ ] 鍘嗗彶妯″紡鍜屼笂浼犳ā寮忓垏鎹?
 - [ ] 閿欒澶勭悊锛堟枃浠舵牸寮忎笉鏀寔銆丆MG涓嶅瓨鍦ㄧ瓑锛?
-- [ ] 澶ф枃浠跺鐞嗭紙1000+鏉℃暟鎹級
+- [ ] 大文件处理（1000+条数据）
 
 ---
 
-## 馃摑 浣跨敤璇存槑
+## 📝 使用说明
 
 ### 鍘嗗彶妯″紡浣跨敤娴佺▼
 ```
-1. 閫夋嫨"鏌ョ湅鍘嗗彶缁撴灉"
-2. 閫夋嫨PHM鍨嬪彿
+1. 选择"查看历史结果"
+2. 选择PHM型号
 3. 鐐瑰嚮PHM涓綋鍗＄墖
 4. 鍦ㄥ脊鍑哄璇濇涓€夋嫨鏃堕棿鑼冨洿
 5. 鏌ョ湅鍘嗗彶妫€娴嬬粨鏋?
@@ -262,7 +262,7 @@ data_management/batch_processing.py
 ### 涓婁紶妯″紡浣跨敤娴佺▼
 ```
 1. 閫夋嫨"涓婁紶鏂囦欢妫€娴?
-2. 閫夋嫨PHM鍨嬪彿
+2. 选择PHM型号
 3. 鐐瑰嚮PHM涓綋鍗＄墖
 4. 鍦ㄥ脊鍑哄璇濇涓笂浼犳枃浠?
 5. 閰嶇疆妫€娴嬪弬鏁帮紙妫€娴嬫ā寮忋€佹槸鍚︿繚瀛橈級
@@ -273,7 +273,7 @@ data_management/batch_processing.py
 
 ---
 
-## 馃殌 閮ㄧ讲璇存槑
+## 🚀 部署说明
 
 ### 鍓嶇閮ㄧ讲
 ```bash
@@ -310,8 +310,8 @@ python manage.py runserver
    - 澶ф枃浠跺缓璁垎鎵瑰鐞?
 
 4. **鏁版嵁鏍煎紡**
-   - CSV锛歎TF-8缂栫爜锛岄琛屼负琛ㄥご
-   - Excel锛氶琛屼负琛ㄥご锛屾敮鎸亁lsx鍜寈ls鏍煎紡
+   - CSV：UTF-8编码，首行为表头
+   - Excel：首行为表头，支持xlsx和xls格式
 
 ---
 

@@ -60,9 +60,9 @@ process_file_for_detection(file_path, cmg, ...)
 _collect_detection_results(cmg, records, ...)
   鈹斺攢 浠庢暟鎹簱璇诲彇妫€娴嬬粨鏋?
   鈹斺攢 鑱氬悎閮ㄤ欢鍋ュ悍搴?
-  鈹斺攢 杩斿洖鍐呭瓨缁撴灉
+  └─ 返回内存结果
   鈫?
-_cleanup_temp_detection_data(session, records)  鈿狅笍 濡傛灉save_to_db=False
+_cleanup_temp_detection_data(session, records)  ⚠️ 如果save_to_db=False
   鈹溾攢 鍒犻櫎鎵€鏈夋娴嬬粨鏋?
   鈹溾攢 鍒犻櫎鎵€鏈塁MGData
   鈹斺攢 鍒犻櫎ImportSession
@@ -84,13 +84,13 @@ file_path = session.file.path  # 瀹夊叏璺緞锛屽湪MEDIA_ROOT涓?
 
 **瀹炴椂妫€娴?*锛?
 ```python
-file_path = 'C:\Users\...\Temp\tmpXXX.xlsx'  # 绯荤粺涓存椂鐩綍
+file_path = 'C:\Users\...\Temp\tmpXXX.xlsx'  # 系统临时目录
 session.file.path  # 鉂?鎶ラ敊锛氳矾寰勫湪media鐩綍澶?
 ```
 
 **瑙ｅ喅鏂规**锛?
 ```python
-# 鍒涘缓鏂版柟娉曪細_parse_file_direct(file_path)
+# 创建新方法：_parse_file_direct(file_path)
 # 涓嶄緷璧杝ession.file锛岀洿鎺ヨ鍙栨枃浠惰矾寰?
 def _parse_file_direct(self, file_path: str, max_rows=None):
     # 鐩存帴鎵撳紑鏂囦欢锛屼笉閫氳繃Django FileField
@@ -105,7 +105,7 @@ def _parse_file_direct(self, file_path: str, max_rows=None):
 **鍘熸湁娴佺▼**锛?
 - 瀛樺偍涓婁紶鐨勬枃浠讹紙FileField锛?
 - 璺熻釜澶勭悊杩涘害
-- 鍏宠仈鍒涘缓鐨凜MGData璁板綍
+- 关联创建的CMGData记录
 
 **瀹炴椂妫€娴?*锛?
 - 鉂?涓嶉渶瑕佸瓨鍌ㄦ枃浠讹紙宸插湪涓存椂鐩綍锛?
@@ -179,7 +179,7 @@ def process_file_for_detection(file_path, cmg, save_to_db=False):
     return results
 ```
 
-#### 2. _parse_file_direct锛堟枃浠惰В鏋愶級
+#### 2. _parse_file_direct（文件解析）
 ```python
 def _parse_file_direct(file_path, max_rows=None):
     """
@@ -190,7 +190,7 @@ def _parse_file_direct(file_path, max_rows=None):
     - CSV/Excel鏍煎紡鏀寔
     - 鏁版嵁绫诲瀷杞崲
     """
-    # 鍐呭祵parse_ts鍑芥暟
+    # 内嵌parse_ts函数
     def parse_ts(value):
         # 鏀寔澶氱鏃堕棿鏍煎紡
         # ISO, Unix timestamp, 甯歌鏍煎紡绛?
@@ -207,7 +207,7 @@ def _parse_file_direct(file_path, max_rows=None):
     return parsed_data  # List[Dict{'timestamp', 'data'}]
 ```
 
-#### 3. _create_cmg_data_batch锛堟暟鎹垱寤猴級
+#### 3. _create_cmg_data_batch（数据创建）
 ```python
 def _create_cmg_data_batch(cmg, parsed_data, session):
     """
@@ -215,7 +215,7 @@ def _create_cmg_data_batch(cmg, parsed_data, session):
     
     绠€鍖栫増鐨刜store_data锛?
     - 鍒嗘壒鍒涘缓锛堥伩鍏嶅唴瀛樻孩鍑猴級
-    - 浜嬪姟淇濇姢
+    - 事务保护
     - 杩斿洖鍒涘缓鐨勫璞″垪琛?
     """
     # 鍒嗘壒鍒涘缓
@@ -233,7 +233,7 @@ def _create_cmg_data_batch(cmg, parsed_data, session):
 
 ---
 
-## 馃搵 鏁版嵁缁撴瀯瀹屾暣瀵圭収
+## 📋 数据结构完整对照
 
 ### 闃舵1锛氭枃浠惰В鏋愬悗
 ```python
@@ -291,7 +291,7 @@ MSFGAnalysisResult(
 )
 ```
 
-### 闃舵4锛氭敹闆嗙粨鏋滃悗锛堝唴瀛橈級
+### 阶段4：收集结果后（内存）
 ```python
 results = {
     'total_frames': 109511,
@@ -345,7 +345,7 @@ file_path = session.file.path  # 鉂?闇€瑕丗ileField
 parsed_data = self._parse_file_direct(file_path)  # 鉁?鐩存帴璇诲彇
 ```
 
-### 淇2锛欼mportSession鍒涘缓
+### 修复2：ImportSession创建
 ```python
 # 閿欒鏂瑰紡
 ImportSession.objects.create(
@@ -377,10 +377,10 @@ stored_records = self._create_cmg_data_batch(cmg, parsed_data, temp_session)
 
 ### 澶嶇敤鏂规硶锛?涓級
 1. **`_run_detection_pipeline`** - 妫€娴嬫祦绋嬶紙瀹屽叏澶嶇敤锛?
-2. **`_collect_detection_results`** - 鏀堕泦缁撴灉锛堟柊澧烇級
+2. **`_collect_detection_results`** - 收集结果（新增）
 3. **`_aggregate_component_health`** - 鑱氬悎鍋ュ悍搴︼紙鏂板锛?
 4. **`_calculate_overall_health`** - 璁＄畻鏁翠綋鍋ュ悍搴︼紙鏂板锛?
-5. **`_cleanup_temp_detection_data`** - 娓呯悊涓存椂鏁版嵁锛堟柊澧烇級
+5. **`_cleanup_temp_detection_data`** - 清理临时数据（新增）
 
 ### 渚濊禆鐨勫師鏈夋柟娉?
 - `_run_detection_pipeline` 鈫?瀹屾暣鐨勬娴嬫祦绋?
@@ -418,12 +418,12 @@ PHMData (鎵归噺鍒涘缓)
 
 ### 1. 蹇呴』浣跨敤鏁版嵁搴?
 鍗充娇鏄复鏃舵娴嬶紝涔熷繀椤伙細
-- 鍒涘缓PHMData瀵硅薄锛堟娴嬪嚱鏁伴渶瑕侊級
+- 创建PHMData对象（检测函数需要）
 - 淇濆瓨妫€娴嬬粨鏋滃埌鏁版嵁搴擄紙鍏宠仈鍏崇郴锛?
-- 浠庢暟鎹簱璇诲彇缁撴灉锛堟敹闆嗛樁娈碉級
+- 从数据库读取结果（收集阶段）
 - 鏈€鍚庢竻鐞嗭紙濡傛灉涓嶄繚瀛橈級
 
-### 2. 涓嶈兘缁曡繃PHMData
+### 2. 不能绕过PHMData
 鎵€鏈夋娴嬪嚱鏁扮殑璁捐閮戒緷璧朇MGData锛?
 ```python
 run_ims_detection(cmg_data: PHMData)
@@ -462,7 +462,7 @@ IMSDetectionResult.data_point = ForeignKey(PHMData)
 
 ---
 
-## 馃搳 淇敼鎬荤粨
+## 📊 修改总结
 
 ### 淇鐨勬墍鏈夐敊璇?
 

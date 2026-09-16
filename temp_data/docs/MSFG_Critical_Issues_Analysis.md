@@ -30,7 +30,7 @@ for i, test_node in enumerate(test_nodes):
 ```python
 # TestPointRule 妯″瀷瀛樺湪浣嗘湭琚皟鐢?
 class TestPointRule(models.Model):
-    rule_expression = models.TextField(help_text="瑙勫垯琛ㄨ揪寮忥紙鍗曠偣琛ㄨ揪寮忥級")
+    rule_expression = models.TextField(help_text="规则表达式（单点表达式）")
     weight = models.FloatField(default=1.0, help_text="鏉冮噸锛?..10锛?)
     # ... 浣嗗湪鎵归噺澶勭悊涓粠鏈娇鐢?
 ```
@@ -47,7 +47,7 @@ for mapping in mappings:
     component_name = mapping.component_name
     if component_name not in component_mappings:
         component_mappings[component_name] = []
-    # 馃毃 涓ラ噸閿欒锛氬拷鐣ヤ簡瀹為檯鐨勬祴璇曠偣鏄犲皠鍏崇郴
+    # 🚨 严重错误：忽略了实际的测试点映射关系
     component_mappings[component_name] = [fault_node.name for fault_node in fault_nodes]
 ```
 
@@ -74,12 +74,12 @@ analysis_result = fusion_algorithm.run_advanced_analysis(
 
 ```python
 # 妯″瀷瀛楁
-component_results = models.JSONField(default=dict, help_text="閮ㄤ欢绾у埆鍒嗘瀽缁撴灉")
+component_results = models.JSONField(default=dict, help_text="部件级别分析结果")
 
 # 浣嗗疄闄呭瓨鍌ㄧ殑鏁版嵁缁撴瀯涓嶄竴鑷?
 ```
 
-## 馃敡 淇鏂规
+## 🔧 修复方案
 
 ### 淇1锛氶噸鍐欐祴鐐硅瘎鍒嗛€昏緫
 
@@ -88,7 +88,7 @@ component_results = models.JSONField(default=dict, help_text="閮ㄤ欢绾у埆�
 ```python
 class TestPointScoringService:
     def calculate_test_scores(self, data_point: PHMData, msfg_definition: MSFGDefinition) -> Dict[str, float]:
-        """鍩轰簬娴嬬偣瑙勫垯璁＄畻娴嬬偣鍒嗘暟"""
+        """基于测点规则计算测点分数"""
         # 1. 鑾峰彇璇SFG鐨勬墍鏈夋祴鐐硅鍒?
         # 2. 鎵ц瑙勫垯琛ㄨ揪寮?
         # 3. 搴旂敤鏉冮噸
@@ -106,39 +106,39 @@ def build_component_mappings(msfg_definition: MSFGDefinition) -> Dict[str, List[
     # 鏋勫缓 component_name -> [fault_names] 鐨勬槧灏?
 ```
 
-### 淇3锛氬畬鍠勬暟鎹簱瀛樺偍
+### 修复3：完善数据库存储
 
 闇€瑕佺‘淇濇暟鎹粨鏋勪竴鑷存€у拰瀹屾暣鎬с€?
 
-### 淇4锛氱鍒扮娴嬭瘯
+### 修复4：端到端测试
 
 闇€瑕佸垱寤哄畬鏁寸殑娴嬭瘯鐢ㄤ緥楠岃瘉鏁翠釜娴佺▼銆?
 
-## 馃搵 璇︾粏淇璁″垝
+## 📋 详细修复计划
 
 ### 闃舵1锛氫慨澶嶆牳蹇冭瘎鍒嗛€昏緫 馃敟 楂樹紭鍏堢骇
 - 鍒涘缓 TestPointScoringService
-- 淇 batch_processing.py 涓殑 _run_msfg_detection 鏂规硶
+- 修复 batch_processing.py 中的 _run_msfg_detection 方法
 - 纭繚娴嬬偣瑙勫垯琚纭娇鐢?
 
 ### 闃舵2锛氫慨澶嶉儴浠舵槧灏?馃敟 楂樹紭鍏堢骇  
-- 淇 component_mappings 鏋勫缓閫昏緫
+- 修复 component_mappings 构建逻辑
 - 纭繚 TestPointComponentMapping 琚纭娇鐢?
 - 楠岃瘉閮ㄤ欢鍋ュ悍搴﹁绠?
 
-### 闃舵3锛氫慨澶嶆暟鎹簱瀛樺偍 馃敟 楂樹紭鍏堢骇
+### 阶段3：修复数据库存储 🔥 高优先级
 - 妫€鏌?MSFGAnalysisResult 瀛楁瀹氫箟
-- 淇鏁版嵁淇濆瓨閫昏緫
+- 修复数据保存逻辑
 - 纭繚鏁版嵁缁撴瀯涓€鑷存€?
 
 ### 闃舵4锛氱鍒扮楠岃瘉 馃敟 楂樹紭鍏堢骇
-- 鍒涘缓娴嬭瘯鏁版嵁
+- 创建测试数据
 - 楠岃瘉瀹屾暣娴佺▼
 - 纭繚缁撴灉鍑嗙‘鎬?
 
-## 馃幆 棰勬湡鏁堟灉
+## 🎯 预期效果
 
-淇鍚庣殑MSFG妯″潡灏嗚兘澶燂細
+修复后的MSFG模块将能够：
 
 1. **姝ｇ‘浣跨敤娴嬬偣瑙勫垯**锛氭牴鎹厤缃殑瑙勫垯琛ㄨ揪寮忚绠楁祴鐐瑰垎鏁?
 2. **鍑嗙‘鐨勯儴浠舵槧灏?*锛氬熀浜嶵estPointComponentMapping杩涜姝ｇ‘鐨勯儴浠跺仴搴峰害鎺ㄦ柇

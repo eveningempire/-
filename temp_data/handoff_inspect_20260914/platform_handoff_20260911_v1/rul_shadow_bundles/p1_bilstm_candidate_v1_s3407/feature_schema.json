@@ -1,0 +1,29 @@
+{
+  "columns": [
+    "lox_pump__health",
+    "lox_pump__delta",
+    "lox_pump__load",
+    "oxygen_turbine__health",
+    "oxygen_turbine__delta",
+    "oxygen_turbine__load",
+    "kerosene_pipeline__health",
+    "kerosene_pipeline__delta",
+    "kerosene_pipeline__load",
+    "kerosene_valve__health",
+    "kerosene_valve__delta",
+    "kerosene_valve__load",
+    "gas_generator__health",
+    "gas_generator__delta",
+    "gas_generator__load",
+    "combustion_chamber__health",
+    "combustion_chamber__delta",
+    "combustion_chamber__load",
+    "nozzle__health",
+    "nozzle__delta",
+    "nozzle__load",
+    "system_hi"
+  ],
+  "seq_length": 16,
+  "n_features": 22,
+  "sha256": "a00fd20f8764ac0527569631bcd408b6b7db9ec310a7001dff5b1f2c73be4a09"
+}

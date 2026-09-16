@@ -26,6 +26,10 @@ def status(request):
         "available": service.available,
         "bundle": str(service.bundle),
         "error": service.error,
+        "runtime": service.runtime,
+        "warnings": service.warnings,
+        "input_kind": "upstream_window_evidence",
+        "required_fields": ["run_id", "component_id", "window_index", "timestamp", "hi_cd", "hi_ae", "anomaly_score"],
         "mode": "INTEGRATION_READY_DEVELOPMENT" if service.available else "unavailable",
     })
 
@@ -38,19 +42,40 @@ def evaluate(request):
         record = _body(request)
         if record.get('dataset_id') or record.get('dataset_ids'):
             from datasets.services import read_rows
-            ids=record.get('dataset_ids') or [record.get('dataset_id')]
-            rows=[]
-            for dataset_id in ids: rows.extend(read_rows(dataset_id))
-            numeric=[]
-            for row in rows:
-                vals=[]
-                for value in row.values():
-                    try: vals.append(float(value))
-                    except (TypeError,ValueError): pass
-                if vals: numeric.append(sum(vals)/len(vals))
-            if not numeric: raise ValueError('数据集没有可评估的数值列')
-            hi=[max(0,min(1,1/(1+abs(x)))) for x in numeric]
-            result={'algorithm':record.get('algorithm','fusion'),'level':'system' if record.get('dataset_ids') else 'single','health_index':round(hi[-1],4),'hi_sequence':hi,'status':'success','image_url':None}
+            from .algorithms import ae_gmm, cdpca_ga, gcn_rbd
+
+            ids = record.get('dataset_ids') or [record.get('dataset_id')]
+            datasets_rows = [(dataset_id, read_rows(dataset_id)) for dataset_id in ids]
+            algorithm = str(record.get('algorithm', 'cdpca_ga')).lower().replace('-', '_')
+            if algorithm in {'fusion', 'cdpca', 'cdpca_ga', 'feature_fusion'}:
+                method = cdpca_ga
+                algorithm_name = 'CDPCA-GA'
+            elif algorithm in {'ae', 'ae_gmm', 'aegmm'}:
+                method = ae_gmm
+                algorithm_name = 'AE-GMM'
+            elif algorithm in {'gcn', 'gcn_rbd', 'system'}:
+                method = cdpca_ga
+                algorithm_name = 'GCN+RBD'
+            else:
+                raise ValueError('algorithm 支持 cdpca_ga、ae_gmm、gcn_rbd')
+
+            component_results = []
+            for index, (dataset_id, rows) in enumerate(datasets_rows):
+                if not rows:
+                    continue
+                component = str(record.get('component_ids', [])[index]) if isinstance(record.get('component_ids'), list) and index < len(record.get('component_ids')) else f'component_{dataset_id}'
+                item = method(rows)
+                item['dataset_id'] = dataset_id
+                item['component_id'] = component
+                component_results.append(item)
+            if not component_results:
+                raise ValueError('数据集没有可评估的数值列')
+            if record.get('dataset_ids') or algorithm in {'gcn', 'gcn_rbd', 'system'}:
+                result = gcn_rbd(component_results, [item['component_id'] for item in component_results])
+                result['component_results'] = component_results
+            else:
+                result = component_results[0]
+            result.update({'status': 'success', 'image_url': None, 'requested_algorithm': algorithm_name})
         else:
             result = HealthAssessmentService.instance().require().process_record(record)
         return JsonResponse({"ok": True, "result": result})

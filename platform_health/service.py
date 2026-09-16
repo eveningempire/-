@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import sys
+import warnings
 from pathlib import Path
 from threading import Lock
 
@@ -22,6 +23,8 @@ class HealthAssessmentService:
         self.bundle = Path(settings.PHM_PLATFORM_HANDOFF_DIR) / "health_bundle"
         self.core = None
         self.error = None
+        self.warnings = []
+        self.runtime = {}
         self._load()
 
     @classmethod
@@ -39,6 +42,23 @@ class HealthAssessmentService:
             self.error = f"bundle not found: {self.bundle}"
             return
         try:
+            import joblib
+            import numpy
+            import sklearn
+            import scipy
+            self.runtime = {
+                "python": sys.version.split()[0],
+                "joblib": joblib.__version__,
+                "numpy": numpy.__version__,
+                "scikit_learn": sklearn.__version__,
+                "scipy": scipy.__version__,
+                "model_scikit_learn": "1.9.0",
+            }
+            if sklearn.__version__ != "1.9.0":
+                self.warnings.append(
+                    "模型由 scikit-learn 1.9.0 生成；当前运行时版本不同。"
+                    "推理已通过冒烟测试，但正式部署应升级至 Python 3.11+ 并使用匹配版本。"
+                )
             parent = str(self.bundle)
             if parent not in sys.path:
                 sys.path.insert(0, parent)
@@ -46,13 +66,16 @@ class HealthAssessmentService:
             core_mod = importlib.import_module("platform_adapter.core")
             provenance_mod = importlib.import_module("platform_adapter.provenance")
             schemas_mod = importlib.import_module("platform_adapter.schemas")
-            registry = registry_mod.ModelRegistry.from_json(
-                self.bundle / "model_registry.json", model_root=self.bundle
-            )
-            provenance = provenance_mod.load_bundle_provenance(
-                self.bundle, schemas_mod.SCHEMA_VERSION, core_mod.BUNDLE_VERSION
-            )
-            self.core = core_mod.HealthAssessmentCore(registry, provenance=provenance)
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                registry = registry_mod.ModelRegistry.from_json(
+                    self.bundle / "model_registry.json", model_root=self.bundle
+                )
+                provenance = provenance_mod.load_bundle_provenance(
+                    self.bundle, schemas_mod.SCHEMA_VERSION, core_mod.BUNDLE_VERSION
+                )
+                self.core = core_mod.HealthAssessmentCore(registry, provenance=provenance)
+                self.warnings.extend(str(item.message) for item in caught)
         except Exception as exc:  # dependency/model failures are reported by status API
             self.error = f"{type(exc).__name__}: {exc}"
 

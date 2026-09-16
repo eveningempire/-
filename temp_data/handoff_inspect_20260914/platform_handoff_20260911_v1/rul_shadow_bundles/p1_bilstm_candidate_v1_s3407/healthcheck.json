@@ -1,0 +1,24 @@
+{
+  "status": "FAIL",
+  "failed_checks": [
+    "asset_hashes_verified"
+  ],
+  "contract_version": "platform_shadow_contract_v1",
+  "deployment_mode": "shadow",
+  "actionable": false,
+  "physical_rul_claim": false,
+  "checks": {
+    "bundle_dir": "/irip/xietianyu_2024/workspace/20jd/rul_prediction/deployments/p1_bilstm_candidate_v1_s3407",
+    "asset_hashes_verified": false,
+    "model_type": "bilstm",
+    "model_version": "rul_syn_bilstm_s3407_20260909_n2",
+    "n_features": 22,
+    "seq_length": 16,
+    "input_space": "raw",
+    "scaler_present": true,
+    "train_distribution_present": true,
+    "device": "cpu",
+    "torch": "2.7.1+cu118",
+    "forward_probe": true
+  }
+}

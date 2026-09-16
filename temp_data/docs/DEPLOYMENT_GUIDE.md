@@ -2,7 +2,7 @@
 
 ## 馃殌 浼樺寲鍔熻兘姒傝堪
 
-鏈浼樺寲涓篊MG鍋ュ悍绠＄悊骞冲彴寮曞叆浜嗕互涓嬮噸瑕佸姛鑳斤細
+本次优化为CMG健康管理平台引入了以下重要功能：
 
 ### 鉁?鏍稿績浼樺寲
 1. **Redis缂撳瓨灞?* - 鏄捐憲鎻愬崌鏁版嵁鏌ヨ鎬ц兘
@@ -110,7 +110,7 @@ npm run build
 # 杩涘叆Django Shell
 python manage.py shell
 
-# 娴嬭瘯Redis杩炴帴
+# 测试Redis连接
 from data_management.redis_service import redis_service
 print(redis_service.ping())  # 搴旇杩斿洖True
 ```
@@ -119,14 +119,14 @@ print(redis_service.ping())  # 搴旇杩斿洖True
 - 璁块棶鍓嶇椤甸潰
 - 杩涘叆"绯荤粺绠＄悊 -> 绯荤粺鐘舵€?
 - 鏌ョ湅WebSocket杩炴帴鐘舵€?
-- 娴嬭瘯瀹炴椂鏁版嵁鍔熻兘
+- 测试实时数据功能
 
-### 3. 鎬ц兘娴嬭瘯
+### 3. 性能测试
 ```bash
 # 鏌ョ湅缂撳瓨鐘舵€?
 curl http://localhost:8000/api/v1/data/data/cache-stats/
 
-# 娴嬭瘯瀹炴椂鏁版嵁API
+# 测试实时数据API
 curl http://localhost:8000/api/v1/data/data/realtime/?cmg_id=PHM_001&limit=100
 ```
 
@@ -146,7 +146,7 @@ curl http://localhost:8000/api/v1/data/data/realtime/?cmg_id=PHM_001&limit=100
 - **鏁版嵁搴撳帇鍔?*: 鍑忓皯70%浠ヤ笂
 - **鐢ㄦ埛浣撻獙**: 鏄捐憲鎻愬崌
 
-## 馃敡 甯歌闂瑙ｅ喅
+## 🔧 常见问题解决
 
 ### 1. Redis杩炴帴澶辫触
 ```bash
@@ -156,11 +156,11 @@ sudo systemctl status redis-server
 # 妫€鏌ョ鍙ｅ崰鐢?
 netstat -tlnp | grep 6379
 
-# 娴嬭瘯杩炴帴
+# 测试连接
 redis-cli -h localhost -p 6379 ping
 ```
 
-### 2. WebSocket杩炴帴闂
+### 2. WebSocket连接问题
 - 纭繚浣跨敤ASGI鏈嶅姟鍣?(daphne)
 - 妫€鏌ラ槻鐏璁剧疆
 - 楠岃瘉鍓嶇浠ｇ悊閰嶇疆
@@ -229,12 +229,12 @@ server {
 1. **鏁版嵁鍒嗙墖**: 褰撴暟鎹噺澧為暱鏃惰€冭檻鍒嗗簱鍒嗚〃
 2. **璇诲啓鍒嗙**: 閰嶇疆MySQL涓讳粠澶嶅埗
 3. **缂撳瓨棰勭儹**: 瀹炵幇鐑偣鏁版嵁棰勫姞杞?
-4. **娑堟伅闃熷垪**: 寮曞叆Celery澶勭悊寮傛浠诲姟
+4. **消息队列**: 引入Celery处理异步任务
 
 ## 馃啒 鏀寔涓庣淮鎶?
 
-濡傞亣鍒伴棶棰橈紝璇锋鏌ワ細
-1. 鏃ュ織鏂囦欢涓殑閿欒淇℃伅
+如遇到问题，请检查：
+1. 日志文件中的错误信息
 2. Redis鍜屾暟鎹簱杩炴帴鐘舵€?
 3. 绯荤粺璧勬簮浣跨敤鎯呭喌
 4. 缃戠粶杩炴帴閰嶇疆

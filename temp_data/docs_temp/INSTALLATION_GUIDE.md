@@ -41,7 +41,7 @@ python install_check.py
 
 #### Windows
 1. 璁块棶 [Python瀹樼綉](https://www.python.org/downloads/)
-2. 涓嬭浇Python 3.8+鐗堟湰
+2. 下载Python 3.8+版本
 3. 杩愯瀹夎绋嬪簭锛?*纭繚鍕鹃€?Add Python to PATH"**
 4. 楠岃瘉瀹夎锛?   ```bash
    python --version
@@ -64,8 +64,8 @@ brew install python3
 
 #### Windows
 1. 璁块棶 [Node.js瀹樼綉](https://nodejs.org/)
-2. 涓嬭浇LTS鐗堟湰
-3. 杩愯瀹夎绋嬪簭
+2. 下载LTS版本
+3. 运行安装程序
 4. 楠岃瘉瀹夎锛?   ```bash
    node --version
    npm --version
@@ -93,8 +93,8 @@ nvm use 18
 
 #### Windows
 1. 璁块棶 [MySQL瀹樼綉](https://dev.mysql.com/downloads/mysql/)
-2. 涓嬭浇MySQL 8.0+鐗堟湰
-3. 杩愯瀹夎绋嬪簭锛岃缃畆oot瀵嗙爜
+2. 下载MySQL 8.0+版本
+3. 运行安装程序，设置root密码
 4. 鍚姩MySQL鏈嶅姟
 
 #### Linux (Ubuntu/Debian)
@@ -210,7 +210,7 @@ python manage.py createsuperuser
 # 鍚姩Django鍚庣
 python manage.py runserver
 
-# 鏂扮粓绔獥鍙ｅ惎鍔ㄥ墠绔紑鍙戞湇鍔″櫒
+# 新终端窗口启动前端开发服务器
 cd frontend
 npm run dev
 ```
@@ -231,7 +231,7 @@ npm run build
 1. 璁块棶 http://localhost:8000 鏌ョ湅鍚庣API
 2. 璁块棶 http://localhost:3000 鏌ョ湅鍓嶇鐣岄潰
 3. 妫€鏌ョ郴缁熺姸鎬侀〉闈㈢‘璁ゆ墍鏈夋湇鍔℃甯歌繍琛?
-## 甯歌闂
+## 常见问题
 
 ### Q: Python鍖呭畨瑁呭け璐?**A**: 纭繚浣跨敤铏氭嫙鐜锛屽苟灏濊瘯鍗囩骇pip锛?```bash
 pip install --upgrade pip
@@ -274,7 +274,7 @@ lsof -i :8000
 ## 鎶€鏈敮鎸?
 濡傛灉閬囧埌瀹夎闂锛岃锛?
 1. 杩愯 `install_check.py` 鑴氭湰妫€鏌ョ幆澧?2. 鏌ョ湅閿欒鏃ュ織鍜岀郴缁熻緭鍑?3. 鍙傝€冨父瑙侀棶棰樿В鍐虫柟妗?4. 鑱旂郴鎶€鏈敮鎸佸洟闃?
-## 鏇存柊鏃ュ織
+## 更新日志
 
 - **v1.0.0**: 鍒濆鐗堟湰锛屾敮鎸佸熀鏈殑鍋ュ悍鐩戞祴鍜屾晠闅滆瘖鏂姛鑳?- 鏇村鏇存柊淇℃伅璇锋煡鐪?[CHANGELOG.md](CHANGELOG.md)
 

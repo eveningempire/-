@@ -11,7 +11,7 @@ AttributeError: 'IMSDetectionResult' object has no attribute 'scores'
 
 ---
 
-## 馃攳 闂鍒嗘瀽
+## 🔍 问题分析
 
 ### IMSDetectionResult妯″瀷鐨勫疄闄呭瓧娈?
 
@@ -85,7 +85,7 @@ class IMSDetectionResult(models.Model):
 
 ## 馃搳 妫€娴嬫垚鍔熺殑璇佹嵁
 
-浠庢偍鐨勬棩蹇楀彲浠ョ湅鍒帮細
+从您的日志可以看到：
 ```
 INFO: [娓呯悊] 鍒犻櫎妫€娴嬬粨鏋? IMS=51, 瑙勫垯=306, MSFG=51
 INFO: [娓呯悊] 鍒犻櫎鍘熷鏁版嵁: 1000 鏉¤褰?
@@ -102,9 +102,9 @@ INFO: [娓呯悊] 鍒犻櫎鍘熷鏁版嵁: 1000 鏉¤褰?
 
 ---
 
-## 馃摑 淇敼鎬荤粨
+## 📝 修改总结
 
-**淇敼鏂囦欢**锛歚data_management/batch_processing.py`
+**修改文件**：`data_management/batch_processing.py`
 
 **淇敼浣嶇疆**锛氱453-474琛岋紙`_collect_detection_results`鏂规硶锛?
 

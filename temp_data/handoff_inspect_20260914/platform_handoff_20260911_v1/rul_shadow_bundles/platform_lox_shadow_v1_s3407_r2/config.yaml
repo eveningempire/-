@@ -1,0 +1,17 @@
+model:
+  type: bilstm
+  hidden_size: 48
+  num_layers: 1
+  dropout: 0.1
+data: {}
+training:
+  epochs: 40
+  patience: 6
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  amp: 'off'
+run:
+  seed: 3407
+  version: platform_lox_shadow_bilstm_s3407_20260909_r2
+  device: cpu

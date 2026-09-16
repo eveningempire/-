@@ -26,7 +26,7 @@
 
 ---
 
-## 馃攽 鍏抽敭鍙戠幇
+## 🔑 关键发现
 
 ### 1. 鎵€鏈夋娴嬪嚱鏁伴兘闇€瑕丆MGData瀵硅薄
 
@@ -41,9 +41,9 @@ def run_ims_detection(cmg_data: PHMData) -> List[IMSDetectionResult]:
 #### 瑙勫垯妫€娴?
 ```python
 def evaluate_rules_for_data_point(data_point: PHMData, cmg: PHM = None):
-    """璇勪及鍗曚釜鏁版嵁鐐圭殑瑙勫垯"""
+    """评估单个数据点的规则"""
 ```
-**鍙傛暟**锛歚PHMData`瀵硅薄  
+**参数**：`PHMData`对象  
 **杩斿洖**锛氳鍒欒瘎浼扮粨鏋滃瓧鍏?
 
 #### MSFG妫€娴?
@@ -51,14 +51,14 @@ def evaluate_rules_for_data_point(data_point: PHMData, cmg: PHM = None):
 def _run_msfg_detection(self, record: PHMData, cmg: PHM) -> Optional[Dict[str, Any]]:
     """杩愯MSFG妫€娴?""
 ```
-**鍙傛暟**锛歚PHMData`瀵硅薄  
+**参数**：`PHMData`对象  
 **杩斿洖**锛歁SFG妫€娴嬬粨鏋滃瓧鍏?
 
 ### 2. PHMData瀵硅薄鐨勭粨鏋?
 
 ```python
 class PHMData(models.Model):
-    cmg = models.ForeignKey(PHM)           # 鍏宠仈鐨凜MG
+    cmg = models.ForeignKey(PHM)           # 关联的CMG
     timestamp = models.DateTimeField()      # 鏃堕棿鎴?
     data = models.JSONField()               # 閬ユ祴鏁版嵁锛堝瓧鍏革級
     import_session = models.ForeignKey()    # 鍏宠仈鐨勫鍏ヤ細璇?
@@ -81,7 +81,7 @@ class PHMData(models.Model):
    - 鎵€鏈夋娴嬪嚱鏁伴兘鏄熀浜庢暟鎹簱瀵硅薄璁捐鐨?
    - 渚濊禆PHMData鐨勫叧鑱斿叧绯伙紙PHM銆乼imestamp绛夛級
 
-3. **缁撴灉鏌ヨ**
+3. **结果查询**
    - 鍘嗗彶鏌ヨ渚濊禆鏁版嵁搴撳叧鑱斿叧绯?
    - 鏃犳硶鐩存帴浠庡瓧鍏告煡璇㈡娴嬬粨鏋?
 
@@ -99,7 +99,7 @@ class PHMData(models.Model):
   鈫?
 鍒涘缓涓存椂瀵煎叆浼氳瘽
   鈫?
-瀛樺偍鏁版嵁鍒版暟鎹簱 (_store_data)
+存储数据到数据库 (_store_data)
   鈫?杈撳嚭: List[PHMData]  鉁?鍏抽敭姝ラ锛?
   鈫?
 杩愯妫€娴嬫祦绋?(_run_detection_pipeline)
@@ -129,7 +129,7 @@ stored_records = self._store_data(temp_session, parsed_data)
 # 澶嶇敤鍘熸湁鐨勬娴嬫祦绋?
 detection_summary = self._run_detection_pipeline(temp_session, stored_records)
 
-# 浠庢暟鎹簱鏀堕泦缁撴灉
+# 从数据库收集结果
 results = self._collect_detection_results(cmg, stored_records, detection_summary)
 ```
 
@@ -141,7 +141,7 @@ if not save_to_db:
     temp_session.delete()
 ```
 
-#### 3. 杩斿洖鏍煎紡鍖栫殑鍐呭瓨缁撴灉
+#### 3. 返回格式化的内存结果
 ```python
 results = {
     'total_frames': 1000,
@@ -149,7 +149,7 @@ results = {
     'anomaly_ratio': 0.05,
     'anomaly_frames': [...],      # 寮傚父甯у垪琛?
     'frame_details': [...],        # 姣忎竴甯х殑璇︾粏妫€娴嬬粨鏋?
-    'component_health': {...},     # 鑱氬悎鐨勯儴浠跺仴搴峰害
+    'component_health': {...},     # 聚合的部件健康度
     'overall_health': 0.85,        # 鏁翠綋鍋ュ悍搴?
     'detection_summary': {...}     # 妫€娴嬫祦绋嬫憳瑕?
 }
@@ -209,7 +209,7 @@ def _cleanup_temp_detection_data(self, session: ImportSession, records: List[PHM
 
 ---
 
-## 馃搳 鏁版嵁缁撴瀯瀵规瘮
+## 📊 数据结构对比
 
 ### 鍘熸湁娴佺▼鐨勬暟鎹粨鏋?
 
@@ -255,7 +255,7 @@ def _cleanup_temp_detection_data(self, session: ImportSession, records: List[PHM
 }
 ```
 
-### 鏂版祦绋嬬殑鏁版嵁缁撴瀯
+### 新流程的数据结构
 
 #### 杈撳嚭锛歳esults (Dict) - 鐢ㄤ簬鍓嶇鏄剧ず
 ```python
@@ -302,7 +302,7 @@ def _cleanup_temp_detection_data(self, session: ImportSession, records: List[PHM
 
 ---
 
-## 鈿狅笍 閲嶈娉ㄦ剰浜嬮」
+## ⚠️ 重要注意事项
 
 ### 1. 蹇呴』鍏堝瓨鍌ㄥ啀妫€娴?
 - 鍗充娇`save_to_db=False`锛屼篃闇€瑕佷复鏃跺瓨鍌ㄥ埌鏁版嵁搴?
@@ -310,11 +310,11 @@ def _cleanup_temp_detection_data(self, session: ImportSession, records: List[PHM
 - 杩欐槸鐢辨娴嬪嚱鏁扮殑璁捐鍐冲畾鐨?
 
 ### 2. 涓存椂鏁版嵁浼氳鑷姩娓呯悊
-- 濡傛灉`save_to_db=False`
+- 如果`save_to_db=False`
   - 妫€娴嬬粨鏋滀細琚垹闄?
   - 鍘熷PHMData浼氳鍒犻櫎
   - 瀵煎叆浼氳瘽浼氳鍒犻櫎
-- 濡傛灉`save_to_db=True`
+- 如果`save_to_db=True`
   - 鎵€鏈夋暟鎹繚鐣欏湪鏁版嵁搴撲腑
   - 鍙緵鍚庣画鍘嗗彶鏌ヨ浣跨敤
 
@@ -341,7 +341,7 @@ def _cleanup_temp_detection_data(self, session: ImportSession, records: List[PHM
 3. 鉁?鑷姩鏃堕棿鎴冲幓閲?
 
 ### 涓湡浼樺寲
-1. 鑰冭檻瀹炵幇鍩轰簬瀛楀吀鐨勬娴嬪嚱鏁帮紙鏃犻渶鏁版嵁搴擄級
+1. 考虑实现基于字典的检测函数（无需数据库）
 2. 浣跨敤缂撳瓨鍑忓皯鏁版嵁搴撴煡璇?
 3. 鎵归噺鏌ヨ妫€娴嬬粨鏋?
 
@@ -354,7 +354,7 @@ def _cleanup_temp_detection_data(self, session: ImportSession, records: List[PHM
 
 ## 馃摑 鎬荤粨
 
-閫氳繃娣卞叆鍒嗘瀽鍘熸湁鐨勬娴嬫祦绋嬶紝鎴戝彂鐜帮細
+通过深入分析原有的检测流程，我发现：
 
 1. **鎵€鏈夋娴嬪嚱鏁伴兘鍩轰簬PHMData瀵硅薄璁捐**
    - 杩欎笉鏄痓ug锛岃€屾槸璁捐鍐崇瓥

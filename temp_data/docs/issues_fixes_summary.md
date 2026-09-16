@@ -2,14 +2,14 @@
 
 ## 1. IMS妫€娴嬬粨鏋滈〉闈㈡煡璇㈤棶棰?
 
-### 闂鎻忚堪
+### 问题描述
 - IMS妫€娴嬬粨鏋滈〉闈㈡棤娉曟煡璇㈠埌缁撴灉
 - 妫€娴嬪畬鎴愬悗鏈塈MS缁撴灉锛屼絾椤甸潰鏄剧ず涓虹┖
 
-### 淇鍐呭
+### 修复内容
 1. **鍓嶇鍒嗛〉浼樺寲**锛?
    - 淇敼榛樿姣忛〉鏄剧ず100鏉¤褰?
-   - 鍒濆鍔犺浇鏃跺彧鍔犺浇绗竴椤垫暟鎹紝鎻愰珮鍔犺浇閫熷害
+   - 初始加载时只加载第一页数据，提高加载速度
    - 閬垮厤涓€娆℃€у姞杞芥墍鏈夋暟鎹鑷寸殑闀挎椂闂寸瓑寰?
 
 2. **鍒嗛〉鍔犺浇浼樺寲**锛?
@@ -78,23 +78,23 @@ class DatabaseStatistics(models.Model):
 - `total_frames`: 鎬诲抚鏁?
 
 ### API绔偣
-1. **鑾峰彇缁熻淇℃伅**锛歚GET /api/v1/data/data/statistics/`
+1. **获取统计信息**：`GET /api/v1/data/data/statistics/`
    - 鏀寔鎸塁MG鏌ヨ锛歚?cmg_id=xxx`
    - 杩斿洖鎵€鏈夌粺璁＄被鍨嬬殑鏁版嵁
 
-2. **鍒锋柊缁熻淇℃伅**锛歚POST /api/v1/data/data/refresh-statistics/`
+2. **刷新统计信息**：`POST /api/v1/data/data/refresh-statistics/`
    - 閲嶆柊璁＄畻鎵€鏈夌粺璁℃暟鎹?
-   - 鏀寔鍏ㄥ眬鍜屾寜PHM缁熻
+   - 支持全局和按PHM统计
 
 ### 浣跨敤鍦烘櫙
-1. **Dashboard椤甸潰**锛氬揩閫熸樉绀哄悇绉嶆暟鎹殑鎬绘暟
+1. **Dashboard页面**：快速显示各种数据的总数
 2. **缁撴灉椤甸潰**锛氭樉绀?鍏辨壘鍒?X 鏉¤褰?
 3. **绯荤粺鐩戞帶**锛氱洃鎺ф暟鎹闀胯秼鍔?
 4. **鎬ц兘浼樺寲**锛氶伩鍏嶉绻佺殑COUNT鏌ヨ
 
 ## 4. 姣鏃堕棿鎴冲鐞?
 
-### 闂鑳屾櫙
+### 问题背景
 - 鏃堕棿鎴冲彧绮剧‘鍒扮锛屽鑷村悓涓€绉掑唴鐨勫甯ф暟鎹璇涓烘槸閲嶅鐨?
 - 鏁版嵁瀛樺偍鏃跺ぇ閲忚褰曡杩囨护鎺?
 
@@ -103,8 +103,8 @@ class DatabaseStatistics(models.Model):
 
 ```python
 def _add_milliseconds_to_duplicate_timestamps(self, parsed_data):
-    """涓洪噸澶嶇殑鏃堕棿鎴虫坊鍔犳绉掞紝纭繚姣忓抚閮芥湁鍞竴鐨勬椂闂存埑"""
-    # 鎸夋椂闂存埑鍒嗙粍
+    """为重复的时间戳添加毫秒，确保每帧都有唯一的时间戳"""
+    # 按时间戳分组
     timestamp_groups = {}
     for item in parsed_data:
         ts = item['timestamp']
@@ -116,22 +116,22 @@ def _add_milliseconds_to_duplicate_timestamps(self, parsed_data):
     # 澶勭悊閲嶅鏃堕棿鎴?
     for ts_key, items in timestamp_groups.items():
         if len(items) > 1:
-            # 涓烘瘡缁勯噸澶嶆椂闂存埑娣诲姞閫掑姣
+            # 为每组重复时间戳添加递增毫秒
             for i, item in enumerate(items):
                 new_ts = ts_key.replace(microsecond=i * 1000)
                 item['timestamp'] = new_ts
 ```
 
-### 澶勭悊鏁堟灉
+### 处理效果
 - **鏁版嵁瀹屾暣鎬?*锛氱‘淇濇墍鏈夎В鏋愮殑璁板綍閮借瀛樺偍
 - **鏃堕棿鎴冲敮涓€鎬?*锛氭瘡甯ч兘鏈夊敮涓€鐨勬椂闂存埑
-- **鍚戝悗鍏煎**锛氫笉褰卞搷宸叉湁鍔熻兘
+- **向后兼容**：不影响已有功能
 
 ## 5. 娴佸紡澶勭悊浼樺寲
 
-### 闂鑳屾櫙
+### 问题背景
 - 澶ф暟鎹噺澶勭悊鏃剁敤鎴风瓑寰呮椂闂磋繃闀?
-- 111绉掑鐞嗘椂闂达紝鐢ㄦ埛鏃犳硶鐪嬪埌瀹炴椂杩涘害
+- 111秒处理时间，用户无法看到实时进度
 
 ### 瑙ｅ喅鏂规
 瀹炵幇鏅鸿兘娴佸紡澶勭悊锛?
@@ -147,21 +147,21 @@ else:
     return self._run_batch_detection_pipeline(...)
 ```
 
-### 娴佸紡澶勭悊鐗圭偣
+### 流式处理特点
 - **鎵规澶у皬**锛?00甯?鎵?
-- **瀹炴椂淇濆瓨**锛氭瘡鎵瑰畬鎴愬悗绔嬪嵆淇濆瓨缁撴灉
+- **实时保存**：每批完成后立即保存结果
 - **杩涘害鏇存柊**锛氭瘡鎵瑰畬鎴愬悗骞挎挱杩涘害
 - **鏃╂湡缁撴灉鍙**锛氱涓€鎵圭粨鏋滃湪28绉掑悗鍗冲彲鏌ョ湅
 
-## 6. 娴嬭瘯鑴氭湰
+## 6. 测试脚本
 
 ### 鍒涘缓鐨勬祴璇曡剼鏈?
 1. `test_ims_results.py` - 娴嬭瘯IMS妫€娴嬬粨鏋滄煡璇?
 2. `test_timestamp_fix.py` - 娴嬭瘯姣鏃堕棿鎴冲鐞?
-3. `test_streaming_processing.py` - 娴嬭瘯娴佸紡澶勭悊
-4. `test_broadcast_fix.py` - 娴嬭瘯杩涘害骞挎挱淇
+3. `test_streaming_processing.py` - 测试流式处理
+4. `test_broadcast_fix.py` - 测试进度广播修复
 
-### 娴嬭瘯瑕嗙洊
+### 测试覆盖
 - 鏁版嵁瀛樺偍瀹屾暣鎬?
 - 妫€娴嬬粨鏋滄纭€?
 - API绔偣鍔熻兘

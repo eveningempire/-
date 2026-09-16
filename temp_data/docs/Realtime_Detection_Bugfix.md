@@ -7,11 +7,11 @@ TypeError: ImportSession() got unexpected keyword arguments: 'status', 'processi
 ```
 
 **鍙戠敓浣嶇疆**锛歚data_management/batch_processing.py` 绗?7琛? 
-**瑙﹀彂鍦烘櫙**锛氱敤鎴蜂笂浼犳枃浠惰繘琛屽疄鏃舵娴嬫椂
+**触发场景**：用户上传文件进行实时检测时
 
 ---
 
-## 馃攳 闂鍒嗘瀽
+## 🔍 问题分析
 
 ### 閿欒浠ｇ爜
 ```python
@@ -44,7 +44,7 @@ class ImportSession(models.Model):
 
 ## 鉁?淇鏂规
 
-### 淇鍚庣殑浠ｇ爜
+### 修复后的代码
 ```python
 temp_session = ImportSession.objects.create(
     cmg=cmg,
@@ -82,7 +82,7 @@ detection_summary={'is_realtime': True, 'save_to_db': save_to_db}
 
 ---
 
-## 馃搳 淇敼缁熻
+## 📊 修改统计
 
 **鏂囦欢**锛歚data_management/batch_processing.py`
 
@@ -100,13 +100,13 @@ detection_summary={'is_realtime': True, 'save_to_db': save_to_db}
 
 ## 鉁?娴嬭瘯鐢ㄤ緥
 
-### 娴嬭瘯鏁版嵁
+### 测试数据
 - 鏂囦欢锛歚1553鏁版嵁.xlsx`
 - 澶у皬锛?7.38 MB
 - PHM锛?00-02
 - 妯″紡锛歠ull
 
-### 棰勬湡缁撴灉
+### 预期结果
 ```
 鉁?鏂囦欢涓婁紶鎴愬姛
 鉁?涓存椂浼氳瘽鍒涘缓鎴愬姛

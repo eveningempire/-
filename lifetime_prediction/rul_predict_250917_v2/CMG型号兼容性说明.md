@@ -22,7 +22,7 @@
 ```python
 def normalize_cmg_type(cmg_type: str) -> str:
     """
-    鏍囧噯鍖朇MG鍨嬪彿鍚嶇О锛屽吋瀹筃M鍜孨MS涓ょ鏍煎紡
+    标准化CMG型号名称，兼容NM和NMS两种格式
     
     Args:
         cmg_type: 杈撳叆鐨凜MG鍨嬪彿锛堝 "500NM" 鎴?"500NMS"锛?
@@ -53,7 +53,7 @@ def normalize_cmg_type(cmg_type: str) -> str:
 **鏌ユ壘椤哄簭**锛?
 1. 棣栧厛灏濊瘯 NMS 鏍煎紡鏂囦欢澶癸紙濡?`models/500NMS/`锛?
 2. 濡傛灉涓嶅瓨鍦紝灏濊瘯 NM 鏍煎紡鏂囦欢澶癸紙濡?`models/500NM/`锛?
-3. 濡傛灉閮戒笉瀛樺湪锛屾姏鍑烘竻鏅扮殑閿欒淇℃伅
+3. 如果都不存在，抛出清晰的错误信息
 
 **绀轰緥**锛?
 ```python
@@ -96,13 +96,13 @@ PHM_TYPE_COL_NAME_MAP = {
 
 浠ヤ笅鏂囦欢宸叉坊鍔犲吋瀹规€ф敮鎸侊細
 
-### Strategy 0 (榛樿绠楁硶)
+### Strategy 0 (默认算法)
 - 鉁?`lifetime_prediction/rul_predict_250917_v2/utils.py`
 
 ### Strategy 1 (VAE绠楁硶)
 - 鉁?`lifetime_prediction/rul_predict_250917_v2/strategy1/utils.py`
 
-### Strategy 2 (瀛ょ珛妫灄绠楁硶)
+### Strategy 2 (孤立森林算法)
 - 鉁?`lifetime_prediction/rul_predict_250917_v2/strategy2/utils.py`
 
 ### Strategy 3 (SOM绠楁硶)
@@ -120,7 +120,7 @@ cmg_type = "500NM"
 target_cols = utils.PHM_TYPE_COL_NAME_MAP[cmg_type]["col_names"]
 params = utils.get_model_params(cmg_type, target_cols)
 
-# 鏂瑰紡2锛氫娇鐢∟MS鏍煎紡锛堢粨鏋滅浉鍚岋級
+# 方式2：使用NMS格式（结果相同）
 cmg_type = "500NMS"
 target_cols = utils.PHM_TYPE_COL_NAME_MAP[cmg_type]["col_names"]
 params = utils.get_model_params(cmg_type, target_cols)
@@ -132,7 +132,7 @@ params = utils.get_model_params(cmg_type, target_cols)
 from lifetime_prediction.rul_predict_250917_v2.utils import normalize_cmg_type
 
 # 缁熶竴鏍囧噯鍖栬緭鍏?
-user_input = "500nm"  # 鐢ㄦ埛鍙兘杈撳叆灏忓啓
+user_input = "500nm"  # 用户可能输入小写
 normalized = normalize_cmg_type(user_input)  # 杩斿洖 "500NMS"
 
 # 浣跨敤鏍囧噯鍖栧悗鐨勫瀷鍙?
@@ -145,10 +145,10 @@ target_cols = utils.PHM_TYPE_COL_NAME_MAP[normalized]["col_names"]
 from lifetime_prediction.rul_predict_250917_v2.utils import normalize_cmg_type
 
 try:
-    cmg_type = normalize_cmg_type("999NM")  # 涓嶆敮鎸佺殑鍨嬪彿
+    cmg_type = normalize_cmg_type("999NM")  # 不支持的型号
 except ValueError as e:
     print(e)
-    # 杈撳嚭锛氫笉鏀寔鐨凜MG鍨嬪彿: 999NM
+    # 输出：不支持的CMG型号: 999NM
     #      鏀寔鐨勫瀷鍙锋牸寮? 2NM, 2NMS, 5NM, 5NMS, 15NM, 15NMS, 500NM, 500NMS
 ```
 
@@ -196,17 +196,17 @@ params = utils.get_model_params(cmg_type, target_cols)
    except FileNotFoundError as e:
        logger.error(f"妯″瀷鏂囦欢鏈壘鍒? {e}")
    except ValueError as e:
-       logger.error(f"PHM鍨嬪彿鏃犳晥: {e}")
+       logger.error(f"PHM型号无效: {e}")
    ```
 
 ## 馃摑 娉ㄦ剰浜嬮」
 
 1. **鍨嬪彿澶у皬鍐?*锛氱郴缁熶細鑷姩杞崲涓哄ぇ鍐欙紝浣嗗缓璁粺涓€浣跨敤澶у啓杈撳叆
 2. **鏂囦欢澶瑰懡鍚?*锛氭柊妯″瀷寤鸿浣跨敤NMS鏍煎紡鍛藉悕锛堝`500NMS`锛?
-3. **鏃ュ織璁板綍**锛氬缓璁湪鏃ュ織涓褰曚娇鐢ㄧ殑瀹為檯鍨嬪彿鏍煎紡
-4. **娴嬭瘯瑕嗙洊**锛氱‘淇濇祴璇曠敤渚嬪悓鏃惰鐩朜M鍜孨MS涓ょ鏍煎紡
+3. **日志记录**：建议在日志中记录使用的实际型号格式
+4. **测试覆盖**：确保测试用例同时覆盖NM和NMS两种格式
 
-## 馃攳 甯歌闂
+## 🔍 常见问题
 
 ### Q1: 濡傛灉鎴戞湁鏃х殑500NM妯″瀷锛岄渶瑕侀噸鏂拌缁冨悧锛?
 **A**: 涓嶉渶瑕併€傜郴缁熶細鑷姩鎵惧埌骞朵娇鐢?00NM鏍煎紡鐨勬ā鍨嬫枃浠躲€?

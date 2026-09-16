@@ -1,21 +1,21 @@
 ﻿# 妫€娴嬬粨鏋滄樉绀洪€昏緫瀹屾暣淇
 
-## 馃幆 闂鍒嗘瀽
+## 🎯 问题分析
 
 ### 鐢ㄦ埛鍙嶉鐨勯棶棰?
 1. 鉁?杩涘害鏉℃樉绀烘娴嬪畬鎴?
 2. 鉂?鎸夐挳浠嶆樉绀?妫€娴嬩腑..."锛堝凡淇锛?
 3. 鉂?椤甸潰鍙樉绀哄熀鏈粺璁★紝鍏朵粬淇℃伅閮戒笉鏄剧ず
 
-### 鏄剧ず涓嶅畬鏁寸殑琛ㄧ幇
+### 显示不完整的表现
 ```
 鉁?鏄剧ず鐨勫唴瀹癸細
   - 鏁版嵁甯ф€绘暟锛?000
-  - 寮傚父甯ф暟閲忥細51
+  - 异常帧数量：51
   - 寮傚父甯ф瘮渚嬶細5.10%
 
 鉂?鏈樉绀虹殑鍐呭锛?
-  - 寮傚父甯у垪琛紙鐐瑰嚮搴旇鑳界湅鍒拌鎯咃級
+  - 异常帧列表（点击应该能看到详情）
   - 閮ㄤ欢鍋ュ悍鐘舵€侊紙鍙充晶澶ч潰鏉匡級
 ```
 
@@ -39,7 +39,7 @@ setTimeout(() => {
 hasSelectedCmgAndTime.value = true;  // 鉁?绔嬪嵆
 isDetecting.value = false;            // 鉁?绔嬪嵆
 
-// 鍙欢杩熷叧闂璇濇
+// 只延迟关闭对话框
 setTimeout(() => {
   fileUploadDialogVisible.value = false;
 }, 1500);
@@ -49,7 +49,7 @@ setTimeout(() => {
 
 ### 鍘熷洜2锛氭暟鎹瓧娈靛悕涓嶅尮閰?鉁?宸蹭慨澶?
 
-#### 闂A锛氬紓甯稿抚鐨剆core瀛楁
+#### 问题A：异常帧的score字段
 
 **鍓嶇鏈熸湜**锛堢161琛岋級锛?
 ```vue
@@ -82,7 +82,7 @@ anomalyFrames.value = (results.anomaly_frames || []).map(frame => ({
 **鍘熸湁閫昏緫**锛?
 ```javascript
 async function showAnomalyDetails(frame) {
-  // 鎬绘槸浠庢暟鎹簱API鑾峰彇璇︽儏
+  // 总是从数据库API获取详情
   const [imsResponse, ruleResponse, msfgResponse] = await Promise.all([
     fetch(`...&frame_id=${frame.id}`),  // 鉂?瀹炴椂妫€娴嬫ā寮忎笅鏁版嵁宸茶娓呯悊
     ...
@@ -171,7 +171,7 @@ async function showAnomalyDetails(frame) {
 // 鉁?鍘嗗彶妯″紡锛氫粠API鑾峰彇
 ```
 
-### 4. 杈呭姪鍑芥暟娣诲姞
+### 4. 辅助函数添加
 ```javascript
 // 鉁?extractTop3Components - 鎻愬彇TOP3閮ㄤ欢
 // 鉁?calculateRiskLevel - 璁＄畻椋庨櫓绛夌骇
@@ -193,9 +193,9 @@ async function showAnomalyDetails(frame) {
   鈫?
 fetchAnomalyResults(cmg_id, start_time, end_time)
   鈫?API璋冪敤
-鍚庣浠庢暟鎹簱鏌ヨ
+后端从数据库查询
   鈫?
-杩斿洖缁撴灉
+返回结果
   鈫?
 鏇存柊: anomalyRatio, totalFrames, anomalyCount, anomalyFrames
   鈫?
@@ -245,7 +245,7 @@ showAnomalyDetails(frame)
 **鏁堟灉**锛氭娴嬪畬鎴愬悗锛岄〉闈㈢珛鍗冲埛鏂版樉绀虹粨鏋?
 
 ### 鏀硅繘2锛氬瓧娈靛悕鍏煎
-**鏁堟灉**锛氬紓甯稿抚鍒楄〃姝ｇ‘鏄剧ず鍒嗘暟
+**效果**：异常帧列表正确显示分数
 
 ### 鏀硅繘3锛氬弻妯″紡閫傞厤
 **鏁堟灉**锛?
@@ -255,7 +255,7 @@ showAnomalyDetails(frame)
 ### 鏀硅繘4锛氬畬鏁存暟鎹浆鎹?
 **鏁堟灉**锛?
 - 寮傚父甯э細鏈夊垎鏁版樉绀?
-- 閮ㄤ欢鍋ュ悍锛氬畬鏁寸殑宸﹀彸甯冨眬鏄剧ず
+- 部件健康：完整的左右布局显示
 
 ---
 
@@ -294,13 +294,13 @@ showAnomalyDetails(frame)
 
 ## 鉁?淇敼鎬荤粨
 
-**淇敼鏂囦欢**锛歚frontend/src/views/DetectionOverview.vue`
+**修改文件**：`frontend/src/views/DetectionOverview.vue`
 
 **淇敼鍐呭**锛?
 1. `startDetection`鍑芥暟锛?
    - 绔嬪嵆璁剧疆`hasSelectedCmgAndTime`鍜宍isDetecting`
    - 娣诲姞閿欒妫€鏌?
-   - 鍙欢杩熷叧闂璇濇
+   - 只延迟关闭对话框
 
 2. `updateDisplayFromMemory`鍑芥暟锛?
    - 娣诲姞瀛楁鍚嶈浆鎹紙anomaly_score 鈫?score锛?
@@ -323,7 +323,7 @@ showAnomalyDetails(frame)
 
 ## 馃帀 鐜板湪搴旇瀹屽叏姝ｅ父浜嗭紒
 
-**璇锋祴璇曪細**
+**请测试：**
 1. 鍒锋柊椤甸潰
 2. 涓婁紶鏂囦欢妫€娴?
 3. 妫€娴嬪畬鎴愬悗锛?

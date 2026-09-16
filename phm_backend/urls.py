@@ -11,9 +11,19 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
 from django.views.generic import RedirectView
-from django.views.generic import TemplateView
 from .permission_views import PermissionProfileView, RoleCatalogView, GroupRoleView, LoginView, LogoutView
+
+
+def frontend(request, path=""):
+    """Read Vite's current entry file per request so rebuilt hashes never go stale."""
+    index_path = settings.BASE_DIR / "frontend" / "dist" / "index.html"
+    if not index_path.is_file():
+        return HttpResponse("前端尚未构建，请先运行 npm run build。", status=503, content_type="text/plain; charset=utf-8")
+    response = HttpResponse(index_path.read_bytes(), content_type="text/html; charset=utf-8")
+    response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
 
 urlpatterns = [
     path("api/v1/phm/", include("phm.urls")),
@@ -33,8 +43,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # Favicon route to prevent 404 errors
     path("favicon.ico", RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
-    path("", TemplateView.as_view(template_name="index.html"), name="frontend"),
-    path("<path:path>", TemplateView.as_view(template_name="index.html"), name="frontend-route"),
+    path("", frontend, name="frontend"),
+    path("<path:path>", frontend, name="frontend-route"),
     # API version 1 endpoints
 ] + (static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) if settings.DEBUG else [])
 

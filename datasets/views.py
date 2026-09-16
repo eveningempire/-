@@ -17,7 +17,9 @@ class DatasetViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated(), DatasetAdminPermission()]
         return [IsAuthenticated()]
     def list(self,request,*a,**k):
-        qs=self.queryset
+        # Build a fresh queryset per request. Reusing the class-level queryset
+        # can retain Django's result cache and make deleted datasets reappear.
+        qs=Dataset.objects.order_by('-created_at')
         if request.GET.get('q'): qs=qs.filter(name__icontains=request.GET['q'])
         for key in ('source','fault_type','system','component'):
             if request.GET.get(key): qs=qs.filter(**{key:request.GET[key]})

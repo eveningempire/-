@@ -2,7 +2,7 @@
 
 ## 馃搵 淇鐨勯棶棰?
 
-鏍规嵁鐢ㄦ埛鍙嶉锛屾湰娆′慨澶嶄簡3涓棶棰橈細
+根据用户反馈，本次修复了3个问题：
 
 ### 鉁?闂1锛氬疄鏃舵娴嬬己灏戞枃浠跺鍏ラ€夐」
 
@@ -21,12 +21,12 @@
 <el-form-item label="鏁版嵁澶勭悊妯″紡" v-if="uploadedFile">
   <el-radio-group v-model="detectionConfig.uploadMode">
     <el-radio label="all">澶勭悊鏁翠釜鏂囦欢</el-radio>
-    <el-radio label="partial">鎸囧畾澶勭悊琛屾暟</el-radio>
+    <el-radio label="partial">指定处理行数</el-radio>
   </el-radio-group>
 </el-form-item>
 
-<!-- 澶勭悊琛屾暟 -->
-<el-form-item label="澶勭悊琛屾暟" v-if="detectionConfig.uploadMode === 'partial'">
+<!-- 处理行数 -->
+<el-form-item label="处理行数" v-if="detectionConfig.uploadMode === 'partial'">
   <el-input-number 
     v-model="detectionConfig.maxRows" 
     :min="1" 
@@ -38,7 +38,7 @@
 <!-- 鏃堕棿鎴冲鐞?-->
 <el-form-item label="鏃堕棿鎴冲鐞? v-if="uploadedFile">
   <el-checkbox v-model="detectionConfig.addMilliseconds">
-    鑷姩涓洪噸澶嶆椂闂存埑娣诲姞姣
+    自动为重复时间戳添加毫秒
   </el-checkbox>
 </el-form-item>
 ```
@@ -50,8 +50,8 @@ const detectionConfig = ref({
   mode: 'full',              // 妫€娴嬫ā寮?
   uploadMode: 'all',         // 鏂板锛氭暟鎹鐞嗘ā寮?
   maxRows: 1000,             // 鏂板锛氭渶澶у鐞嗚鏁?
-  addMilliseconds: true,     // 鏂板锛氭椂闂存埑澶勭悊
-  saveResults: false         // 淇濆瓨缁撴灉
+  addMilliseconds: true,     // 新增：时间戳处理
+  saveResults: false         // 保存结果
 });
 ```
 
@@ -104,7 +104,7 @@ function openTimeSelectDialog() {
 **淇鍚?*锛?
 ```javascript
 async function openTimeSelectDialog() {
-  // 鐩存帴璋冪敤鍘熸湁鐨刼penTimeSelector鍑芥暟锛屽畠鍖呭惈瀹屾暣鐨勬椂闂磋酱鍔熻兘
+  // 直接调用原有的openTimeSelector函数，它包含完整的时间轴功能
   await openTimeSelector();
 }
 ```
@@ -114,7 +114,7 @@ async function openTimeSelectDialog() {
 鐢ㄦ埛鐜板湪鍙互锛?
 - 馃搳 鏌ョ湅鏁版嵁鏃堕棿杞村彲瑙嗗寲
 - 馃帤锔?浣跨敤婊戝潡閫夋嫨鏃堕棿鑼冨洿
-- 馃搮 鎵嬪姩杈撳叆鏃堕棿鑼冨洿
+- 📅 手动输入时间范围
 - 馃憖 鏌ョ湅鏁版嵁璁板綍鎬绘暟鍜屾椂闂村垎甯?
 
 **鐢ㄦ埛浣撻獙鎻愬崌**锛?
@@ -153,16 +153,16 @@ async function openTimeSelectDialog() {
 }
 ```
 
-#### 3.2 鏁堟灉瀵规瘮
+#### 3.2 效果对比
 
 **淇鍓?*锛?
 ```
-[  妯″紡閫夋嫨  ]  [    PHM鍨嬪彿閫夋嫨锛堝緢瀹斤級    ]
+[  模式选择  ]  [    PHM型号选择（很宽）    ]
 ```
 
 **淇鍚?*锛?
 ```
-[    妯″紡閫夋嫨    ]  [    PHM鍨嬪彿閫夋嫨    ]
+[    模式选择    ]  [    PHM型号选择    ]
 ```
 
 **鐢ㄦ埛浣撻獙鎻愬崌**锛?
@@ -172,9 +172,9 @@ async function openTimeSelectDialog() {
 
 ---
 
-## 馃搳 淇敼缁熻
+## 📊 修改统计
 
-### 鍓嶇淇敼
+### 前端修改
 
 **鏂囦欢**锛歚frontend/src/views/DetectionOverview.vue`
 
@@ -182,7 +182,7 @@ async function openTimeSelectDialog() {
 
 1. **閰嶇疆閫夐」鎵╁睍**锛氱害40琛?
    - 鏁版嵁澶勭悊妯″紡閫夋嫨
-   - 澶勭悊琛屾暟杈撳叆
+   - 处理行数输入
    - 鏃堕棿鎴冲鐞嗗紑鍏?
 
 2. **鐘舵€佸彉閲忔洿鏂?*锛?涓柊灞炴€?
@@ -204,20 +204,20 @@ async function openTimeSelectDialog() {
 
 ## 鉁?娴嬭瘯娓呭崟
 
-### 闂1娴嬭瘯
+### 问题1测试
 - [ ] 鏁版嵁澶勭悊妯″紡鍒囨崲姝ｅ父
 - [ ] 鎸囧畾琛屾暟杈撳叆鏈夋晥楠岃瘉锛?-1000000锛?
 - [ ] 鏃堕棿鎴冲鐞嗗紑鍏冲姛鑳芥甯?
 - [ ] 閰嶇疆鍙傛暟姝ｇ‘浼犻€掑埌鍚庣
 
-### 闂2娴嬭瘯
+### 问题2测试
 - [ ] 鏃堕棿閫夋嫨鍣ㄥ璇濇姝ｅ父寮瑰嚭
 - [ ] 鏃堕棿杞村彲瑙嗗寲姝ｇ‘鏄剧ず
 - [ ] 婊戝潡閫夋嫨鏃堕棿鑼冨洿鍔熻兘姝ｅ父
-- [ ] 鎵嬪姩鏃堕棿杈撳叆鍔熻兘姝ｅ父
+- [ ] 手动时间输入功能正常
 - [ ] 纭鍚庢纭姞杞藉巻鍙叉暟鎹?
 
-### 闂3娴嬭瘯
+### 问题3测试
 - [ ] 涓や釜涓嬫媺妗嗗搴︾浉绛?
 - [ ] 鍝嶅簲寮忓竷灞€姝ｅ父
 - [ ] 涓嶅悓灞忓箷灏哄涓嬫樉绀烘甯?
@@ -233,17 +233,17 @@ async function openTimeSelectDialog() {
 
 ### 2. 澶嶇敤鐜版湁鍔熻兘
 - 閬垮厤閲嶅閫犺疆瀛?
-- 淇濈暀宸查獙璇佺殑鍔熻兘
-- 鍑忓皯浠ｇ爜鍐椾綑
+- 保留已验证的功能
+- 减少代码冗余
 
 ### 3. 瑙嗚浼樺寲
 - 娉ㄩ噸鐣岄潰骞宠　
-- 缁熶竴缁勪欢澶у皬
+- 统一组件大小
 - 鎻愬崌鏁翠綋缇庤搴?
 
 ---
 
-## 馃摑 淇鍓嶅悗瀵规瘮
+## 📝 修复前后对比
 
 ### 鏂囦欢涓婁紶瀵硅瘽妗?
 
@@ -282,7 +282,7 @@ async function openTimeSelectDialog() {
 
 **淇鍚?*锛?
 ```
-[   妯″紡   ]  [  PHM鍨嬪彿  ]
+[   模式   ]  [  PHM型号  ]
 ```
 
 ---
@@ -300,11 +300,11 @@ async function openTimeSelectDialog() {
 ## 馃殌 鍚庣画寤鸿
 
 1. **鍚庣鏀寔**
-   - 纭繚鍚庣API鏀寔`max_rows`鍜宍add_milliseconds`鍙傛暟
-   - 瀹炵幇琛屾暟闄愬埗鍜屾椂闂存埑澶勭悊閫昏緫
+   - 确保后端API支持`max_rows`和`add_milliseconds`参数
+   - 实现行数限制和时间戳处理逻辑
 
 2. **鐢ㄦ埛鏂囨。**
-   - 鏇存柊鐢ㄦ埛鎵嬪唽锛岃鏄庢柊澧炵殑閰嶇疆閫夐」
+   - 更新用户手册，说明新增的配置选项
    - 娣诲姞浣跨敤绀轰緥鍜屾渶浣冲疄璺?
 
 3. **鎬ц兘浼樺寲**
@@ -314,7 +314,7 @@ async function openTimeSelectDialog() {
 ---
 
 **淇瀹屾垚鏃堕棿**锛?025-10-10  
-**淇浜哄憳**锛欰I Assistant  
+**修复人员**：AI Assistant  
 **浠ｇ爜璐ㄩ噺**锛氣渽 閫氳繃璇硶妫€鏌? 
 **鐢ㄦ埛鍙嶉**锛氣渽 鎵€鏈夐棶棰樺凡瑙ｅ喅  
 

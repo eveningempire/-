@@ -45,7 +45,7 @@
 
 ## 浣跨敤鏂规硶
 
-### 1. 鍒涘缓榛樿瑙勫垯
+### 1. 创建默认规则
 
 ```bash
 # 涓洪粯璁MG妯″瀷鍒涘缓瑙勫垯
@@ -58,7 +58,7 @@ python manage.py create_default_rules --model-name="PHM_Model_X"
 ### 2. 娴嬭瘯瑙勫垯妫€娴?
 
 ```bash
-# 杩愯榛樿娴嬭瘯
+# 运行默认测试
 python manage.py test_rule_detection
 
 # 鎸囧畾妯″瀷鍜屾祴璇曟暟閲?
@@ -80,14 +80,14 @@ python manage.py test_rule_detection --model-name="PHM_Model_X" --test-count=20
 | 鍙傛暟鍚?| 鎻忚堪 | 鍏稿瀷鑼冨洿 | 鍗曚綅 |
 |--------|------|----------|------|
 | `value_highT` | 楂樻俯浼犳劅鍣ㄨ鏁?| 20-35 | 掳C |
-| `value_highI` | 楂樼數娴佷紶鎰熷櫒璇绘暟 | 0.3-1.2 | A |
-| `value_lowI` | 浣庣數娴佷紶鎰熷櫒璇绘暟 | 2.0-4.5 | A |
+| `value_highI` | 高电流传感器读数 | 0.3-1.2 | A |
+| `value_lowI` | 低电流传感器读数 | 2.0-4.5 | A |
 | `w` | 闄€铻鸿浆閫?| 5800-6200 | RPM |
 | `u` | 鎸姩骞呭€?| 20-35 | - |
 | `viscosity_estimated` | 娑︽粦娌圭矘搴︿及璁?| 10-25 | cSt |
 | `mu_EHL_estimated` | EHL娑︽粦绯绘暟浼拌 | 0.04-0.06 | - |
 
-## 鏁呴殰绛夌骇璇存槑
+## 故障等级说明
 
 - **CRITICAL**: 涓ラ噸鏁呴殰锛岄渶瑕佺珛鍗冲鐞?
 - **HIGH**: 楂樼骇鏁呴殰锛岄渶瑕佷紭鍏堝鐞? 
@@ -109,11 +109,11 @@ python manage.py test_rule_detection --model-name="PHM_Model_X" --test-count=20
 
 ## 瑙勫垯琛ㄨ揪寮忚娉?
 
-瑙勫垯琛ㄨ揪寮忔敮鎸佷互涓嬭娉曪細
+规则表达式支持以下语法：
 
 - **姣旇緝鎿嶄綔绗?*: `>`, `<`, `>=`, `<=`, `==`, `!=`
 - **閫昏緫鎿嶄綔绗?*: `and`, `or`, `not`
-- **鏁板鍑芥暟**: `abs()`, `max()`, `min()`
+- **数学函数**: `abs()`, `max()`, `min()`
 - **鍙傛暟寮曠敤**: 鐩存帴浣跨敤鍙傛暟鍚嶏紝濡?`value_highT`
 
 绀轰緥锛?
@@ -124,17 +124,17 @@ python manage.py test_rule_detection --model-name="PHM_Model_X" --test-count=20
 # 澶嶅悎鏉′欢
 "value_highI > 1.0 and w < 5900.0"
 
-# 鏁板鍑芥暟
+# 数学函数
 "abs(value_highT - 25.0) > 5.0"
 ```
 
 ## 鏁呴殰鎺掓煡
 
-### 甯歌闂
+### 常见问题
 
 1. **瑙勫垯缂栬瘧澶辫触**
    - 妫€鏌ヨ鍒欒〃杈惧紡璇硶
-   - 纭鍙傛暟鍚嶇О姝ｇ‘
+   - 确认参数名称正确
    - 鏌ョ湅Django鏃ュ織
 
 2. **瑙勫垯涓嶈Е鍙?*  
@@ -142,14 +142,14 @@ python manage.py test_rule_detection --model-name="PHM_Model_X" --test-count=20
    - 纭闃堝€艰缃悎鐞?
    - 楠岃瘉鏁版嵁瀹屾暣鎬?
 
-3. **鎬ц兘闂**
-   - 鍑忓皯澶嶆潅瑙勫垯鏁伴噺
+3. **性能问题**
+   - 减少复杂规则数量
    - 浼樺寲瑙勫垯琛ㄨ揪寮?
    - 鑰冭檻寮傛澶勭悊
 
 ### 璋冭瘯鏂规硶
 
-1. 浣跨敤娴嬭瘯鍛戒护楠岃瘉瑙勫垯
+1. 使用测试命令验证规则
 2. 妫€鏌ョ紪璇戝悗鐨勮鍒欑紦瀛?
 3. 鏌ョ湅璇︾粏鐨勬娴嬬粨鏋滄棩蹇?
 

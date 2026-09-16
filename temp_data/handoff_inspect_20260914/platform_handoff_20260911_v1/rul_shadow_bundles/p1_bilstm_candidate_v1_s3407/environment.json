@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-09-09T19:42:34+00:00",
+  "python": "3.11.16",
+  "platform": "Linux-5.15.0-48-generic-x86_64-with-glibc2.35",
+  "hostname": "irip-c3-compute-1",
+  "numpy": "2.4.6",
+  "pandas": "3.0.5",
+  "torch": "2.7.1+cu118",
+  "cuda_available": false,
+  "cuda_version": null,
+  "gpu_name": null,
+  "deploy_version": "p1_bilstm_candidate_v1_s3407",
+  "run_version": "rul_syn_bilstm_s3407_20260909_n2"
+}

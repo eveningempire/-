@@ -8,7 +8,7 @@
 
 | 瀛楁鍚?| 绫诲瀷 | 璇存槑 |
 |--------|------|------|
-| `data_point` | OneToOneField | 鍏宠仈鐨凜MGData |
+| `data_point` | OneToOneField | 关联的CMGData |
 | `ims_model` | ForeignKey | 浣跨敤鐨処MS妯″瀷 |
 | `is_anomaly` | BooleanField | 鏄惁寮傚父 鉁?|
 | `anomaly_score` | FloatField | 寮傚父鍒嗘暟 鉁?|
@@ -33,7 +33,7 @@ details = ims_res.detection_details
 
 | 瀛楁鍚?| 绫诲瀷 | 璇存槑 |
 |--------|------|------|
-| `cmg_model` | ForeignKey | 鍏宠仈鐨凜MG妯″瀷 |
+| `cmg_model` | ForeignKey | 关联的CMG模型 |
 | `fault_definition` | ForeignKey | 鍏宠仈鐨勬晠闅滃畾涔?|
 | `rule_id` | CharField | 瑙勫垯ID 鉁?|
 | `rule_expression` | TextField | 瑙勫垯琛ㄨ揪寮?鉁?|
@@ -55,7 +55,7 @@ details = ims_res.detection_details
 
 | 瀛楁鍚?| 绫诲瀷 | 璇存槑 |
 |--------|------|------|
-| `cmg_model` | ForeignKey | 鍏宠仈鐨凜MG妯″瀷 |
+| `cmg_model` | ForeignKey | 关联的CMG模型 |
 | `fault_name` | CharField | 鏁呴殰鍚嶇О 鉁?|
 | `fault_level` | IntegerField | 鏁呴殰绛夌骇 |
 | `component` | CharField | 娑夊強閮ㄤ欢 |
@@ -71,7 +71,7 @@ details = ims_res.detection_details
 
 | 瀛楁鍚?| 绫诲瀷 | 璇存槑 |
 |--------|------|------|
-| `data_point` | ForeignKey | 鍏宠仈鐨凜MGData |
+| `data_point` | ForeignKey | 关联的CMGData |
 | `rule_definition` | ForeignKey | 瑙﹀彂鐨勮鍒?鉁?|
 | `fault_definition` | ForeignKey | 妫€娴嬪埌鐨勬晠闅?鉁?|
 | `is_triggered` | BooleanField | 瑙勫垯鏄惁瑙﹀彂 鉁?|
@@ -97,7 +97,7 @@ for rule_res in rule_res_list:
 
 | 瀛楁鍚?| 绫诲瀷 | 璇存槑 |
 |--------|------|------|
-| `data_point` | ForeignKey | 鍏宠仈鐨凜MGData |
+| `data_point` | ForeignKey | 关联的CMGData |
 | `msfg_definition` | ForeignKey | 浣跨敤鐨凪SFG瀹氫箟 |
 | `test_results` | JSONField | 娴嬭瘯鐐圭粨鏋?鉁?|
 | `fault_results` | JSONField | 鏁呴殰鐐圭粨鏋?鉁?|
@@ -141,7 +141,7 @@ for rule_res in rule_res_list:
 
 ## 馃攽 鍏抽敭瑕佺偣
 
-### 鍛藉悕瑙勮寖宸紓
+### 命名规范差异
 1. **IMSDetectionResult**锛氫娇鐢ㄩ€氱敤瀛楁鍚?
    - `is_anomaly`
    - `anomaly_score`
@@ -164,7 +164,7 @@ for rule_res in rule_res_list:
 
 ## 鈿狅笍 甯歌闄烽槺
 
-### 闄烽槺1锛氬亣璁炬墍鏈夋ā鍨嬮兘鏈塦name`瀛楁
+### 陷阱1：假设所有模型都有`name`字段
 ```python
 obj.name  # 鉂?涓嶆槸鎵€鏈夋ā鍨嬮兘鏈?
 obj.rule_id  # 鉁?RuleDefinition

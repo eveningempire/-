@@ -16,7 +16,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from phm_backend.permissions import has_permission
-from .models import TelemetrySample, TelemetrySession
+from .models import TelemetrySample, TelemetrySession, RealtimeAlarm
+from .realtime_detection import detect_sample
 
 
 def describe(session):
@@ -26,6 +27,8 @@ def describe(session):
         state = 'live' if last.received_at > timezone.now() - timedelta(seconds=5) else 'stale'
     return {'id': str(session.id), 'name': session.name, 'columns': session.columns,
             'state': state, 'sample_count': session.samples.count(),
+            'monitoring_enabled': session.monitoring_enabled,
+            'alarm_count': session.alarms.count(),
             'created_at': session.created_at, 'closed_at': session.closed_at,
             'last_received_at': last.received_at if last else None}
 
@@ -109,8 +112,11 @@ def ingest(request, session_id):
             if not session.columns:
                 session.columns = columns
                 session.save(update_fields=['columns'])
-            TelemetrySample.objects.bulk_create([TelemetrySample(session=session, values=row) for row in rows])
-        return Response({'ok': True, 'accepted': len(rows), 'last_time': rows[-1]['time']}, status=201)
+            samples = TelemetrySample.objects.bulk_create([TelemetrySample(session=session, values=row) for row in rows])
+            detected = []
+            for sample in samples:
+                detected.extend(detect_sample(session, sample))
+        return Response({'ok': True, 'accepted': len(rows), 'last_time': rows[-1]['time'], 'alarms': len(detected), 'monitoring_enabled': session.monitoring_enabled}, status=201)
     except (ValueError, OverflowError) as exc:
         return Response({'detail': str(exc)}, status=400)
 
@@ -126,6 +132,31 @@ def close(request, session_id):
             session.closed_at = timezone.now()
             session.save(update_fields=['closed_at'])
     return Response(describe(session))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def monitoring(request, session_id):
+    session = get_object_or_404(TelemetrySession, pk=session_id)
+    enabled = request.data.get('enabled')
+    if not isinstance(enabled, bool):
+        return Response({'detail': 'enabled 必须是布尔值'}, status=400)
+    session.monitoring_enabled = enabled
+    session.save(update_fields=['monitoring_enabled'])
+    return Response(describe(session))
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def alarms(request, session_id):
+    session = get_object_or_404(TelemetrySession, pk=session_id)
+    try:
+        after = int(request.query_params.get('after', 0))
+    except (TypeError, ValueError):
+        return Response({'detail': 'after 必须是非负整数'}, status=400)
+    query = session.alarms.filter(id__gt=after).order_by('id')[:500]
+    results = list(query.values('id', 'sample_id', 'signal', 'value', 'threshold', 'operator', 'severity', 'fault_name', 'isolation_target', 'health_index', 'acknowledged', 'created_at'))
+    return Response({'session': describe(session), 'results': results, 'next_cursor': results[-1]['id'] if results else after})
 
 
 class Echo:

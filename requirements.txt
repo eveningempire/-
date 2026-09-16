@@ -1,1 +1,9 @@
 django-cors-headers==4.3.1
+joblib==1.4.2
+numpy==2.0.2
+scikit-learn==1.6.1
+scipy==1.13.1
+PyYAML==6.0.2
+torch==2.5.1; platform_system != "Windows"
+# Windows offline/runtime installer should use the CPU wheel:
+# pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu

@@ -1,7 +1,7 @@
 <template>
   <div class="analysis-page">
     <h2>故障诊断分析</h2>
-    <div class="controls"><el-select v-model="id" filterable placeholder="选择 CSV 数据集" @change="clear"><el-option v-for="d in datasets" :key="d.id" :label="d.name" :value="d.id"/></el-select><el-button type="primary" :loading="loading" :disabled="!id" @click="run">运行 Hier14 诊断</el-button></div>
+    <div class="controls"><el-select v-model="id" filterable placeholder="选择 CSV 数据集" @change="clear"><el-option v-for="d in datasets" :key="d.id" :label="d.name" :value="d.id"/></el-select><el-select v-model="algorithm" @change="clear"><el-option label="Hier14 层次时序诊断" value="hier14"/><el-option label="MSFG + TEAMS-RT" value="msfg_teams_rt"/><el-option label="PCA–iForest" value="pca_iforest"/></el-select><el-button type="primary" :loading="loading" :disabled="!id" @click="run">运行 {{algorithmName}}</el-button></div>
     <el-descriptions v-if="selected" :column="2" border><el-descriptions-item label="数据来源">{{selected.source==='simulation'?'仿真':'离线上传'}}</el-descriptions-item><el-descriptions-item label="系统 / 部件">{{selected.system||'未记录'}} / {{selected.component||'未记录'}}</el-descriptions-item><el-descriptions-item label="故障标签（录入信息）">{{selected.fault_type||'未标注'}}</el-descriptions-item><el-descriptions-item label="注入时间（录入信息）">{{selected.injection_time??'未记录'}}</el-descriptions-item></el-descriptions>
     <el-alert v-if="error" title="诊断未完成，尚无模型结论" type="error" :closable="false" show-icon><p>{{failureReason}}</p><p>补齐 Hier14 源码、权重及符合模型字段要求的 CSV 后重新运行。数据集的故障标签不代表预测结果。</p><details><summary>技术详情</summary><pre>{{error}}</pre></details></el-alert>
     <el-empty v-if="!result&&!error" description="尚无诊断结果"/>
@@ -13,7 +13,9 @@
       <h3>窗口诊断明细</h3>
       <el-table :data="pageRows" stripe><el-table-column prop="window_index" label="窗口" width="90"/><el-table-column prop="time_start" label="起始时间 (s)"/><el-table-column prop="time_end" label="结束时间 (s)"/><el-table-column prop="pred_name" label="预测类别"/><el-table-column label="最高概率"><template #default="s">{{percent(s.row.confidence)}}</template></el-table-column></el-table>
       <el-pagination v-model:current-page="page" :page-size="10" :total="windows.length" layout="prev, pager, next"/>
-      <h3>运行依据</h3><el-descriptions :column="2" border><el-descriptions-item label="模型">Hier14</el-descriptions-item><el-descriptions-item label="窗口长度">{{result.seq_len}} 样本</el-descriptions-item><el-descriptions-item label="滑动步长">{{result.window_stride}} 样本</el-descriptions-item><el-descriptions-item label="采样间隔">{{result.sample_dt}} s</el-descriptions-item></el-descriptions>
+      <h3 v-if="result.evidence?.length">诊断证据</h3><el-table v-if="result.evidence?.length" :data="result.evidence" size="small"><el-table-column prop="signal" label="信号"/><el-table-column prop="test" label="测点"/><el-table-column prop="baseline" label="基准"/><el-table-column prop="latest" label="当前"/><el-table-column prop="z_score" label="偏离Z值"/><el-table-column prop="pca_loading" label="PCA贡献"/></el-table>
+      <h3 v-if="result.d_matrix">MSFG 依赖矩阵</h3><div v-if="result.d_matrix" class="matrix"><table><thead><tr><th>故障 / 测点</th><th v-for="t in result.d_matrix.tests" :key="t">{{t}}</th></tr></thead><tbody><tr v-for="(f,i) in result.d_matrix.faults" :key="f"><th>{{f}}</th><td v-for="(v,j) in result.d_matrix.values[i]" :key="j" :class="{hit:v}">{{v}}</td></tr></tbody></table></div>
+      <h3>运行依据</h3><el-descriptions :column="2" border><el-descriptions-item label="算法">{{result.algorithm||algorithmName}}</el-descriptions-item><el-descriptions-item label="窗口长度">{{result.seq_len}} 样本</el-descriptions-item><el-descriptions-item label="滑动步长">{{result.window_stride}} 样本</el-descriptions-item><el-descriptions-item label="运行模式">{{result.model_mode}}</el-descriptions-item></el-descriptions>
       <details><summary>原始模型输出</summary><pre>{{JSON.stringify(result,null,2)}}</pre></details>
     </template>
   </div>
@@ -21,7 +23,8 @@
 <script setup>
 import {ref,computed,onMounted} from 'vue'
 import ReportChart from '../components/ReportChart.vue'
-const datasets=ref([]),id=ref(),result=ref(null),error=ref(''),loading=ref(false),page=ref(1)
+const datasets=ref([]),id=ref(),result=ref(null),error=ref(''),loading=ref(false),page=ref(1),algorithm=ref('hier14')
+const algorithmName=computed(()=>({hier14:'Hier14',msfg_teams_rt:'MSFG + TEAMS-RT',pca_iforest:'PCA–iForest'}[algorithm.value]))
 const selected=computed(()=>datasets.value.find(d=>d.id===id.value)),windows=computed(()=>result.value?.window_series||[]),last=computed(()=>windows.value.at(-1)),pageRows=computed(()=>windows.value.slice((page.value-1)*10,page.value*10))
 const percent=v=>v==null?'未提供':(100*Number(v)).toFixed(1)+'%'
 const failureReason=computed(()=>/repo not found|不存在|Missing.*artifact/i.test(error.value)?'诊断运行依赖缺失，模型未执行。':/columns|rows|CSV/i.test(error.value)?'输入数据不符合模型要求。':'模型执行失败，请检查技术详情。')
@@ -29,8 +32,8 @@ const probabilityChart=computed(()=>{const p=result.value?.class_probs||[],a=res
 const timeline=computed(()=>({tooltip:{trigger:'axis'},grid:{containLabel:true,left:55,right:40,bottom:70},xAxis:{type:'value',name:'窗口结束时间 (s)'},yAxis:{type:'value',name:'最高类别概率 (%)',min:0,max:100},dataZoom:[{type:'inside'},{type:'slider'}],series:[{name:'窗口置信度',type:'line',data:windows.value.map(w=>[w.time_end,w.confidence*100]),color:'#247bba'}]}))
 function clear(){result.value=null;error.value='';page.value=1}
 onMounted(async()=>{try{const r=await fetch('/api/v1/datasets/');if(!r.ok)throw Error('数据集加载失败');datasets.value=await r.json()}catch(e){error.value=e.message}})
-async function run(){clear();loading.value=true;try{const r=await fetch('/api/v1/fault-diagnosis/predict/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dataset_id:id.value})});const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'诊断失败');result.value=j.result}catch(e){error.value=e.message}finally{loading.value=false}}
+async function run(){clear();loading.value=true;try{const r=await fetch('/api/v1/fault-diagnosis/predict/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dataset_id:id.value,algorithm:algorithm.value})});const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'诊断失败');result.value=j.result}catch(e){error.value=e.message}finally{loading.value=false}}
 </script>
 <style scoped>
 .analysis-page{max-width:1250px;min-width:0;color:#253448}.controls{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.controls .el-select{width:360px;max-width:100%}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-block:1px solid #dce4ec;margin:24px 0;padding:24px 0;gap:20px}.metrics small,.metrics strong{display:block}.metrics strong{font-size:22px;margin-top:10px;overflow-wrap:anywhere}.el-alert{margin-top:20px}h3{font-size:17px;margin-top:28px}p{line-height:1.7}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto}details{margin:20px 0}.el-pagination{margin:16px 0}@media(max-width:800px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style>
+.matrix{overflow:auto;margin:12px 0 22px}.matrix table{border-collapse:collapse;min-width:760px;font-size:12px}.matrix th,.matrix td{border:1px solid #d9e2ec;padding:8px;text-align:center}.matrix th{background:#f5f8fc}.matrix td.hit{background:#ffe7e7;color:#c43838;font-weight:700}</style>

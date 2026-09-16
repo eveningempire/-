@@ -1,0 +1,56 @@
+{
+  "deployment_manifest_version": 1,
+  "deploy_version": "platform_lox_shadow_v1_s3407_r2",
+  "created_at": "2026-09-09T19:49:10+00:00",
+  "contract_version": "platform_shadow_contract_v1",
+  "deployment_mode": "shadow",
+  "actionable": false,
+  "physical_rul_claim": false,
+  "profile": "P2_lox_shadow",
+  "score_name": "synthetic_proxy_score",
+  "model_version": "platform_lox_shadow_bilstm_s3407_20260909_r2",
+  "model_type": "bilstm",
+  "model_config": {
+    "type": "bilstm",
+    "hidden_size": 48,
+    "num_layers": 1,
+    "dropout": 0.1
+  },
+  "n_components": 7,
+  "feature_schema": {
+    "columns": [
+      "S1_mean",
+      "S1_std",
+      "S2_mean",
+      "S2_std",
+      "S14_mean",
+      "S14_std",
+      "hi_smooth",
+      "hi_raw",
+      "confidence",
+      "observability"
+    ],
+    "seq_length": 16,
+    "n_features": 10,
+    "sha256": "e1cbf86a616f849f0bad3fa2640266e1c558ba039dee0126507f22f4acdad8e2"
+  },
+  "input_space": "raw",
+  "generator": {
+    "label_source": "platform_lox_shadow_fixture_v1",
+    "generator_version": "platform_lox_shadow_fixture_v1",
+    "fixture_sha256": "c90559d49fe7fd48a29be6046e242ab86b49bf2ab93a60b75a1e3dbcdff3a28a",
+    "synthetic": true,
+    "real_409_data_used": false,
+    "schema_note": "input schema equals the frozen 409 lox_pump sequence schema"
+  },
+  "runtime_hints": {
+    "python": "3.11.16",
+    "torch": "2.7.1+cu118",
+    "numpy": "2.4.6"
+  },
+  "notes": [
+    "Scores are synthetic-contract outputs for integration and observation only.",
+    "The 409 dataset remains PROXY_ONLY / NOT_RUN_TO_FAILURE / NOT_TRAINABLE_ALL_CENSORED.",
+    "No HTTP/RPC contract is assumed; the stable interfaces are the Python API and the NPZ CLI."
+  ]
+}

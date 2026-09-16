@@ -35,19 +35,19 @@
 
 ### 闂2锛氭枃浠惰矾寰勮闂敊璇?鉁?
 - Django FileField璺緞闄愬埗
-- 鍒涘缓`_parse_file_direct`鐩存帴瑙ｆ瀽涓存椂鏂囦欢
+- 创建`_parse_file_direct`直接解析临时文件
 
 ### 闂3锛氭椂闂存埑鏍煎紡涓嶆敮鎸?鉁?
 - 娣诲姞`%Y_%m_%d_%H:%M:%S`鏍煎紡
-- 瀹屾暣澶嶅埗鍘熸湁鐨勬椂闂存埑瑙ｆ瀽閫昏緫
+- 完整复制原有的时间戳解析逻辑
 
 ### 闂4锛歮ax_rows鍙傛暟鏈娇鐢?鉁?
-- 鍚庣鎺ユ敹鍙傛暟
+- 后端接收参数
 - 浼犻€掑埌澶勭悊鍣?
-- 鍦ㄨВ鏋愭椂闄愬埗琛屾暟
+- 在解析时限制行数
 
 ### 闂5锛歛dd_milliseconds鍙傛暟鏈娇鐢?鉁?
-- 鍚庣鎺ユ敹鍙傛暟
+- 后端接收参数
 - 浼犻€掑埌澶勭悊鍣?
 - 璋冪敤鏃堕棿鎴冲幓閲嶆柟娉?
 
@@ -89,21 +89,21 @@
    - IMS妫€娴?
    - 瑙勫垯妫€娴?
    - MSFG妫€娴?
-   - 缁撴灉鏀堕泦
+   - 结果收集
    - 鏁版嵁娓呯悊
 4. 鉁?涓存椂鏁版嵁绠＄悊
 5. 鉁?閿欒澶勭悊鍜屾棩蹇?
 
 ---
 
-## 馃搳 鎬ц兘琛ㄧ幇
+## 📊 性能表现
 
-### 娴嬭瘯鏁版嵁
+### 测试数据
 - **鏂囦欢**锛?553鏁版嵁.xlsx
 - **鎬昏褰曟暟**锛?09,511鏉?
 - **娴嬭瘯閰嶇疆**锛氬鐞?000琛?
 
-### 鎬ц兘缁撴灉
+### 性能结果
 ```
 瑙ｆ瀽鏂囦欢锛? ~1绉?
 鍒涘缓鏁版嵁锛? ~3绉?
@@ -130,7 +130,7 @@ MSFG妫€娴嬶細  51
 
 ### 1. frontend/src/views/DetectionOverview.vue
 - 鎿嶄綔姝ラ鎻愮ず鏇存柊
-- 娣诲姞妯″紡閫夋嫨鍜孋MG鍨嬪彿閫夋嫨
+- 添加模式选择和CMG型号选择
 - 绉婚櫎鏃堕棿閫夋嫨鎸夐挳
 - 娣诲姞鏂囦欢涓婁紶瀵硅瘽妗?
 - 鏂板9涓嚱鏁?
@@ -233,7 +233,7 @@ MSFG妫€娴嬶細  51
 - 鉁?鏅鸿兘鏁版嵁绠＄悊
 - 鉁?娓呮櫚鐨勬棩蹇楄緭鍑?
 
-### 鎬ц兘琛ㄧ幇
+### 性能表现
 - 鉁?1000琛岀害30绉?
 - 鉁?10涓囪绾?-10鍒嗛挓
 - 鉁?鎵归噺浼樺寲锛?000鏉?鎵癸級
@@ -246,13 +246,13 @@ MSFG妫€娴嬶細  51
 1. `Detection_Overview_Upgrade_Plan.md` - 鍒濆鍗囩骇鏂规
 2. `Detection_Overview_Simple_Upgrade.md` - 绠€鍖栧崌绾ф柟妗?
 3. `Detection_Overview_Implementation_Complete.md` - 瀹炴柦瀹屾垚鎶ュ憡
-4. `Detection_Overview_Fixes.md` - 鐢ㄦ埛鍙嶉淇
+4. `Detection_Overview_Fixes.md` - 用户反馈修复
 5. `Batch_Processing_Detection_Flow_Analysis.md` - 娴佺▼鍒嗘瀽
-6. `Detection_Flow_Complete_Analysis.md` - 瀹屾暣娴佺▼瀵圭収
-7. `Realtime_Detection_Bugfix.md` - ImportSession淇
+6. `Detection_Flow_Complete_Analysis.md` - 完整流程对照
+7. `Realtime_Detection_Bugfix.md` - ImportSession修复
 8. `Timestamp_Parsing_Fix.md` - 鏃堕棿鎴宠В鏋愪慨澶?
-9. `Detection_Config_Parameters_Fix.md` - 閰嶇疆鍙傛暟淇
-10. `Model_Fields_Fix.md` - 妯″瀷瀛楁淇
+9. `Detection_Config_Parameters_Fix.md` - 配置参数修复
+10. `Model_Fields_Fix.md` - 模型字段修复
 11. **`Realtime_Detection_Complete.md`** - 鏈枃妗?
 
 **鍏?1涓缁嗘枃妗ｏ紝瀹屾暣璁板綍浜嗗疄鐜拌繃绋嬶紒**
@@ -280,9 +280,9 @@ MSFG妫€娴嬶細  51
 
 ## 鉁?鑷磋阿
 
-鎰熻阿鎮ㄥ湪鏁翠釜瀹炵幇杩囩▼涓殑鑰愬績鍙嶉鍜岀粏鑷存祴璇曪紒
+感谢您在整个实现过程中的耐心反馈和细致测试！
 
-閫氳繃鎮ㄧ殑鍙嶉锛屾垜浠細
+通过您的反馈，我们：
 - 馃敡 淇浜?涓妧鏈棶棰?
 - 馃搱 瀹炵幇浜嗗畬鏁寸殑鍙屾ā寮忓姛鑳?
 - 馃摎 浜у嚭浜?1浠借缁嗘枃妗?
