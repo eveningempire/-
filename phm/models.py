@@ -69,6 +69,12 @@ class AuditEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
 
+class UserPermissionProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="phm_permission_profile")
+    permissions = models.JSONField(default=list, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class RealtimeAlarm(models.Model):
     session = models.ForeignKey(TelemetrySession, on_delete=models.CASCADE, related_name="alarms")
     sample = models.ForeignKey(TelemetrySample, on_delete=models.CASCADE, related_name="alarms")

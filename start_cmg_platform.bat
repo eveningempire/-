@@ -22,36 +22,39 @@ if not exist ".venv\Scripts\python.exe" (
     exit /b 1
 )
 
-where npm >nul 2>&1
-if errorlevel 1 (
-    echo [ERROR] Node.js and npm are required to build the frontend.
-    pause
-    exit /b 1
-)
-
-echo [1/4] Checking frontend dependencies...
-if not exist "frontend\node_modules" (
+echo [1/4] Checking packaged frontend...
+if not exist "frontend\dist\index.html" (
+    echo [INFO] Packaged frontend was not found; a local build is required.
+    where npm >nul 2>&1
+    if errorlevel 1 (
+        echo [ERROR] Install Node.js and npm, or restore frontend\dist.
+        pause
+        exit /b 1
+    )
+    if not exist "frontend\node_modules" (
+        pushd frontend
+        call npm install
+        if errorlevel 1 (
+            popd
+            echo [ERROR] npm install failed.
+            pause
+            exit /b 1
+        )
+        popd
+    )
+    echo [2/4] Building frontend...
     pushd frontend
-    call npm install
+    call npm run build
     if errorlevel 1 (
         popd
-        echo [ERROR] npm install failed.
+        echo [ERROR] Frontend build failed.
         pause
         exit /b 1
     )
     popd
+) else (
+    echo [2/4] Using packaged frontend build.
 )
-
-echo [2/4] Building frontend...
-pushd frontend
-call npm run build
-if errorlevel 1 (
-    popd
-    echo [ERROR] Frontend build failed.
-    pause
-    exit /b 1
-)
-popd
 
 set "USE_SQLITE=true"
 set "DJANGO_DEBUG=True"

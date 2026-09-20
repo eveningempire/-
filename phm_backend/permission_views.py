@@ -10,7 +10,8 @@ from rest_framework import status
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-from .permissions import ROLE_PERMISSIONS, user_role, has_permission
+from .permissions import ROLE_PERMISSIONS, PERMISSION_LABELS, user_role, has_permission, effective_permissions
+from phm.models import UserPermissionProfile
 
 User = get_user_model()
 
@@ -42,14 +43,25 @@ class PermissionProfileView(APIView):
 
     def get(self, request):
         role = user_role(request.user)
-        return Response({"username": request.user.username, "role": role, "permissions": sorted(ROLE_PERMISSIONS.get(role, set()))})
+        return Response({"username": request.user.username, "role": role, "permissions": sorted(effective_permissions(request.user))})
 
 
 class RoleCatalogView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({"roles": [{"key": key, "permissions": sorted(value)} for key, value in ROLE_PERMISSIONS.items()]})
+        users = []
+        if has_permission(request.user, "manage_users"):
+            users = [{"id": user.id, "username": user.username, "role": user_role(user),
+                      "permissions": sorted(effective_permissions(user))}
+                     for user in User.objects.filter(is_active=True).order_by("username")]
+        return Response({
+            "permission_catalog": [{"key": key, "label": label} for key, label in PERMISSION_LABELS.items()],
+            "roles": [{"key": key, "permissions": sorted(value),
+                       "permission_labels": [PERMISSION_LABELS[p] for p in sorted(value)]}
+                      for key, value in ROLE_PERMISSIONS.items()],
+            "users": users,
+        })
 
 
 class GroupRoleView(APIView):
@@ -83,4 +95,14 @@ class GroupRoleView(APIView):
         if role != "admin":
             group, _ = Group.objects.get_or_create(name="PHM-查看者")
             target.groups.add(group)
-        return Response({"user_id": target.id, "role": role})
+        requested = request.data.get("permissions")
+        if requested is not None:
+            if not isinstance(requested, list):
+                return Response({"detail": "权限必须是列表"}, status=status.HTTP_400_BAD_REQUEST)
+            invalid = set(requested) - set(PERMISSION_LABELS)
+            if invalid:
+                return Response({"detail": f"存在无效权限：{', '.join(sorted(invalid))}"}, status=status.HTTP_400_BAD_REQUEST)
+            profile, _ = UserPermissionProfile.objects.get_or_create(user=target)
+            profile.permissions = [] if role == "admin" else sorted(set(requested) | {"view"})
+            profile.save(update_fields=["permissions", "updated_at"])
+        return Response({"user_id": target.id, "role": role, "permissions": sorted(effective_permissions(target))})

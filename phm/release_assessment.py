@@ -20,9 +20,11 @@ def _finite01(value, name):
 
 def _normalise_weights(health, requested):
     raw = {key: float(requested.get(key, DEFAULT_WEIGHTS.get(key, 1.0))) for key in health}
-    if any(not math.isfinite(value) or value <= 0 for value in raw.values()):
-        raise ValueError("子系统权重必须为正有限数值")
+    if any(not math.isfinite(value) or value < 0 for value in raw.values()):
+        raise ValueError("子系统权重必须为非负有限数值")
     total = sum(raw.values())
+    if total <= 0:
+        raise ValueError("子系统权重合计必须大于 0")
     return {key: value / total for key, value in raw.items()}
 
 

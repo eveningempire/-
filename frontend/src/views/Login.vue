@@ -1,4 +1,4 @@
-<template><div class="login"><div class="card"><h1>重复使用运载器健康管理平台</h1><el-form :model="form" @submit.prevent="submit"><el-form-item><el-input v-model="form.username" placeholder="用户名"/></el-form-item><el-form-item><el-input v-model="form.password" type="password" placeholder="密码"/></el-form-item><el-button type="primary" native-type="submit" :loading="loading">登录系统</el-button></el-form><small>用户账号由管理员创建</small></div></div></template>
+<template><div class="login"><div class="card"><h1>重复使用运载器发射场健康管理平台</h1><el-form :model="form" @submit.prevent="submit"><el-form-item><el-input v-model="form.username" placeholder="用户名"/></el-form-item><el-form-item><el-input v-model="form.password" type="password" placeholder="密码"/></el-form-item><el-button type="primary" native-type="submit" :loading="loading">登录系统</el-button></el-form><small>用户账号由管理员创建</small></div></div></template>
 <script setup>
 import { reactive, ref } from 'vue'; import { useRouter, useRoute } from 'vue-router'; import { ElMessage } from 'element-plus';
 const router=useRouter(), route=useRoute(), form=reactive({username:'',password:''}), loading=ref(false);

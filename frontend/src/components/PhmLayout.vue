@@ -1,7 +1,7 @@
 <template>
   <el-container class="shell">
     <el-aside width="250px" class="side">
-      <div class="brand"><b>PHM</b><span>重复使用运载器健康管理平台</span></div>
+      <div class="brand"><b>PHM</b><span>重复使用运载器发射场健康管理平台</span></div>
       <el-menu router :default-active="$route.path" class="nav">
         <el-menu-item index="/"><el-icon><Monitor /></el-icon>综合态势</el-menu-item>
         <el-sub-menu index="monitor"><template #title><el-icon><DataLine /></el-icon>状态监测</template><el-menu-item index="/telemetry">遥测数据监测</el-menu-item><el-menu-item index="/alarms">异常告警中心</el-menu-item></el-sub-menu>
@@ -14,7 +14,7 @@
       <div class="online">● 平台服务正常</div>
     </el-aside>
     <el-container>
-      <el-header class="header"><div><h1>重复使用运载器健康管理平台</h1><p>状态监测 · 故障诊断 · 健康评估 · 寿命预测</p></div><div class="actions"><el-tag type="success">演示环境</el-tag><span>{{ now }}</span><el-button size="small" type="danger" plain @click="logout">退出登录</el-button></div></el-header>
+      <el-header class="header"><div><h1>重复使用运载器发射场健康管理平台</h1><p>状态监测 · 故障诊断 · 健康评估 · 寿命预测</p></div><div class="actions"><el-tag type="success">演示环境</el-tag><span>{{ now }}</span><el-button size="small" type="danger" plain @click="logout">退出登录</el-button></div></el-header>
       <el-main class="main"><router-view /></el-main>
     </el-container>
   </el-container>

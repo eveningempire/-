@@ -1,9 +1,19 @@
+channels==4.3.2
+channels-redis==4.3.0
+daphne==4.2.1
+Django==4.2.30
 django-cors-headers==4.3.1
+django-redis==6.0.0
+djangorestframework==3.16.1
 joblib==1.4.2
 numpy==2.0.2
+openpyxl==3.1.5
+pandas==2.3.3
+redis==7.0.1
 scikit-learn==1.6.1
 scipy==1.13.1
 PyYAML==6.0.2
 torch==2.5.1; platform_system != "Windows"
+whitenoise==6.11.0
 # Windows offline/runtime installer should use the CPU wheel:
 # pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu

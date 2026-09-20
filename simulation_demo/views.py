@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datasets.models import Dataset
 from .models import FaultWorkflowEvent, FaultWorkflowTask
 
-FAULTS={"动力":{"泄漏":"pressure","泵效率下降":"temperature"},"电源":{"母线欠压":"bus_voltage","电池容量衰减":"battery_capacity"},"控制":{"传感器偏置":"attitude_error","执行器迟滞":"control_error"}}
+FAULTS={"动力":{"泄漏":"pressure","泵效率下降":"temperature"},"控制":{"传感器偏置":"attitude_error","执行器迟滞":"control_error"}}
 NOMINAL={"pressure":1.0,"temperature":.4,"bus_voltage":1.0,"battery_capacity":1.0,"attitude_error":0.0,"control_error":.02}
 THRESHOLDS={"pressure":.12,"temperature":.12,"bus_voltage":.10,"battery_capacity":.10,"attitude_error":.08,"control_error":.09}
 AMPLITUDES={"pressure":.35,"temperature":.3,"bus_voltage":.3,"battery_capacity":.25,"attitude_error":.25,"control_error":.25}
@@ -39,7 +39,10 @@ def sample(request): return JsonResponse({"ok":True,"subsystems":{k:list(v) for 
 def workflows(request):
  if request.method=="GET": return JsonResponse({"ok":True,"results":[_task(x) for x in FaultWorkflowTask.objects.order_by("-created_at")[:100]]})
  try:
-  b=json.loads(request.body or "{}"); t=FaultWorkflowTask.objects.create(name=b.get("name") or "故障注入任务",mode=b.get("mode","offline"),subsystem=b.get("subsystem","动力"),fault_mode=b.get("fault_mode","泄漏"),severity=float(b.get("severity",.6)),injection_time=float(b.get("injection_time",40)),status="ready",current_stage="ready"); return JsonResponse({"ok":True,"task":_task(t)},status=201)
+  b=json.loads(request.body or "{}"); subsystem=b.get("subsystem","动力"); fault_mode=b.get("fault_mode","泄漏")
+  if subsystem not in FAULTS: return JsonResponse({"ok":False,"error":"子系统仅支持动力和控制"},status=400)
+  if fault_mode not in FAULTS[subsystem]: return JsonResponse({"ok":False,"error":"故障模式与所选子系统不匹配"},status=400)
+  t=FaultWorkflowTask.objects.create(name=b.get("name") or "故障注入任务",mode=b.get("mode","offline"),subsystem=subsystem,fault_mode=fault_mode,severity=float(b.get("severity",.6)),injection_time=float(b.get("injection_time",40)),status="ready",current_stage="ready"); return JsonResponse({"ok":True,"task":_task(t)},status=201)
  except Exception as e: return JsonResponse({"ok":False,"error":str(e)},status=400)
 
 @csrf_exempt

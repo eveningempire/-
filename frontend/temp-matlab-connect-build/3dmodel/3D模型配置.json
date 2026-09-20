@@ -1,0 +1,7 @@
+{
+    "低速框架作动电机": "Fillet5",
+    "低速框架转动装置": "Boss-Extrude1",
+    "低速框架": "Cut-Extrude2",
+    "高速转子轴系": "T-Motor F80Pro.step<1>[2]",
+    "高速转子电机": "T-Motor F80Pro.step<1>[3]"
+}

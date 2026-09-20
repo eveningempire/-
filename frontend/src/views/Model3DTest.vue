@@ -177,12 +177,12 @@ const cmgParts = [
 const simulationUnits = [
   {
     key: 'vehicle',
-    name: '可回收运载器总体状态',
-    summary: '整器健康总览',
+    name: '甲烷可回收运载器总体状态',
+    summary: '单芯级复用构型',
     state: 'RUNNING',
     stateType: 'success',
     health: '健康 92%',
-    source: '总体构型示意 / Three.js 程序化模型',
+    source: '朱雀三号 / 新一代甲烷复用火箭风格通用示意（非官方模型）',
     modelType: 'rocket',
     statusCards: [
       { label: '飞行阶段', value: '再入返回', detail: '姿态稳定，准备着陆' },
@@ -197,10 +197,11 @@ const simulationUnits = [
       { key: 'thermal', label: '热防护裕度', value: '76%', percent: 76, status: 'warning' },
     ],
     parts: [
-      { name: '箭体结构', mesh: 'vehicle-body', metric: '载荷 61%', health: '正常', healthType: 'success', alarm: '无', signal: '结构载荷 / 振动反馈' },
+      { name: '一二级箭体与贮箱', mesh: 'vehicle-body', metric: '载荷 61%', health: '正常', healthType: 'success', alarm: '无', signal: '结构载荷 / 贮箱压力 / 振动反馈' },
+      { name: '级间段与分离机构', mesh: 'interstage', metric: '分离回路就绪', health: '正常', healthType: 'success', alarm: '无', signal: '分离回路 / 锁紧机构状态' },
       { name: '栅格舵/气动控制', mesh: 'grid-fins', metric: '舵偏 4.2°', health: '正常', healthType: 'success', alarm: '无', signal: '舵面角度 / 气动载荷反馈' },
-      { name: '主发动机组', mesh: 'main-engines', metric: '推力 68%', health: '正常', healthType: 'success', alarm: '无', signal: '推力室压力 / 涡泵转速' },
-      { name: '着陆支腿', mesh: 'landing-legs', metric: '锁定就绪', health: '正常', healthType: 'success', alarm: '无', signal: '支腿锁定 / 缓冲状态' },
+      { name: '液氧甲烷发动机簇', mesh: 'main-engines', metric: '7/7 在线 · 推力68%', health: '正常', healthType: 'success', alarm: '无', signal: '推力室压力 / 涡泵转速 / 混合比' },
+      { name: '展开式着陆机构', mesh: 'landing-legs', metric: '四腿展开锁定', health: '正常', healthType: 'success', alarm: '无', signal: '展开角 / 锁定 / 缓冲器行程' },
       { name: '热防护区域', mesh: 'thermal-shield', metric: '温升关注', health: '关注', healthType: 'warning', alarm: '局部温升', signal: 'TPS 温度阵列反馈' },
     ],
   },
@@ -491,107 +492,67 @@ function createProceduralModel(type) {
 
 function createRocketModel() {
   const group = new THREE.Group()
-  group.name = 'ReusableLaunchVehicle'
+  group.name = 'MethaloxReusableLaunchVehicle'
 
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd9e2ec, metalness: 0.32, roughness: 0.42 })
-  const darkMat = new THREE.MeshStandardMaterial({ color: 0x223146, metalness: 0.45, roughness: 0.36 })
-  const accentMat = new THREE.MeshStandardMaterial({ color: 0x2b78c6, metalness: 0.2, roughness: 0.5 })
-  const heatMat = new THREE.MeshStandardMaterial({ color: 0xd46b3d, metalness: 0.18, roughness: 0.55 })
-  const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf4f7fb, metalness: 0.2, roughness: 0.32 })
-  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x142a43, metalness: 0.2, roughness: 0.18, clearcoat: 0.8, clearcoatRoughness: 0.12 })
-  const nozzleMat = new THREE.MeshStandardMaterial({ color: 0x8a9caf, metalness: 0.78, roughness: 0.28 })
+  const steel = new THREE.MeshPhysicalMaterial({ color: 0xcbd3da, metalness: .78, roughness: .24, clearcoat: .45, clearcoatRoughness: .2 })
+  const steelLight = new THREE.MeshStandardMaterial({ color: 0xe9eef2, metalness: .58, roughness: .3 })
+  const dark = new THREE.MeshStandardMaterial({ color: 0x202a35, metalness: .72, roughness: .28 })
+  const black = new THREE.MeshStandardMaterial({ color: 0x0c1218, metalness: .45, roughness: .45 })
+  const accent = new THREE.MeshStandardMaterial({ color: 0x2368a2, metalness: .3, roughness: .42 })
+  const heat = new THREE.MeshStandardMaterial({ color: 0x9c4b2f, metalness: .28, roughness: .56 })
+  const nozzle = new THREE.MeshStandardMaterial({ color: 0x65717c, metalness: .9, roughness: .22 })
 
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.86, 7.4, 48), bodyMat)
-  body.name = 'vehicle-body'
-  body.position.y = 1.2
-  group.add(body)
+  // 单芯级大直径两级液氧甲烷构型，参考新一代可回收火箭比例。
+  const firstStage = new THREE.Mesh(new THREE.CylinderGeometry(1.02, 1.08, 6.9, 64), steel)
+  firstStage.name = 'vehicle-body'; firstStage.position.y = -.55; group.add(firstStage)
+  const secondStage = new THREE.Mesh(new THREE.CylinderGeometry(.82, .98, 3.05, 64), steelLight)
+  secondStage.name = 'vehicle-body'; secondStage.position.y = 4.42; group.add(secondStage)
+  const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(.82, 1.02, .72, 64), steelLight)
+  shoulder.name = 'interstage'; shoulder.position.y = 2.54; group.add(shoulder)
+  const interstage = new THREE.Mesh(new THREE.CylinderGeometry(1.025, 1.025, .62, 64), dark)
+  interstage.name = 'interstage'; interstage.position.y = 2.12; group.add(interstage)
+  const fairing = new THREE.Mesh(new THREE.ConeGeometry(.82, 2.35, 64), steelLight)
+  fairing.name = 'vehicle-body'; fairing.position.y = 7.12; group.add(fairing)
 
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.72, 1.55, 48), bodyMat)
-  nose.name = 'vehicle-body'
-  nose.position.y = 5.68
-  group.add(nose)
-
-  const band1 = new THREE.Mesh(new THREE.CylinderGeometry(0.73, 0.73, 0.18, 48), accentMat)
-  band1.name = 'vehicle-body'
-  band1.position.y = 3.25
-  group.add(band1)
-
-  const interstage = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.42, 48), darkMat)
-  interstage.name = 'vehicle-body'
-  interstage.position.y = -1.98
-  group.add(interstage)
-
-  for (const y of [-2.38, 0.15, 3.08]) {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.77, 0.045, 12, 48), whiteMat)
-    ring.name = 'vehicle-body'
-    ring.rotation.x = Math.PI / 2
-    ring.position.y = y
-    group.add(ring)
+  // 蒙皮焊缝、级间标识带和纵向管线整流罩。
+  for (const y of [-3.55, -2.25, -.9, .45, 1.75, 3.16, 4.25, 5.55]) {
+    const seam = new THREE.Mesh(new THREE.TorusGeometry(y > 2.7 ? .825 : 1.025, .025, 10, 64), y === 1.75 ? accent : dark)
+    seam.name = y === 1.75 ? 'interstage' : 'vehicle-body'; seam.rotation.x = Math.PI / 2; seam.position.y = y; group.add(seam)
   }
+  const raceway = new THREE.Mesh(new THREE.BoxGeometry(.12, 6.1, .12), dark)
+  raceway.name = 'vehicle-body'; raceway.position.set(1.02, -.35, 0); group.add(raceway)
+  const mark = new THREE.Mesh(new THREE.BoxGeometry(.018, 1.7, .44), accent)
+  mark.name = 'vehicle-body'; mark.position.set(1.025, .7, 0); group.add(mark)
 
-  for (const y of [2.15, 2.52]) {
-    const windowBand = new THREE.Mesh(new THREE.CylinderGeometry(0.735, 0.735, 0.18, 48), glassMat)
-    windowBand.name = 'vehicle-body'
-    windowBand.position.y = y
-    group.add(windowBand)
-  }
-
-  const thermal = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.92, 0.82, 48), heatMat)
-  thermal.name = 'thermal-shield'
-  thermal.position.y = -2.92
-  group.add(thermal)
-
+  // 四片可动栅格舵，采用格栅板而非简单实心方块。
   for (let i = 0; i < 4; i += 1) {
-    const angle = (Math.PI / 2) * i
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.92, 0.62), darkMat)
-    fin.name = 'grid-fins'
-    fin.position.set(Math.cos(angle) * 0.84, 3.82, Math.sin(angle) * 0.84)
-    fin.rotation.y = -angle
-    group.add(fin)
+    const angle = i * Math.PI / 2
+    const finGroup = new THREE.Group(); finGroup.name = 'grid-fins'
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(.12, 1.1, .82), dark); frame.name = 'grid-fins'; finGroup.add(frame)
+    for (let n = -2; n <= 2; n += 1) {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(.14, .055, .72), black); bar.name = 'grid-fins'; bar.position.y = n * .18; finGroup.add(bar)
+    }
+    finGroup.position.set(Math.cos(angle) * 1.12, 1.28, Math.sin(angle) * 1.12); finGroup.rotation.y = -angle; group.add(finGroup)
 
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.11, 1.35, 0.16), darkMat)
-    leg.name = 'landing-legs'
-    leg.position.set(Math.cos(angle) * 1.18, -2.85, Math.sin(angle) * 1.18)
-    leg.rotation.z = Math.cos(angle) * 0.28
-    leg.rotation.x = -Math.sin(angle) * 0.28
-    group.add(leg)
+    // 展开式支腿：主支柱、斜撑和着陆脚垫。
+    const legGroup = new THREE.Group(); legGroup.name = 'landing-legs'
+    const strut = new THREE.Mesh(new THREE.BoxGeometry(.14, 2.65, .18), dark); strut.name = 'landing-legs'; strut.position.y = -.3; strut.rotation.z = .34; legGroup.add(strut)
+    const brace = new THREE.Mesh(new THREE.BoxGeometry(.09, 1.75, .11), steelLight); brace.name = 'landing-legs'; brace.position.set(-.28, .15, 0); brace.rotation.z = -.38; legGroup.add(brace)
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(.34, .42, .12, 28), black); foot.name = 'landing-legs'; foot.position.set(.44, -1.62, 0); legGroup.add(foot)
+    legGroup.position.set(Math.cos(angle) * 1.15, -3.22, Math.sin(angle) * 1.15); legGroup.rotation.y = -angle; group.add(legGroup)
   }
 
-  for (let i = 0; i < 3; i += 1) {
-    const angle = (Math.PI * 2 * i) / 3
-    const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.28, 0.55, 32), nozzleMat)
-    engine.name = 'main-engines'
-    engine.position.set(Math.cos(angle) * 0.38, -3.65, Math.sin(angle) * 0.38)
-    group.add(engine)
-    const throat = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.32, 32), darkMat)
-    throat.name = 'main-engines'
-    throat.position.set(Math.cos(angle) * 0.38, -3.94, Math.sin(angle) * 0.38)
-    throat.rotation.x = Math.PI
-    group.add(throat)
+  const engineDeck = new THREE.Mesh(new THREE.CylinderGeometry(1.08, 1.08, .48, 64), heat)
+  engineDeck.name = 'thermal-shield'; engineDeck.position.y = -4.2; group.add(engineDeck)
+  const enginePositions = [[0,0], [.54,0], [-.54,0], [.27,.47], [.27,-.47], [-.27,.47], [-.27,-.47]]
+  for (const [x,z] of enginePositions) {
+    const chamber = new THREE.Mesh(new THREE.CylinderGeometry(.16, .2, .36, 32), dark); chamber.name = 'main-engines'; chamber.position.set(x,-4.48,z); group.add(chamber)
+    const bell = new THREE.Mesh(new THREE.CylinderGeometry(.17, .3, .62, 32, 1, true), nozzle); bell.name = 'main-engines'; bell.position.set(x,-4.86,z); group.add(bell)
   }
+  const plume = new THREE.Mesh(new THREE.ConeGeometry(.56, 1.65, 40), new THREE.MeshStandardMaterial({ color:0x8fd8ff, emissive:0x246fb5, transparent:true, opacity:.46 }))
+  plume.name = 'main-engines'; plume.position.y = -5.78; plume.rotation.x = Math.PI; group.add(plume)
 
-  // 两个外挂推进剂舱，提升总体构型辨识度。
-  for (const side of [-1, 1]) {
-    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 5.8, 32), whiteMat)
-    tank.name = 'vehicle-body'
-    tank.position.set(side * 0.98, 0.78, 0)
-    group.add(tank)
-    const tankNose = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.65, 32), whiteMat)
-    tankNose.name = 'vehicle-body'
-    tankNose.position.set(side * 0.98, 3.98, 0)
-    group.add(tankNose)
-  }
-
-  const flame = new THREE.Mesh(
-    new THREE.ConeGeometry(0.48, 1.25, 32),
-    new THREE.MeshStandardMaterial({ color: 0xffa447, emissive: 0x662200, transparent: true, opacity: 0.58 }),
-  )
-  flame.name = 'main-engines'
-  flame.position.y = -4.45
-  flame.rotation.x = Math.PI
-  group.add(flame)
-
-  group.rotation.z = -0.18
+  group.rotation.z = -0.105
   return group
 }
 

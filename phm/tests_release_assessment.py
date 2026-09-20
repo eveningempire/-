@@ -4,6 +4,21 @@ from .models import ReleaseAssessment
 
 
 class ReleaseAssessmentTests(TestCase):
+    def test_operator_supplied_weights_are_normalized_and_used(self):
+        response = self.client.post(
+            "/api/v1/phm/release-assessments/",
+            data=json.dumps({
+                "subsystem_health": {"动力": .9, "电源": .6, "结构": .8},
+                "subsystem_weights": {"动力": 6, "电源": 3, "结构": 1},
+                "release_threshold": .5,
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201)
+        assessment = response.json()["assessment"]
+        self.assertEqual(assessment["subsystem_weights"], {"动力": .6, "电源": .3, "结构": .1})
+        self.assertAlmostEqual(assessment["weighted_health_index"], .8)
+
     def setUp(self): self.client = Client()
 
     def test_release_when_all_constraints_pass(self):
