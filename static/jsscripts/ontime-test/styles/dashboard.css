@@ -1,0 +1,64 @@
+/* 仪表盘相关样式 */
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(230, 247, 255, 0.5), rgba(239, 219, 255, 0.3));
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+}
+
+.chart-container {
+    flex: 1;
+    min-height: 250px;
+}
+
+.trend-placeholder {
+    flex: 1;
+    background: linear-gradient(to bottom, rgba(230, 247, 255, 0.3), rgba(239, 219, 255, 0.2));
+    border-radius: var(--border-radius);
+    min-height: 250px;
+}
+
+/* 健康状态颜色指示器 */
+.health-indicator {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 15px;
+}
+
+.indicator-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.indicator-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.indicator-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.indicator-excellent {
+    background-color: var(--primary-medium);
+}
+
+.indicator-good {
+    background-color: var(--green-medium);
+}
+
+.indicator-fair {
+    background-color: var(--orange-medium);
+}
+
+.indicator-poor {
+    background-color: var(--danger);
+}

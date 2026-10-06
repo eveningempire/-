@@ -1,0 +1,58 @@
+/* Element UI 组件覆盖样式 */
+.el-card__body {
+    overflow: auto;
+    padding: 15px !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.el-progress .el-progress__text {
+    top: 50%;
+    white-space: pre-wrap !important;
+    font-size: 14px !important;
+}
+
+.el-progress .el-progress-bar__outer {
+    background: rgba(24, 144, 255, 0.1);
+    height: 16px !important;
+    border-radius: 100px;
+}
+
+.el-progress-bar__inner {
+    border-radius: 100px;
+    background: linear-gradient(to right, var(--primary-medium), var(--secondary-medium)) !important;
+}
+
+.el-button--primary {
+    background-color: var(--primary-medium);
+    border-color: var(--primary-medium);
+}
+
+.el-button--primary:hover, 
+.el-button--primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: #fff;
+}
+
+.el-select .el-input__inner {
+    border-color: var(--secondary-light);
+}
+
+.el-select .el-input.is-focus .el-input__inner {
+    border-color: var(--primary-medium);
+}
+
+.el-select .el-input__inner:hover {
+    border-color: var(--primary-medium);
+}
+
+/* 覆盖Element UI的默认样式 */
+.red-border-input .el-input__inner {
+    border-color: red;
+}
+
+.green-border-input .el-input__inner {
+    border-color: green;
+}

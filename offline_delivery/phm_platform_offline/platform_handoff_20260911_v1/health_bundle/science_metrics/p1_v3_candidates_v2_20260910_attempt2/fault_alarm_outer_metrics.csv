@@ -1,0 +1,8 @@
+﻿component_id,chosen_config,healthy_windows,healthy_window_false_alarm_rate,healthy_trajectories,healthy_trajectory_false_alarm_rate,detection_rate,n_fault_runs,median_delay_sec,n_delay_valid,fa_pass,detection_pass,delay_pass,all_hard_gates_pass,hard_gates_pass
+lox_pump,FA-1a,2828,0.11244695898161244,28,0.17857142857142858,0.3333333333333333,6,44.900000000000006,2,False,False,False,False,False
+oxygen_turbine,FA-1a,2828,0.0,28,0.0,0.6666666666666666,6,46.89999999999999,4,True,False,False,False,False
+kerosene_pipeline,FA-1b,2828,0.01166902404526167,28,0.03571428571428571,1.0,6,44.89999999999999,6,True,True,False,False,False
+kerosene_valve,FA-1a,2828,0.04314002828854314,28,0.10714285714285714,0.5,6,0.8999999999999773,3,True,False,True,False,False
+gas_generator,FA-1a,2828,0.14745403111739747,28,0.17857142857142858,0.5,6,84.9,3,False,False,False,False,False
+combustion_chamber,FA-1b,2828,0.021216407355021217,28,0.07142857142857142,0.5,6,88.9,3,True,False,False,False,False
+nozzle,FA-1a,2828,0.09688826025459689,28,0.17857142857142858,1.0,6,42.900000000000006,6,False,True,False,False,False

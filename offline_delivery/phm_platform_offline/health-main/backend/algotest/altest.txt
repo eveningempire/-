@@ -1,0 +1,56 @@
+import os
+import json
+import numpy as np
+import joblib
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from .feature_extraction import extract_all_features  # 你之前定义的特征提取函数
+
+# ==== 加载模型 ====
+MODEL_FOLDER = r"D:\pythonpro\health\backend\algotest\life\1"  # 你保存pkl的路径
+SCALER_PATH = os.path.join(MODEL_FOLDER, 'scaler.pkl')
+PCA_PATH = os.path.join(MODEL_FOLDER, 'pca.pkl')
+META_PATH = os.path.join(MODEL_FOLDER, 'hi_meta.json')
+
+scaler = joblib.load(SCALER_PATH)
+pca = joblib.load(PCA_PATH)
+with open(META_PATH, 'r') as f:
+    meta = json.load(f)
+best_weights = np.array(meta['weights'])
+global_min = meta['global_min']
+global_max = meta['global_max']
+
+@api_view(['POST'])
+def compute_hi(request):
+    """
+    接收一段新的传感器信号,在线计算 HI 值
+    """
+    try:
+        data = request.data.get('signal')  # 前端传一个 list
+        fs = float(request.data.get('fs', 1.0))  # 采样率
+
+        signal = np.array(data, dtype=float)
+
+        # === 1. 提取特征 ===
+        feats = extract_all_features(signal, fs=fs).reshape(1, -1)
+
+        # === 2. 标准化 ===
+        feats_scaled = scaler.transform(feats)
+
+        # === 3. PCA 降维 ===
+        pcs = pca.transform(feats_scaled)  # (1, n_components)
+
+        # === 4. 使用遗传算法权重计算 HI_raw ===
+        HI_raw = float(np.dot(pcs, best_weights))
+
+        # === 5. 归一化 ===
+        HI_norm = (HI_raw - global_min) / (global_max - global_min + 1e-12)
+
+        return JsonResponse({
+            'HI_raw': HI_raw,
+            'HI_norm': float(HI_norm)
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+

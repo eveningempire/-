@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "ate",
+    "email": "ate@qq.com",
+    "password": "271828",
+    "role": "管理员"
+  },
+  {
+    "id": 2,
+    "name": "gzy",
+    "email": "gzy@163.com",
+    "password": "123456",
+    "role": "管理员"
+  },
+  {
+    "id": 3,
+    "name": "lisi",
+    "email": "lisi@buaa.com",
+    "password": "123",
+    "role": "普通用户"
+  },
+  {
+    "id": 4,
+    "name": "wangwu",
+    "email": "1301638846@qq.com",
+    "password": "234",
+    "role": "普通用户"
+  }
+]

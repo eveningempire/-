@@ -1,0 +1,79 @@
+[
+  {
+    "name": "mean",
+    "cn_name": "均值",
+    "formula": "μ = (1/N) Σx_i",
+    "description": "信号的平均值，反映信号的直流分量",
+    "category": "统计特征"
+  },
+  {
+    "name": "var",
+    "cn_name": "方差",
+    "formula": "σ² = (1/N) Σ(x_i - μ)²",
+    "description": "信号偏离均值的程度，反映信号的波动性",
+    "category": "统计特征"
+  },
+  {
+    "name": "std",
+    "cn_name": "标准差",
+    "formula": "σ = √var",
+    "description": "方差的平方根，反映信号的离散程度",
+    "category": "统计特征"
+  },
+  {
+    "name": "rms",
+    "cn_name": "均方根",
+    "formula": "RMS = √[(1/N) Σx_i²]",
+    "description": "信号能量的度量，反映信号的有效值",
+    "category": "能量特征"
+  },
+  {
+    "name": "peak2peak",
+    "cn_name": "峰峰值",
+    "formula": "P2P = max(x) - min(x)",
+    "description": "信号最大值与最小值之差，反映信号的动态范围",
+    "category": "幅值特征"
+  },
+  {
+    "name": "skew",
+    "cn_name": "偏度",
+    "formula": "Skew = E[(x-μ)³] / σ³",
+    "description": "信号分布的对称性度量，反映分布的偏斜方向",
+    "category": "分布特征"
+  },
+  {
+    "name": "kurt",
+    "cn_name": "峭度",
+    "formula": "Kurt = E[(x-μ)⁴] / σ⁴",
+    "description": "信号分布的尾部厚度，反映异常值的存在",
+    "category": "分布特征"
+  },
+  {
+    "name": "form_factor",
+    "cn_name": "波形因子",
+    "formula": "FF = RMS / mean(|x|)",
+    "description": "波形形状的度量，反映信号的波形特性",
+    "category": "形状因子"
+  },
+  {
+    "name": "crest_factor",
+    "cn_name": "峰值因子",
+    "formula": "CF = max(|x|) / RMS",
+    "description": "峰值与有效值之比，反映冲击特性",
+    "category": "形状因子"
+  },
+  {
+    "name": "clearance_factor",
+    "cn_name": "裕度因子",
+    "formula": "CLF = max(|x|) / [mean(√|x|)]²",
+    "description": "信号裕度的度量，对早期故障敏感",
+    "category": "形状因子"
+  },
+  {
+    "name": "kurtosis_factor",
+    "cn_name": "峭度因子",
+    "formula": "KF = Kurt / σ⁴",
+    "description": "归一化的峭度，增强对冲击的敏感性",
+    "category": "形状因子"
+  }
+]

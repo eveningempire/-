@@ -1,0 +1,17 @@
+{
+  "columns": [
+    "S1_mean",
+    "S1_std",
+    "S2_mean",
+    "S2_std",
+    "S14_mean",
+    "S14_std",
+    "hi_smooth",
+    "hi_raw",
+    "confidence",
+    "observability"
+  ],
+  "seq_length": 16,
+  "n_features": 10,
+  "sha256": "e1cbf86a616f849f0bad3fa2640266e1c558ba039dee0126507f22f4acdad8e2"
+}

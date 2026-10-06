@@ -1,0 +1,85 @@
+/* 系统健康状态区域 */
+.system-health-container {
+    margin-top: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.system-health-card {
+    box-shadow: none !important;
+    border: 1px solid var(--secondary-light);
+    flex: 1;
+}
+
+/* 使用渐变背景 */
+.tech-card {
+    box-shadow: 0 4px 15px rgba(24, 144, 255, 0.1) !important;
+    border-radius: var(--border-radius);
+    background: linear-gradient(135deg, white, var(--primary-light));
+}
+
+.card-header {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-dark);
+    border-bottom: 1px solid var(--secondary-light);
+    background-color: var(--primary-light);
+}
+
+.system-list {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.system-item {
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.system-item:last-child {
+    border-bottom: none;
+}
+
+.system-item:nth-child(even) {
+    background-color: rgba(230, 247, 255, 0.2);
+}
+
+.system-name {
+    display: flex;
+    align-items: center;
+}
+
+.system-name .el-tag {
+    font-size: 14px;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+    background-color: var(--primary-light) !important;
+    color: var(--primary-dark) !important;
+    border-color: var(--secondary-light) !important;
+}
+
+.system-progress {
+    padding-left: 15px;
+}
+
+/* 为不同的系统添加不同的标签颜色 */
+.system-item:nth-child(3n+1) .system-name .el-tag {
+    background-color: var(--primary-light) !important;
+    color: var(--primary-dark) !important;
+}
+
+.system-item:nth-child(3n+2) .system-name .el-tag {
+    background-color: var(--purple-light) !important;
+    color: var(--purple-dark) !important;
+    border-color: var(--purple-light) !important;
+}
+
+.system-item:nth-child(3n+3) .system-name .el-tag {
+    background-color: var(--green-light) !important;
+    color: var(--green-dark) !important;
+    border-color: var(--green-light) !important;
+}

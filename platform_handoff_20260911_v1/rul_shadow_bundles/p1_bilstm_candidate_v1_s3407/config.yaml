@@ -1,0 +1,33 @@
+model:
+  type: bilstm
+  hidden_size: 48
+  num_layers: 1
+  dropout: 0.1
+data:
+  seed: 3407
+  n_units: 40
+  train_fraction: 0.6
+  validation_fraction: 0.2
+  n_components: 7
+  channels_per_component: 3
+  min_cycles: 30
+  max_cycles: 70
+  min_history: 4
+  window_length: 16
+  censored_fraction: 0.12
+  normalization_cap: 60.0
+  conditions:
+  - 0.8
+  - 1.0
+  - 1.25
+training:
+  epochs: 40
+  patience: 6
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  amp: auto
+run:
+  seed: 3407
+  version: rul_syn_bilstm_s3407_20260909_n2
+  device: cuda

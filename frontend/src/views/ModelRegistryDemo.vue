@@ -1,0 +1,27 @@
+<template>
+  <div class="page">
+    <div class="page-head"><div><h2>预测与诊断模型管理</h2><p>查看已接入模型，导入新的算法适配包。</p></div><el-button :loading="loading" @click="load">刷新目录</el-button></div>
+    <el-alert title="模型名称登记不等于完成训练。新增算法需包含入口代码、参数说明及所需模型资产。" type="warning" :closable="false" />
+    <el-card v-if="isAdmin" class="import-card" shadow="never">
+      <template #header><b>导入模型 / 算法</b></template>
+      <p>选择包含 <code>manifest.json</code>、Python 入口文件和必要模型文件的 ZIP 包。导入后会出现在下方列表；故障诊断和寿命预测插件也会出现在相应页面的算法选择框中。</p>
+      <div class="upload-row"><input ref="fileInput" type="file" accept=".zip" @change="onFileChange" /><el-button type="primary" :loading="uploading" :disabled="!uploadFile" @click="upload">导入算法包</el-button></div>
+      <el-collapse><el-collapse-item title="查看导入使用说明" name="guide"><ol><li>在本机建立以算法 <code>key</code> 命名的文件夹，放入 <code>manifest.json</code>、入口 Python 文件和模型权重。入口函数签名为 <code>predict(csv_path, parameters)</code>。</li><li>将该文件夹压缩为 ZIP；也可直接压缩文件夹内的文件。上传无需连接网络。</li><li>使用管理员账号导入；成功后目录会自动刷新。到相应业务页面选择算法，并用已登记的 CSV 测试运行。</li></ol><p>清单示例（将名称、类别和入口改为自己的算法）：</p><pre>{ "key": "my_rul_model", "name": "我的寿命模型", "version": "1.0", "category": "rul", "entrypoint": "algorithm.py:predict", "min_rows": 51, "parameters": {} }</pre><p>类别可填 <code>diagnosis</code>、<code>rul</code> 或 <code>health_assessment</code>。诊断插件返回 <code>pred_name</code>；寿命插件返回 <code>rul_value</code> 和 <code>unit</code>；健康评估插件返回 <code>health_index</code>，目前通过算法接口调用。输入目前只支持 CSV。已有 key 不会被覆盖，请为新版本使用新的 key。导入只检查包结构，首次运行仍需验证依赖和结果。</p></el-collapse-item></el-collapse>
+    </el-card>
+    <el-alert v-else title="只有管理员可以导入算法包；当前账号可查看模型目录。" type="info" :closable="false" />
+    <el-alert v-if="loadError" :title="loadError" type="error" :closable="false" />
+    <el-card shadow="never"><template #header><b>当前模型与算法</b></template><el-table :data="models" v-loading="loading" row-key="id"><el-table-column prop="name" label="模型" min-width="220"/><el-table-column prop="domain" label="业务方向" width="130"/><el-table-column prop="version" label="版本" width="110"/><el-table-column label="来源" width="100"><template #default="s">{{s.row.source==='plugin'?'用户导入':'平台内置'}}</template></el-table-column><el-table-column label="状态" width="135"><template #default="s"><el-tag :type="s.row.source==='plugin'?'warning':s.row.deployable?'success':'info'">{{s.row.source==='plugin'?'已导入，待验证':s.row.deployable?'已接入':'待集成'}}</el-tag></template></el-table-column><el-table-column prop="evidence" label="说明" min-width="270"/></el-table></el-card>
+  </div>
+</template>
+<script setup>
+import {ref,onMounted} from 'vue'
+import {ElMessage} from 'element-plus'
+const models=ref([]),loading=ref(false),uploading=ref(false),uploadFile=ref(null),fileInput=ref(null),isAdmin=ref(false),loadError=ref('')
+const csrfHeaders=()=>{const token=document.cookie.split('; ').find(x=>x.startsWith('csrftoken='))?.slice(10);return token?{'X-CSRFToken':decodeURIComponent(token)}:{}}
+const domainName={diagnosis:'故障诊断',health_assessment:'健康评估',rul:'寿命预测'}
+function onFileChange(event){uploadFile.value=event.target.files?.[0]||null}
+async function load(){loading.value=true;loadError.value='';try{const [legacyResponse,algorithmResponse]=await Promise.all([fetch('/api/v1/phm/model-catalog/',{credentials:'include'}),fetch('/api/v1/integrations/algorithm-assets/algorithms/',{credentials:'include'})]);if(!legacyResponse.ok||!algorithmResponse.ok)throw Error('模型目录加载失败');const legacy=await legacyResponse.json(),catalog=await algorithmResponse.json();const plugins=(catalog.results||[]).filter(item=>item.source==='plugin').map(item=>({id:`plugin:${item.key}`,name:item.name,domain:domainName[item.category]||item.category,version:item.version,source:'plugin',deployable:false,evidence:`${item.description||'本地算法插件'} · key: ${item.key}`}));models.value=[...(legacy.models||[]).map(item=>({...item,source:'builtin'})),...plugins];if(catalog.invalid_plugins?.length)loadError.value=`有 ${catalog.invalid_plugins.length} 个插件清单无效，请检查导入包`}catch(error){loadError.value=error.message}finally{loading.value=false}}
+async function upload(){if(!uploadFile.value)return;uploading.value=true;try{const form=new FormData();form.append('file',uploadFile.value);const response=await fetch('/api/v1/integrations/algorithm-assets/algorithms/import/',{method:'POST',credentials:'include',headers:csrfHeaders(),body:form});const body=await response.json();if(!response.ok||!body.ok)throw Error(body.error||'导入失败');ElMessage.success(`已导入 ${body.algorithm.name}`);uploadFile.value=null;if(fileInput.value)fileInput.value.value='';await load()}catch(error){ElMessage.error(error.message)}finally{uploading.value=false}}
+onMounted(async()=>{try{const response=await fetch('/api/v1/permissions/profile/',{credentials:'include'});if(response.ok)isAdmin.value=(await response.json()).role==='admin'}finally{await load()}})
+</script>
+<style scoped>.page{max-width:1300px}.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.page-head h2{margin:0 0 6px}.page-head p{margin:0;color:#718198}.el-alert,.import-card{margin-bottom:16px}.import-card p{line-height:1.6;color:#526477}.upload-row{display:flex;align-items:center;gap:16px;margin:16px 0}.upload-row input{max-width:420px}.el-collapse ol{padding-left:22px;line-height:1.8}.el-collapse pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f9fc;padding:12px;border-radius:4px}@media(max-width:700px){.page-head,.upload-row{display:block}.page-head .el-button,.upload-row .el-button{margin-top:12px}}</style>

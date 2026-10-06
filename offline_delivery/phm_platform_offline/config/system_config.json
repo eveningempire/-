@@ -1,0 +1,29 @@
+{
+  "streaming_threshold": 10000,
+  "batch_size": 2000,
+  "batch_size_for_save": 5000,
+  "detection_frequency": {
+    "enabled": true,
+    "mode": "low_frequency",
+    "high_frequency": {
+      "interval_seconds": 1,
+      "frames_per_interval": 1
+    },
+    "medium_frequency": {
+      "interval_seconds": 1,
+      "frames_per_interval": 1
+    },
+    "low_frequency": {
+      "interval_seconds": 1,
+      "frames_per_interval": 1
+    },
+    "adaptive": {
+      "small_dataset_threshold": 1000,
+      "medium_dataset_threshold": 5000,
+      "large_dataset_threshold": 10000,
+      "small_dataset_interval": 1,
+      "medium_dataset_interval": 30,
+      "large_dataset_interval": 60
+    }
+  }
+}

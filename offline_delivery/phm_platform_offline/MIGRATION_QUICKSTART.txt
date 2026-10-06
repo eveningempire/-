@@ -1,0 +1,12 @@
+PHM 离线迁移快速开始
+
+1. 完整解压离线交付包。
+2. 进入 phm_platform_offline 目录。
+3. 执行:powershell -NoProfile -ExecutionPolicy Bypass -File .\setup_migration.ps1
+4. 执行:.\start_phm_platform.bat
+5. 浏览器打开:http://127.0.0.1:8000/
+
+停止:.\stop_phm_platform.bat
+卸载项目虚拟环境:.\uninstall_phm_platform.bat
+
+包内已提供 Python 3.10.11 和离线依赖,正常部署不需要联网。

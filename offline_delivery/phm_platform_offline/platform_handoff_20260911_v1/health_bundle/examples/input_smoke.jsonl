@@ -1,0 +1,8 @@
+{"run_id": 9001, "session_id": "example", "component_id": "lox_pump", "window_index": 0, "timestamp": 144.9, "hi_cd": 0.96, "hi_ae": 1.0, "anomaly_score": -7.5, "reconstruction_error": 0.0004, "confidence": 0.97}
+{"run_id": 9001, "session_id": "example", "component_id": "lox_pump", "window_index": 1, "timestamp": 146.9, "hi_cd": 0.95, "hi_ae": 1.0, "anomaly_score": -7.2, "confidence": 0.96}
+{"run_id": 9001, "session_id": "example", "component_id": "gas_generator", "window_index": 0, "timestamp": 144.9, "hi_cd": 0.52, "hi_ae": 0.99, "anomaly_score": -6.1, "confidence": 0.95}
+{"run_id": 9001, "session_id": "example", "component_id": "gas_generator", "window_index": 1, "timestamp": 146.9, "hi_cd": 0.5, "hi_ae": 0.99, "anomaly_score": -6.0, "confidence": 0.95}
+this-line-is-not-json
+{"run_id": 9001, "session_id": "example", "component_id": "lox_pump", "window_index": 2, "timestamp": 148.9, "hi_cd": 0.31, "hi_true": 0.42}
+{"run_id": 9001, "session_id": "example", "component_id": "mystery_part", "window_index": 0, "timestamp": 148.9, "hi_cd": 0.9, "hi_ae": 1.0, "anomaly_score": 0.1}
+{"action": "summary", "session_id": "example", "run_id": 9001}

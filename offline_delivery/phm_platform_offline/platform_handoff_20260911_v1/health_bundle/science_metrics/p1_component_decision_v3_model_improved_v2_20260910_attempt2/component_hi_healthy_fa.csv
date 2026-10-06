@@ -1,0 +1,8 @@
+﻿component_id,healthy_windows,healthy_window_false_alarm_rate,healthy_trajectories,healthy_trajectory_false_alarm_rate
+lox_pump,2744,0.0,28,0.0
+oxygen_turbine,2780,0.0,28,0.0
+kerosene_pipeline,2813,0.0,28,0.0
+kerosene_valve,2816,0.0,28,0.0
+gas_generator,2816,0.0,28,0.0
+combustion_chamber,2824,0.0,28,0.0
+nozzle,2818,0.0,28,0.0

@@ -1,0 +1,245 @@
+/* 设计令牌 (Design Tokens) - CMG 健康管理平台 */
+:root {
+  /* === 核心色彩系统 === */
+  /* 主色调 - 深空蓝 */
+  --cmg-primary-50: #e6f4ff;
+  --cmg-primary-100: #bae7ff;
+  --cmg-primary-200: #91d5ff;
+  --cmg-primary-300: #69c0ff;
+  --cmg-primary-400: #40a9ff;
+  --cmg-primary-500: #1890ff;
+  --cmg-primary-600: #096dd9;
+  --cmg-primary-700: #0050b3;
+  --cmg-primary-800: #003a8c;
+  --cmg-primary-900: #002766;
+
+  /* 功能色彩 */
+  --cmg-success-50: #f6ffed;
+  --cmg-success-500: #52c41a;
+  --cmg-success-600: #389e0d;
+  
+  --cmg-warning-50: #fffbe6;
+  --cmg-warning-500: #faad14;
+  --cmg-warning-600: #d48806;
+  
+  --cmg-error-50: #fff2f0;
+  --cmg-error-500: #ff4d4f;
+  --cmg-error-600: #cf1322;
+  
+  --cmg-info-50: #e6fffb;
+  --cmg-info-500: #13c2c2;
+  --cmg-info-600: #08979c;
+
+  /* 中性色彩 - 冷灰调 */
+  --cmg-gray-50: #f8fafc;
+  --cmg-gray-100: #f1f5f9;
+  --cmg-gray-200: #e2e8f0;
+  --cmg-gray-300: #cbd5e1;
+  --cmg-gray-400: #94a3b8;
+  --cmg-gray-500: #64748b;
+  --cmg-gray-600: #475569;
+  --cmg-gray-700: #334155;
+  --cmg-gray-800: #1e293b;
+  --cmg-gray-900: #0f172a;
+
+  /* === 间距系统 === */
+  --cmg-space-0: 0;
+  --cmg-space-1: 0.25rem;  /* 4px */
+  --cmg-space-2: 0.5rem;   /* 8px */
+  --cmg-space-3: 0.75rem;  /* 12px */
+  --cmg-space-4: 1rem;     /* 16px */
+  --cmg-space-5: 1.25rem;  /* 20px */
+  --cmg-space-6: 1.5rem;   /* 24px */
+  --cmg-space-8: 2rem;     /* 32px */
+  --cmg-space-10: 2.5rem;  /* 40px */
+  --cmg-space-12: 3rem;    /* 48px */
+  --cmg-space-16: 4rem;    /* 64px */
+
+  /* === 圆角系统 === */
+  --cmg-radius-none: 0;
+  --cmg-radius-sm: 0.125rem;   /* 2px */
+  --cmg-radius-base: 0.25rem;  /* 4px */
+  --cmg-radius-md: 0.375rem;   /* 6px */
+  --cmg-radius-lg: 0.5rem;     /* 8px */
+  --cmg-radius-xl: 0.75rem;    /* 12px */
+  --cmg-radius-2xl: 1rem;      /* 16px */
+  --cmg-radius-full: 9999px;
+
+  /* === 阴影系统 === */
+  --cmg-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --cmg-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --cmg-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --cmg-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --cmg-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* === 字体系统 === */
+  --cmg-font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', monospace;
+  --cmg-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* === 字体大小 === */
+  --cmg-text-xs: 0.75rem;     /* 12px */
+  --cmg-text-sm: 0.875rem;    /* 14px */
+  --cmg-text-base: 1rem;      /* 16px */
+  --cmg-text-lg: 1.125rem;    /* 18px */
+  --cmg-text-xl: 1.25rem;     /* 20px */
+  --cmg-text-2xl: 1.5rem;     /* 24px */
+  --cmg-text-3xl: 1.875rem;   /* 30px */
+
+  /* === Z-index 层级 === */
+  --cmg-z-dropdown: 1000;
+  --cmg-z-sticky: 1020;
+  --cmg-z-fixed: 1030;
+  --cmg-z-modal-backdrop: 1040;
+  --cmg-z-modal: 1050;
+  --cmg-z-popover: 1060;
+  --cmg-z-tooltip: 1070;
+
+  /* === 动画时长 === */
+  --cmg-duration-fast: 150ms;
+  --cmg-duration-base: 200ms;
+  --cmg-duration-slow: 300ms;
+  --cmg-duration-slower: 500ms;
+
+  /* === 过渡效果 === */
+  --cmg-transition-all: all var(--cmg-duration-base) cubic-bezier(0.4, 0, 0.2, 1);
+  --cmg-transition-colors: color var(--cmg-duration-base) cubic-bezier(0.4, 0, 0.2, 1), 
+                           background-color var(--cmg-duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                           border-color var(--cmg-duration-base) cubic-bezier(0.4, 0, 0.2, 1);
+  --cmg-transition-opacity: opacity var(--cmg-duration-base) cubic-bezier(0.4, 0, 0.2, 1);
+  --cmg-transition-transform: transform var(--cmg-duration-base) cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === 专业航天风格配色 === */
+  --cmg-aerospace-primary: var(--cmg-primary-700);     /* 深空蓝 */
+  --cmg-aerospace-secondary: var(--cmg-gray-600);      /* 冷灰 */
+  --cmg-aerospace-accent: var(--cmg-info-500);         /* 青绿高亮 */
+  --cmg-aerospace-warning: var(--cmg-warning-500);     /* 琥珀警告 */
+  --cmg-aerospace-danger: var(--cmg-error-500);        /* 异常红 */
+  --cmg-aerospace-success: var(--cmg-success-500);     /* 正常绿 */
+  
+  /* === 背景色 === */
+  --cmg-bg-primary: #ffffff;
+  --cmg-bg-secondary: var(--cmg-gray-50);
+  --cmg-bg-tertiary: var(--cmg-gray-100);
+  --cmg-bg-overlay: rgba(15, 23, 42, 0.5);
+
+  /* === 文字颜色 === */
+  --cmg-text-primary: var(--cmg-gray-900);
+  --cmg-text-secondary: var(--cmg-gray-700);
+  --cmg-text-tertiary: var(--cmg-gray-500);
+  --cmg-text-disabled: var(--cmg-gray-400);
+  --cmg-text-inverse: #ffffff;
+
+  /* === 边框颜色 === */
+  --cmg-border-light: var(--cmg-gray-200);
+  --cmg-border-base: var(--cmg-gray-300);
+  --cmg-border-strong: var(--cmg-gray-400);
+}
+
+/* 暗色主题 */
+[data-theme="dark"] {
+  /* 重新定义暗色主题的颜色 */
+  --cmg-bg-primary: var(--cmg-gray-900);
+  --cmg-bg-secondary: var(--cmg-gray-800);
+  --cmg-bg-tertiary: var(--cmg-gray-700);
+  --cmg-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  --cmg-text-primary: var(--cmg-gray-100);
+  --cmg-text-secondary: var(--cmg-gray-300);
+  --cmg-text-tertiary: var(--cmg-gray-400);
+  --cmg-text-disabled: var(--cmg-gray-600);
+
+  --cmg-border-light: var(--cmg-gray-700);
+  --cmg-border-base: var(--cmg-gray-600);
+  --cmg-border-strong: var(--cmg-gray-500);
+
+  /* 调整主色调在暗色主题下的表现 */
+  --cmg-aerospace-primary: var(--cmg-primary-400);
+  --cmg-aerospace-secondary: var(--cmg-gray-400);
+}
+
+/* Element Plus 主题覆盖 */
+:root {
+  /* 覆盖 Element Plus 的主要颜色变量 */
+  --el-color-primary: var(--cmg-aerospace-primary);
+  --el-color-primary-light-3: var(--cmg-primary-300);
+  --el-color-primary-light-5: var(--cmg-primary-200);
+  --el-color-primary-light-7: var(--cmg-primary-100);
+  --el-color-primary-light-8: var(--cmg-primary-50);
+  --el-color-primary-light-9: var(--cmg-primary-50);
+  --el-color-primary-dark-2: var(--cmg-primary-800);
+
+  --el-color-success: var(--cmg-aerospace-success);
+  --el-color-warning: var(--cmg-aerospace-warning);
+  --el-color-danger: var(--cmg-aerospace-danger);
+  --el-color-error: var(--cmg-aerospace-danger);
+  --el-color-info: var(--cmg-aerospace-accent);
+
+  /* 文字颜色 */
+  --el-text-color-primary: var(--cmg-text-primary);
+  --el-text-color-regular: var(--cmg-text-secondary);
+  --el-text-color-secondary: var(--cmg-text-tertiary);
+  --el-text-color-placeholder: var(--cmg-text-disabled);
+  --el-text-color-disabled: var(--cmg-text-disabled);
+
+  /* 边框颜色 */
+  --el-border-color: var(--cmg-border-base);
+  --el-border-color-light: var(--cmg-border-light);
+  --el-border-color-lighter: var(--cmg-border-light);
+  --el-border-color-extra-light: var(--cmg-border-light);
+  --el-border-color-dark: var(--cmg-border-strong);
+  --el-border-color-darker: var(--cmg-border-strong);
+
+  /* 背景颜色 */
+  --el-bg-color: var(--cmg-bg-primary);
+  --el-bg-color-page: var(--cmg-bg-secondary);
+  --el-bg-color-overlay: var(--cmg-bg-overlay);
+
+  /* 圆角 */
+  --el-border-radius-base: var(--cmg-radius-base);
+  --el-border-radius-small: var(--cmg-radius-sm);
+  --el-border-radius-round: var(--cmg-radius-full);
+  --el-border-radius-circle: var(--cmg-radius-full);
+
+  /* 阴影 */
+  --el-box-shadow: var(--cmg-shadow-base);
+  --el-box-shadow-light: var(--cmg-shadow-sm);
+  --el-box-shadow-base: var(--cmg-shadow-base);
+  --el-box-shadow-dark: var(--cmg-shadow-md);
+
+  /* 字体 */
+  --el-font-family: var(--cmg-font-sans);
+  --el-font-size-extra-small: var(--cmg-text-xs);
+  --el-font-size-small: var(--cmg-text-sm);
+  --el-font-size-base: var(--cmg-text-base);
+  --el-font-size-medium: var(--cmg-text-lg);
+  --el-font-size-large: var(--cmg-text-xl);
+  --el-font-size-extra-large: var(--cmg-text-2xl);
+
+  /* 间距 */
+  --el-component-size-large: 40px;
+  --el-component-size: 32px;
+  --el-component-size-small: 24px;
+}
+
+/* 暗色主题下的 Element Plus 覆盖 */
+[data-theme="dark"] {
+  --el-bg-color: var(--cmg-bg-primary);
+  --el-bg-color-page: var(--cmg-bg-secondary);
+  --el-bg-color-overlay: var(--cmg-bg-overlay);
+
+  --el-text-color-primary: var(--cmg-text-primary);
+  --el-text-color-regular: var(--cmg-text-secondary);
+  --el-text-color-secondary: var(--cmg-text-tertiary);
+  --el-text-color-placeholder: var(--cmg-text-disabled);
+  --el-text-color-disabled: var(--cmg-text-disabled);
+
+  --el-border-color: var(--cmg-border-base);
+  --el-border-color-light: var(--cmg-border-light);
+  --el-border-color-lighter: var(--cmg-border-light);
+  --el-border-color-extra-light: var(--cmg-border-light);
+  --el-border-color-dark: var(--cmg-border-strong);
+  --el-border-color-darker: var(--cmg-border-strong);
+
+  /* 暗色主题下的主色调调整 */
+  --el-color-primary: var(--cmg-aerospace-primary);
+}
