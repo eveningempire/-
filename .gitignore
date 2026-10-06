@@ -31,3 +31,5 @@ integrations/**/*.slx
 *.sqlite3
 *.db
 *.zip
+# Backup archives
+*.zip.bak
