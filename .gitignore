@@ -33,3 +33,4 @@ integrations/**/*.slx
 *.zip
 # Backup archives
 *.zip.bak
+offline_delivery/phm_platform_offline/offline/python/*.whl
