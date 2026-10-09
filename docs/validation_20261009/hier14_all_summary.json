@@ -1,0 +1,181 @@
+{
+  "provenance": {
+    "python": "3.9.13",
+    "torch": "2.5.1+cpu",
+    "sklearn": "1.6.1",
+    "algorithms": [
+      "hier14"
+    ],
+    "files": 492,
+    "representative": false,
+    "hier14_available": true,
+    "training_overlap": "unknown; customer archive may overlap model training data; this is integration evaluation, not an independent holdout",
+    "truth_rule": "FaultFlag used only by scorer; homogeneous windows evaluated, transition windows omitted; no phase/maturity filtering",
+    "inference_changes": "no retraining or threshold tuning; original checkpoint preprocessing retained",
+    "artifacts": {
+      "best_model.pth": "5a01561d2567f0a88ca92768c2f4b758fd8018aaa70b24e4a6c225e3309a5323",
+      "scaler.pkl": "40fd714c1974870a0f2eb901290095f025a78c33b75cc2a86d30c899302cb6f0",
+      "deploy_meta.json": "9b932305415fc6cae61617ab1a1fe43209305eb5f5e9252e255444597976a883"
+    }
+  },
+  "metrics": [
+    {
+      "algorithm": "hier14",
+      "data_type": "raw",
+      "files": 246,
+      "success": 246,
+      "errors": 0,
+      "model_modes": {
+        "trained-hier14": 246
+      },
+      "homogeneous_windows": 16462,
+      "normal_windows": 8532,
+      "fault_windows": 7930,
+      "window_class_accuracy": 0.9204227918843397,
+      "window_binary_accuracy": 0.942595067428016,
+      "normal_false_alarm_rate": 0.02273792780121894,
+      "fault_detection_recall": 0.905296343001261,
+      "fault_class_accuracy": 0.8592686002522069,
+      "baseline_files": 7,
+      "baseline_aggregate_correct": 7,
+      "fault_files": 239,
+      "fault_aggregate_correct": 106,
+      "fault_aggregate_detected": 106,
+      "class_identification_supported": true,
+      "per_class": {
+        "正常": {
+          "windows": 8532,
+          "correct": 8338,
+          "detected": 194
+        },
+        "泵气蚀": {
+          "windows": 598,
+          "correct": 562,
+          "detected": 562
+        },
+        "涡轮转速下降": {
+          "windows": 598,
+          "correct": 598,
+          "detected": 598
+        },
+        "管路堵塞": {
+          "windows": 654,
+          "correct": 654,
+          "detected": 654
+        },
+        "主阀门卡滞": {
+          "windows": 654,
+          "correct": 654,
+          "detected": 654
+        },
+        "燃气泄漏": {
+          "windows": 598,
+          "correct": 598,
+          "detected": 598
+        },
+        "燃烧不稳定": {
+          "windows": 654,
+          "correct": 654,
+          "detected": 654
+        },
+        "喷管堵塞": {
+          "windows": 655,
+          "correct": 641,
+          "detected": 654
+        },
+        "TVC偏角不足": {
+          "windows": 654,
+          "correct": 75,
+          "detected": 269
+        },
+        "RCS推力不足": {
+          "windows": 580,
+          "correct": 314,
+          "detected": 452
+        },
+        "栅格舵偏角不足": {
+          "windows": 510,
+          "correct": 338,
+          "detected": 356
+        },
+        "控制器无信号": {
+          "windows": 603,
+          "correct": 554,
+          "detected": 556
+        },
+        "陀螺仪恒偏差": {
+          "windows": 603,
+          "correct": 603,
+          "detected": 603
+        },
+        "陀螺仪卡死": {
+          "windows": 569,
+          "correct": 569,
+          "detected": 569
+        }
+      },
+      "confusion": {
+        "正常 -> 正常": 8338,
+        "正常 -> TVC偏角不足": 38,
+        "正常 -> 控制器无信号": 16,
+        "正常 -> 栅格舵偏角不足": 80,
+        "正常 -> 泵气蚀": 60,
+        "泵气蚀 -> 泵气蚀": 562,
+        "泵气蚀 -> 正常": 36,
+        "栅格舵偏角不足 -> 正常": 154,
+        "栅格舵偏角不足 -> 控制器无信号": 18,
+        "栅格舵偏角不足 -> 栅格舵偏角不足": 338,
+        "管路堵塞 -> 管路堵塞": 654,
+        "控制器无信号 -> 控制器无信号": 554,
+        "控制器无信号 -> 正常": 47,
+        "控制器无信号 -> 泵气蚀": 1,
+        "控制器无信号 -> 栅格舵偏角不足": 1,
+        "喷管堵塞 -> 喷管堵塞": 641,
+        "喷管堵塞 -> 正常": 1,
+        "喷管堵塞 -> 栅格舵偏角不足": 13,
+        "燃气泄漏 -> 燃气泄漏": 598,
+        "燃烧不稳定 -> 燃烧不稳定": 654,
+        "RCS推力不足 -> RCS推力不足": 314,
+        "RCS推力不足 -> 正常": 128,
+        "RCS推力不足 -> 控制器无信号": 17,
+        "RCS推力不足 -> 栅格舵偏角不足": 117,
+        "RCS推力不足 -> 泵气蚀": 1,
+        "RCS推力不足 -> 喷管堵塞": 3,
+        "陀螺仪卡死 -> 陀螺仪卡死": 569,
+        "陀螺仪恒偏差 -> 陀螺仪恒偏差": 603,
+        "TVC偏角不足 -> TVC偏角不足": 75,
+        "TVC偏角不足 -> 正常": 385,
+        "TVC偏角不足 -> 控制器无信号": 12,
+        "TVC偏角不足 -> 栅格舵偏角不足": 107,
+        "TVC偏角不足 -> 泵气蚀": 54,
+        "TVC偏角不足 -> 喷管堵塞": 21,
+        "涡轮转速下降 -> 涡轮转速下降": 598,
+        "主阀门卡滞 -> 主阀门卡滞": 654
+      }
+    },
+    {
+      "algorithm": "hier14",
+      "data_type": "derived",
+      "files": 246,
+      "success": 0,
+      "errors": 246,
+      "model_modes": {},
+      "homogeneous_windows": 0,
+      "normal_windows": 0,
+      "fault_windows": 0,
+      "window_class_accuracy": null,
+      "window_binary_accuracy": null,
+      "normal_false_alarm_rate": null,
+      "fault_detection_recall": null,
+      "fault_class_accuracy": null,
+      "baseline_files": 0,
+      "baseline_aggregate_correct": 0,
+      "fault_files": 0,
+      "fault_aggregate_correct": 0,
+      "fault_aggregate_detected": 0,
+      "class_identification_supported": true,
+      "per_class": {},
+      "confusion": {}
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 <template>
   <el-container class="shell">
-    <el-aside width="250px" class="side">
+    <button v-if="mobileMenu" class="nav-backdrop" aria-label="关闭导航" @click="mobileMenu = false" />
+    <el-aside width="250px" class="side" :class="{ 'mobile-open': mobileMenu }">
       <div class="brand"><b>PHM</b><span>重复使用运载器发射场健康管理平台</span></div>
-      <el-menu router :default-active="$route.path" class="nav">
+      <el-menu router :default-active="$route.path" class="nav" @select="mobileMenu = false">
         <el-menu-item index="/"><el-icon><Monitor /></el-icon>综合态势</el-menu-item>
         <el-sub-menu index="monitor"><template #title><el-icon><DataLine /></el-icon>状态监测</template><el-menu-item index="/telemetry">遥测数据监测</el-menu-item><el-menu-item index="/alarms">异常告警中心</el-menu-item></el-sub-menu>
         <el-sub-menu index="simulation"><template #title><el-icon><DataLine /></el-icon>仿真及故障注入</template><el-menu-item index="/simulation-demo">离线故障数据集</el-menu-item><el-menu-item index="/realtime-fault-injection">实时故障注入</el-menu-item><el-menu-item index="/fault-replay">故障事件重演</el-menu-item></el-sub-menu><el-sub-menu index="diagnosis"><template #title><el-icon><Aim /></el-icon>故障诊断</template><el-menu-item index="/fault-diagnosis">诊断分析</el-menu-item></el-sub-menu>
@@ -14,7 +15,7 @@
       <div class="online">● 平台服务正常</div>
     </el-aside>
     <el-container>
-      <el-header class="header"><div><h1>重复使用运载器发射场健康管理平台</h1><p>状态监测 · 故障诊断 · 健康评估 · 寿命预测</p></div><div class="actions"><el-tag type="success">演示环境</el-tag><span>{{ now }}</span><el-button size="small" type="danger" plain @click="logout">退出登录</el-button></div></el-header>
+      <el-header class="header"><div class="header-title"><el-button class="mobile-menu" :icon="Menu" circle aria-label="打开导航" @click="mobileMenu = true" /><div><h1>重复使用运载器发射场健康管理平台</h1><p>状态监测 · 故障诊断 · 健康评估 · 寿命预测</p></div></div><div class="actions"><el-tag type="success">演示环境</el-tag><span>{{ now }}</span><el-button size="small" type="danger" plain @click="logout">退出登录</el-button></div></el-header>
       <el-main class="main"><router-view /></el-main>
     </el-container>
   </el-container>
@@ -22,12 +23,20 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Monitor, DataLine, Aim, TrendCharts, Timer, FolderOpened, Share, User, Box } from '@element-plus/icons-vue'
-const router = useRouter(), now = ref(''); let timer
+import { Monitor, DataLine, Aim, TrendCharts, Timer, FolderOpened, Share, User, Box, Menu } from '@element-plus/icons-vue'
+const router = useRouter(), now = ref(''), mobileMenu = ref(false); let timer
 const tick = () => { now.value = new Date().toLocaleString('zh-CN', { hour12: false }) }
 onMounted(() => { tick(); timer = setInterval(tick, 1000) }); onUnmounted(() => clearInterval(timer))
 async function logout() { await fetch('/api/v1/auth/logout/', { method: 'POST', credentials: 'include' }); sessionStorage.removeItem('user'); router.replace('/login') }
 </script>
+<style scoped>
+.shell>.el-container,.main{min-width:0}.header-title{display:flex;align-items:center;gap:12px;min-width:0}.mobile-menu,.nav-backdrop{display:none}
+@media(max-width:760px){
+  .shell>.side{position:fixed;z-index:2001;top:0;bottom:0;left:0;width:250px!important;transform:translateX(-100%);transition:transform .2s;overflow-y:auto}.shell>.side.mobile-open{transform:translateX(0)}
+  .nav-backdrop{display:block;position:fixed;inset:0;z-index:2000;border:0;background:rgba(0,0,0,.35)}
+  .mobile-menu{display:inline-flex;flex-shrink:0}.shell .header{padding:12px;gap:12px;min-height:78px;height:auto}.shell .header h1{font-size:15px;line-height:1.4}.header p,.actions>span,.actions>.el-tag{display:none}.actions{gap:0;flex-shrink:0}.shell .main{padding:18px 14px}
+}
+</style>
 <style scoped>.shell{height:100vh;background:#f3f6fa}.side{background:#102945;color:#fff;display:flex;flex-direction:column}.brand{height:76px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid #ffffff20}.brand b{background:#2189e8;padding:13px;border-radius:8px}.brand span{flex:1;font-size:14px;line-height:1.35}.nav{border:0;flex:1;background:transparent}.nav :deep(.el-menu-item),.nav :deep(.el-sub-menu__title){color:#c5d4e8}.nav :deep(.el-menu-item.is-active){background:#2189e8;color:white}.online{margin:16px;padding:12px;color:#9fe4c5;border:1px solid #ffffff25;border-radius:6px}.header{height:78px;background:white;border-bottom:1px solid #e1e7ef;display:flex;justify-content:space-between;align-items:center;padding:0 26px}.header h1{font-size:20px;margin:0;color:#162b45}.header p{margin:6px 0 0;color:#718198;font-size:12px}.actions{display:flex;align-items:center;gap:16px;color:#60728a;font-size:13px}.main{overflow:auto;padding:24px}</style>
 
 

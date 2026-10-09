@@ -2,6 +2,8 @@ import json
 import math
 import hashlib
 import csv
+import io
+from functools import lru_cache
 from pathlib import Path
 
 from django.conf import settings
@@ -13,6 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import FaultEvent, FaultReplay, TelemetrySession
 from datasets.models import Dataset
+from datasets.batch_processing import inspect_file
+from datasets.schema import column_roles
 
 
 ASSET_SCENARIOS = {
@@ -80,6 +84,12 @@ def _ensure_asset_events():
     return created
 
 
+@lru_cache(maxsize=1)
+def _manifest_records(path, modified):
+    payload = json.loads(Path(path).read_text(encoding='utf-8'))
+    return {entry['dataset_id']: entry for entry in payload['files']}
+
+
 def _ensure_dataset_events():
     """Expose data-management CSV datasets as replayable persisted events."""
     created = 0
@@ -87,54 +97,53 @@ def _ensure_dataset_events():
     owner = User.objects.filter(is_superuser=True).order_by("id").first() or User.objects.order_by("id").first()
     if owner is None:
         owner = User.objects.create_user(username="dataset-assets", password=None)
+    manifest_path = Path(settings.MEDIA_ROOT) / 'datasets' / 'simulate_data_+1' / 'import_manifest.json'
+    manifest = _manifest_records(str(manifest_path), manifest_path.stat().st_mtime_ns) if manifest_path.is_file() else {}
+    registered = {event.diagnosis.get('source_key'): event for event in FaultEvent.objects.all()}
     for dataset in Dataset.objects.exclude(file="").order_by("id"):
         source_key = f"dataset:{dataset.pk}"
-        if FaultEvent.objects.filter(diagnosis__source_key=source_key).exists():
+        if source_key in registered:
+            entry = manifest.get(dataset.pk)
+            event = registered[source_key]
+            if entry and entry['file'] == dataset.file.name and not event.diagnosis.get('file_backed'):
+                event.diagnosis.update({
+                    'file_backed': True, 'time_column': entry['time_column'],
+                    'fault_flag_column': entry['fault_flag_column'],
+                    'parameter_columns': entry['parameter_columns'],
+                    'fault_label_summary': entry['fault_label_summary'],
+                    'injection_time': dataset.injection_time,
+                })
+                event.save(update_fields=['diagnosis'])
             continue
         try:
-            with dataset.file.open("rb") as raw:
-                import io
-                with io.TextIOWrapper(raw, encoding="utf-8-sig", newline="") as text:
-                    reader = csv.DictReader(text)
-                    fields = reader.fieldnames or []
-                    rows = list(reader)
-            if not rows:
+            report = manifest.get(dataset.pk)
+            if report is None or report['file'] != dataset.file.name:
+                report = inspect_file(dataset.file.path)
+            if report['row_count'] < 2:
                 continue
-            time_field = next((f for f in fields if str(f).lower() in {"time", "timestamp", "t"}), None)
-            columns = ["time"] + [f for f in fields if f != time_field]
-            values = []
-            for index, row in enumerate(rows):
-                try:
-                    time_value = float(row.get(time_field)) if time_field else float(index)
-                except (TypeError, ValueError):
-                    time_value = float(index)
-                sample = {"time": time_value}
-                for field in fields:
-                    if field == time_field:
-                        continue
-                    try:
-                        sample[field] = float(row[field])
-                    except (TypeError, ValueError):
-                        continue
-                if len(sample) > 1:
-                    values.append(sample)
-            if len(values) < 2:
+            time_field = report['time_column']
+            columns = ['time'] + [f for f in report['columns'] if f != time_field]
+            start = report['time_summary']['start'] if time_field else 0
+            end = report['time_summary']['end'] if time_field else report['row_count'] - 1
+            if start is None or end is None:
                 continue
             with transaction.atomic():
                 session = TelemetrySession.objects.create(
                     name=f"数据管理 · {dataset.name}", created_by=owner,
                     token_hash=hashlib.sha256(source_key.encode()).hexdigest(), columns=columns,
                 )
-                session.samples.bulk_create([
-                    session.samples.model(session=session, values=item) for item in values
-                ], batch_size=500)
                 FaultEvent.objects.create(
                     session=session, name=dataset.name or f"数据集 {dataset.pk}",
                     severity="critical" if dataset.fault_type else "warning",
                     isolation_target=dataset.component or dataset.system or "",
-                    start_time=values[0]["time"], end_time=values[-1]["time"],
+                    start_time=start, end_time=end,
                     diagnosis={"source_key": source_key, "dataset_id": dataset.pk,
-                               "source_csv": dataset.name, "sample_count": len(values),
+                               "source_csv": dataset.name, "sample_count": report['row_count'],
+                               "file_backed": True, 'time_column': time_field,
+                               'fault_flag_column': report['fault_flag_column'],
+                               'parameter_columns': report['parameter_columns'],
+                               'fault_label_summary': report['fault_label_summary'],
+                               'injection_time': dataset.injection_time,
                                "system": dataset.system, "component": dataset.component,
                                "fault_type": dataset.fault_type},
                 )
@@ -169,13 +178,53 @@ def _number(value, name):
     return value
 
 
+def _csv_curve(event, start, end):
+    dataset = get_object_or_404(Dataset, pk=event.diagnosis['dataset_id'])
+    stride = max(1, math.ceil(event.diagnosis.get('sample_count', 0) / 2000))
+    rows, count, last, previous = [], 0, None, None
+    with dataset.file.open('rb') as raw, io.TextIOWrapper(raw, encoding='utf-8-sig', newline='') as text:
+        reader = csv.DictReader(text)
+        roles = column_roles(reader.fieldnames or [])
+        time_field, label_field = roles['time_column'], roles['fault_flag_column']
+        columns = ['time'] + [f for f in reader.fieldnames if f != time_field]
+        for index, row in enumerate(reader):
+            try:
+                timestamp = float(row[time_field]) if time_field else float(index)
+            except (TypeError, ValueError):
+                continue
+            if not math.isfinite(timestamp) or not start <= timestamp <= end:
+                continue
+            sample = {'time': timestamp}
+            for field in columns[1:]:
+                try:
+                    value = float(row[field])
+                    if math.isfinite(value):
+                        sample[field] = value
+                except (TypeError, ValueError):
+                    continue
+            boundary = previous is not None and label_field and previous.get(label_field) != sample.get(label_field)
+            if boundary and (not rows or rows[-1] is not previous):
+                rows.append(previous)
+            if count % stride == 0 or boundary:
+                rows.append(sample)
+            count += 1
+            previous = last = sample
+    if last is not None and (not rows or rows[-1] is not last):
+        rows.append(last)
+    return rows, columns, count, stride
+
+
 def _curve(event, start, end):
-    rows = [sample.values for sample in event.session.samples.order_by("id")
-            if isinstance(sample.values.get("time"), (int, float)) and start <= sample.values["time"] <= end]
-    columns = event.session.columns or (list(rows[0]) if rows else [])
+    if event.diagnosis.get('file_backed'):
+        rows, columns, count, stride = _csv_curve(event, start, end)
+    else:
+        rows = [sample.values for sample in event.session.samples.order_by("id")
+                if isinstance(sample.values.get("time"), (int, float)) and start <= sample.values["time"] <= end]
+        columns = event.session.columns or (list(rows[0]) if rows else [])
+        count, stride = len(rows), 1
     series = {key: [[row["time"], row[key]] for row in rows if isinstance(row.get(key), (int, float))]
-              for key in columns if key != "time"}
-    return {"columns": columns, "rows": rows, "series": series, "count": len(rows)}
+              for key in column_roles(columns)['parameter_columns']}
+    return {"columns": columns, **column_roles(columns), "rows": rows, "series": series, "count": count, 'display_count': len(rows), 'sample_stride': stride}
 
 
 @csrf_exempt
@@ -194,7 +243,7 @@ def events(request):
         query = [event for event in query if str((event.diagnosis or {}).get("dataset_id")) in dataset_ids]
         if request.GET.get("session_id"):
             query = [event for event in query if str(event.session_id) == request.GET["session_id"]]
-        results = [_event(x) for x in query[:500]]
+        results = [_event(x) for x in query]
         return JsonResponse({"ok": True, "count": len(results), "results": results})
     if request.method != "POST":
         return JsonResponse({"ok": False, "error": "仅支持 GET/POST"}, status=405)

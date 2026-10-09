@@ -15,6 +15,8 @@ from itertools import chain
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
+from .schema import column_roles
+
 
 SUPPORTED_SUFFIXES = {".csv", ".json", ".jsonl", ".ndjson", ".xlsx"}
 MAX_COLUMNS = 500
@@ -159,6 +161,11 @@ def inspect_file(path: str | Path, *, display_name: str | None = None) -> dict[s
     """Return a bounded-memory quality and classification report."""
     file_path = Path(path)
     columns, rows = iter_rows(file_path)
+    roles = column_roles(columns)
+    time_column, label_column = roles['time_column'], roles['fault_flag_column']
+    time_start = time_end = previous_time = first_fault_time = None
+    time_order_errors = label_errors = 0
+    fault_counts = Counter()
     missing = Counter()
     invalid = Counter()
     numeric = Counter()
@@ -176,10 +183,27 @@ def inspect_file(path: str | Path, *, display_name: str | None = None) -> dict[s
                 numeric[column] += 1
             elif column.lower() not in {"name", "label", "fault", "fault_type", "system", "component"}:
                 invalid[column] += 1
+        time_value = None
+        if time_column and _finite_number(row.get(time_column)):
+            time_value = float(row[time_column])
+            if previous_time is not None and time_value <= previous_time:
+                time_order_errors += 1
+            if time_start is None:
+                time_start = time_value
+            time_end = previous_time = time_value
+        if label_column:
+            value = row.get(label_column)
+            if _finite_number(value) and float(value) in (0, 1):
+                flag = int(float(value))
+                fault_counts[str(flag)] += 1
+                if flag == 1 and first_fault_time is None and time_value is not None:
+                    first_fault_time = time_value
+            else:
+                label_errors += 1
     numeric_columns = [column for column in columns if numeric[column] > 0]
     missing_total = sum(missing.values())
     invalid_total = sum(invalid.values())
-    quality = "error" if row_count == 0 or not columns else "warning" if missing_total or invalid_total else "valid"
+    quality = "error" if row_count == 0 or not columns else "warning" if missing_total or invalid_total or time_order_errors or label_errors else "valid"
     return {
         "file_name": display_name or file_path.name,
         "format": file_path.suffix.lower().lstrip("."),
@@ -187,12 +211,16 @@ def inspect_file(path: str | Path, *, display_name: str | None = None) -> dict[s
         "row_count": row_count,
         "columns": columns,
         "numeric_columns": numeric_columns,
+        **roles,
+        "numeric_parameter_columns": [column for column in roles['parameter_columns'] if column in numeric_columns],
+        "time_summary": {"start": time_start, "end": time_end, "non_increasing_count": time_order_errors},
+        "fault_label_summary": {"counts": dict(fault_counts), "first_fault_time": first_fault_time, "invalid_count": label_errors},
         "missing_values": dict(missing),
         "invalid_values": dict(invalid),
         "missing_value_count": missing_total,
         "invalid_value_count": invalid_total,
         "quality_status": quality,
-        "quality_message": "可用于算法处理" if quality == "valid" else "存在缺失或非数值字段,请结合算法要求复核" if quality == "warning" else "文件为空或没有表头",
+        "quality_message": "可用于算法处理" if quality == "valid" else "存在缺失、非数值字段、时间顺序或标签问题，请复核" if quality == "warning" else "文件为空或没有表头",
         "inferred_metadata": _infer_metadata(display_name or file_path.name, columns),
         "sample": sample,
     }

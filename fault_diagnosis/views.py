@@ -8,7 +8,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .service import DiagnosisService
-from .matlab_bridge import MatlabBridge
 from .route_algorithms import msfg_teams_rt, pca_iforest
 
 
@@ -16,7 +15,7 @@ def _quality_for_csv(csv_path):
     """Attach a bounded quality report before an algorithm is allowed to decide."""
     from datasets.batch_processing import inspect_file
     report = inspect_file(csv_path)
-    if report['row_count'] == 0 or not report['numeric_columns']:
+    if report['row_count'] == 0 or not report['numeric_parameter_columns']:
         raise ValueError('数据质量不合格:文件为空或没有可用数值信号')
     return report
 
@@ -33,7 +32,30 @@ def _standardize_result(result, quality):
     result['decision'] = decision
     result['decision_label'] = {'normal': '正常', 'abnormal': '异常', 'uncertain': '诊断不确定'}[decision]
     result['decision_rule'] = '按算法输出类别与置信度判定;置信度低于 0.55 时标记为诊断不确定'
-    result['data_quality'] = {key: quality[key] for key in ('row_count', 'columns', 'numeric_columns', 'missing_value_count', 'invalid_value_count', 'quality_status', 'quality_message')}
+    events = []
+    active = None
+    previous_index = None
+    for index, window in enumerate(result.get('window_series', [])):
+        name = window.get('pred_name')
+        probability = window.get('confidence')
+        alerted = name not in {None, '正常', '正常状态', '未知', '不确定', '诊断不确定'} and probability is not None and float(probability) >= .55
+        if not alerted:
+            active = None
+            continue
+        start, end = window['time_start'], window['time_end']
+        if active and active['fault'] == name and previous_index == index-1:
+            active['time_end'] = end
+            active['window_count'] += 1
+            active['max_confidence'] = max(active['max_confidence'], probability)
+        else:
+            active = {'fault': name, 'time_start': start, 'time_end': end,
+                      'window_count': 1, 'max_confidence': probability}
+            events.append(active)
+        previous_index = index
+    result['detected_events'] = events
+    result['event_summary'] = {'event_count': len(events), 'abnormal_windows': sum(event['window_count'] for event in events),
+                               'source': 'model_window_predictions', 'confidence_threshold': .55}
+    result['data_quality'] = {key: quality[key] for key in ('row_count', 'columns', 'numeric_columns', 'parameter_columns', 'numeric_parameter_columns', 'time_column', 'fault_flag_column', 'column_roles', 'time_summary', 'fault_label_summary', 'missing_value_count', 'invalid_value_count', 'quality_status', 'quality_message')}
     return result
 
 
@@ -123,14 +145,5 @@ def _run_algorithm(algorithm, csv_path):
 
 @csrf_exempt
 def simulate_inject(request):
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': '仅支持 POST'}, status=405)
-    try:
-        body = json.loads(request.body.decode('utf-8') or '{}')
-        bridge = MatlabBridge()
-        out = Path(__file__).resolve().parent.parent / 'media' / 'matlab_runs'
-        out.mkdir(parents=True, exist_ok=True)
-        result = bridge.run(out, body.get('fault'))
-        return JsonResponse({'ok': True, 'output_dir': str(out), 'stdout': result.stdout[-4000:]})
-    except Exception as exc:
-        return JsonResponse({'ok': False, 'error': str(exc)}, status=503)
+    from simulation_demo.views import run
+    return run(request)

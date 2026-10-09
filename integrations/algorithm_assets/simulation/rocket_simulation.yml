@@ -1,0 +1,9 @@
+name: rocket_simulation
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - -r requirements-no-matlab.txt

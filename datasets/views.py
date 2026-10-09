@@ -46,7 +46,7 @@ class DatasetViewSet(viewsets.ModelViewSet):
         if d.file:
             try:
                 report = inspect_file(d.file.path, display_name=d.name)
-                item['columns'] = report['columns']; item['preview'] = report['sample']; item['quality'] = {k: report[k] for k in ('row_count', 'numeric_columns', 'quality_status', 'quality_message')}
+                item['columns'] = report['columns']; item['preview'] = report['sample']; item['quality'] = {k: report[k] for k in ('row_count', 'numeric_columns', 'numeric_parameter_columns', 'time_column', 'fault_flag_column', 'parameter_columns', 'column_roles', 'time_summary', 'fault_label_summary', 'quality_status', 'quality_message')}
             except Exception: pass
         return Response(item)
     @action(detail=True, methods=['get'], url_path='download')
@@ -65,6 +65,7 @@ class DatasetViewSet(viewsets.ModelViewSet):
         try:
             from itertools import islice
             from .batch_processing import iter_rows
+            from .schema import column_roles
             offset = int(request.query_params.get('offset', 0))
             limit = int(request.query_params.get('limit', 500))
             if offset < 0 or not 1 <= limit <= 1000:
@@ -73,7 +74,7 @@ class DatasetViewSet(viewsets.ModelViewSet):
             if not columns or len(columns) != len(set(columns)):
                 raise ValueError('数据字段为空或重名')
             rows = list(islice(reader, offset, offset + limit + 1))
-            return Response({'columns': columns, 'rows': rows[:limit],
+            return Response({'columns': columns, **column_roles(columns), 'rows': rows[:limit],
                              'next_offset': offset + min(limit, len(rows)), 'has_more': len(rows) > limit})
         except (ValueError, OSError, UnicodeError) as exc:
             return Response({'detail': f'CSV 读取失败:{exc}'}, status=400)

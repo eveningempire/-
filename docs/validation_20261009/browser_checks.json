@@ -1,0 +1,25 @@
+{
+  "desktop": {
+    "width": 1440,
+    "scrollWidth": 1440
+  },
+  "mobile": {
+    "width": 390,
+    "scrollWidth": 390
+  },
+  "diagnosisMobile": {
+    "width": 390,
+    "scrollWidth": 390
+  },
+  "pageErrors": [],
+  "realTaskIds": [
+    "2d768f63-51e9-4a6c-ab7d-71ea509560a1",
+    "bc907309-f20d-45a4-8e45-5caba0fb2934"
+  ],
+  "derivedThenRawHttpStatuses": [
+    503,
+    200
+  ],
+  "pumpEventCount": 7,
+  "gyroEventCount": 6
+}

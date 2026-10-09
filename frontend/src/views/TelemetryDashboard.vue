@@ -48,8 +48,9 @@ let timer,generation=0,offset=0,cursor=0,buffer=[],pos=0,more=true,shown=0
 const labels={waiting:'等待数据',live:'正在接收',stale:'超过 5 秒未收到数据',closed:'采集已结束'},signalLabels={time:'时间',timestamp:'时间戳',pressure:'压力',temperature:'温度',bus_voltage:'母线电压',battery_capacity:'电池容量',attitude_error:'姿态误差',control_error:'控制误差',current:'电流',voltage:'电压',HI_norm:'健康指数'}
 const status=computed(()=>error.value?'读取失败':mode.value==='live'?labels[state.value]:ended.value?'回放结束':playing.value?'正在回放':'未播放')
 const numeric=v=>v!==null&&v!==undefined&&String(v).trim()!==''&&Number.isFinite(Number(v))?Number(v):null
-const timeKey=computed(()=>columns.value.find(k=>k.toLowerCase()==='time'))
-const signals=computed(()=>columns.value.filter(k=>k!==timeKey.value&&rows.value.some(r=>numeric(r[k])!==null)))
+const columnName=k=>k.replace(/[\s_-]+/g,'').toLowerCase()
+const timeKey=computed(()=>columns.value.find(k=>['time','timestamp','t','时间','时间戳'].includes(columnName(k))))
+const signals=computed(()=>columns.value.filter(k=>k!==timeKey.value&&columnName(k)!=='faultflag'&&rows.value.some(r=>numeric(r[k])!==null)))
 const chart=computed(()=>({tooltip:{trigger:'axis'},grid:{containLabel:true,left:60,right:35,bottom:75},xAxis:{type:'value',name:signalLabels[timeKey.value]||'样本序号'},yAxis:{type:'value',name:signalLabels[signal.value]||signal.value,scale:true},dataZoom:[{type:'inside'},{type:'slider'}],series:[{name:signalLabels[signal.value]||signal.value,type:'line',showSymbol:rows.value.length<2,symbolSize:8,connectNulls:false,data:rows.value.map((r,i)=>[timeKey.value?numeric(r[timeKey.value]):shown-rows.value.length+i,numeric(r[signal.value])])}]}))
 const ingestUrl=computed(()=>connection.value?new URL(connection.value.ingest_path,location.origin).href:'')
 const matlabSetupCode=computed(()=>connection.value?`% 第一次使用时执行:选择本机离线包中的 integrations/matlab 文件夹\nmatlabToolsDir = uigetdir(pwd, '选择 phm_platform_offline/integrations/matlab 文件夹');\nif isequal(matlabToolsDir, 0)\n    error('PHM:MATLABPath', '未选择 MATLAB 工具目录');\nend\naddpath(matlabToolsDir);\naddpath(fullfile(matlabToolsDir, 'examples'));\n\n% 本次采集会话参数(请勿把 token 提交到代码仓库)\ningestUrl = '${ingestUrl.value}';\ntoken = '${connection.value.token}';\n\n% 检查发送函数是否可用\nassert(~isempty(which('phm_send_telemetry')), ...\n    '未找到 phm_send_telemetry.m,请确认选择的是 integrations/matlab 文件夹');\ndisp('MATLAB 接入配置完成');`:'')

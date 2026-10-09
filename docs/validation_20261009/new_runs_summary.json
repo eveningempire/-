@@ -1,0 +1,263 @@
+{
+  "provenance": {
+    "python": "3.9.13",
+    "torch": "2.5.1+cpu",
+    "sklearn": "1.6.1",
+    "algorithms": [
+      "hier14",
+      "msfg_teams_rt",
+      "pca_iforest"
+    ],
+    "files": 6,
+    "representative": false,
+    "hier14_available": true,
+    "training_overlap": "unknown; customer archive may overlap model training data; this is integration evaluation, not an independent holdout",
+    "truth_rule": "FaultFlag used only by scorer; homogeneous windows evaluated, transition windows omitted; no phase/maturity filtering",
+    "inference_changes": "no retraining or threshold tuning; original checkpoint preprocessing retained",
+    "artifacts": {
+      "best_model.pth": "5a01561d2567f0a88ca92768c2f4b758fd8018aaa70b24e4a6c225e3309a5323",
+      "scaler.pkl": "40fd714c1974870a0f2eb901290095f025a78c33b75cc2a86d30c899302cb6f0",
+      "deploy_meta.json": "9b932305415fc6cae61617ab1a1fe43209305eb5f5e9252e255444597976a883"
+    }
+  },
+  "metrics": [
+    {
+      "algorithm": "hier14",
+      "data_type": "raw",
+      "files": 3,
+      "success": 3,
+      "errors": 0,
+      "model_modes": {
+        "trained-hier14": 3
+      },
+      "homogeneous_windows": 211,
+      "normal_windows": 198,
+      "fault_windows": 13,
+      "window_class_accuracy": 0.8151658767772512,
+      "window_binary_accuracy": 0.8151658767772512,
+      "normal_false_alarm_rate": 0.19696969696969696,
+      "fault_detection_recall": 1.0,
+      "fault_class_accuracy": 1.0,
+      "baseline_files": 1,
+      "baseline_aggregate_correct": 1,
+      "fault_files": 2,
+      "fault_aggregate_correct": 0,
+      "fault_aggregate_detected": 0,
+      "class_identification_supported": true,
+      "per_class": {
+        "正常": {
+          "windows": 198,
+          "correct": 159,
+          "detected": 39
+        },
+        "泵气蚀": {
+          "windows": 5,
+          "correct": 5,
+          "detected": 5
+        },
+        "陀螺仪恒偏差": {
+          "windows": 8,
+          "correct": 8,
+          "detected": 8
+        }
+      },
+      "confusion": {
+        "正常 -> 正常": 159,
+        "正常 -> TVC偏角不足": 3,
+        "泵气蚀 -> 泵气蚀": 5,
+        "正常 -> 栅格舵偏角不足": 25,
+        "正常 -> 控制器无信号": 11,
+        "陀螺仪恒偏差 -> 陀螺仪恒偏差": 8
+      }
+    },
+    {
+      "algorithm": "msfg_teams_rt",
+      "data_type": "raw",
+      "files": 3,
+      "success": 3,
+      "errors": 0,
+      "model_modes": {
+        "operational-msfg-teams-rt": 3
+      },
+      "homogeneous_windows": 1,
+      "normal_windows": 1,
+      "fault_windows": 0,
+      "window_class_accuracy": null,
+      "window_binary_accuracy": 0.0,
+      "normal_false_alarm_rate": 1.0,
+      "fault_detection_recall": null,
+      "fault_class_accuracy": null,
+      "baseline_files": 1,
+      "baseline_aggregate_correct": 0,
+      "fault_files": 2,
+      "fault_aggregate_correct": 0,
+      "fault_aggregate_detected": 2,
+      "class_identification_supported": false,
+      "per_class": {
+        "正常": {
+          "windows": 1,
+          "correct": 0,
+          "detected": 1
+        }
+      },
+      "confusion": {
+        "正常 -> X异常": 1
+      }
+    },
+    {
+      "algorithm": "pca_iforest",
+      "data_type": "raw",
+      "files": 3,
+      "success": 3,
+      "errors": 0,
+      "model_modes": {
+        "operational-pca-iforest": 3
+      },
+      "homogeneous_windows": 3793,
+      "normal_windows": 3486,
+      "fault_windows": 307,
+      "window_class_accuracy": null,
+      "window_binary_accuracy": 0.4033746374901134,
+      "normal_false_alarm_rate": 0.6098680436029834,
+      "fault_detection_recall": 0.5537459283387622,
+      "fault_class_accuracy": null,
+      "baseline_files": 1,
+      "baseline_aggregate_correct": 0,
+      "fault_files": 2,
+      "fault_aggregate_correct": 0,
+      "fault_aggregate_detected": 2,
+      "class_identification_supported": false,
+      "per_class": {
+        "正常": {
+          "windows": 3486,
+          "correct": 1360,
+          "detected": 2126
+        },
+        "泵气蚀": {
+          "windows": 129,
+          "correct": 0,
+          "detected": 1
+        },
+        "陀螺仪恒偏差": {
+          "windows": 178,
+          "correct": 0,
+          "detected": 169
+        }
+      },
+      "confusion": {
+        "正常 -> 异常": 2126,
+        "正常 -> 正常": 1360,
+        "泵气蚀 -> 正常": 128,
+        "泵气蚀 -> 异常": 1,
+        "陀螺仪恒偏差 -> 正常": 9,
+        "陀螺仪恒偏差 -> 异常": 169
+      }
+    },
+    {
+      "algorithm": "hier14",
+      "data_type": "derived",
+      "files": 3,
+      "success": 0,
+      "errors": 3,
+      "model_modes": {},
+      "homogeneous_windows": 0,
+      "normal_windows": 0,
+      "fault_windows": 0,
+      "window_class_accuracy": null,
+      "window_binary_accuracy": null,
+      "normal_false_alarm_rate": null,
+      "fault_detection_recall": null,
+      "fault_class_accuracy": null,
+      "baseline_files": 0,
+      "baseline_aggregate_correct": 0,
+      "fault_files": 0,
+      "fault_aggregate_correct": 0,
+      "fault_aggregate_detected": 0,
+      "class_identification_supported": true,
+      "per_class": {},
+      "confusion": {}
+    },
+    {
+      "algorithm": "msfg_teams_rt",
+      "data_type": "derived",
+      "files": 3,
+      "success": 3,
+      "errors": 0,
+      "model_modes": {
+        "operational-msfg-teams-rt": 3
+      },
+      "homogeneous_windows": 1,
+      "normal_windows": 1,
+      "fault_windows": 0,
+      "window_class_accuracy": null,
+      "window_binary_accuracy": 0.0,
+      "normal_false_alarm_rate": 1.0,
+      "fault_detection_recall": null,
+      "fault_class_accuracy": null,
+      "baseline_files": 1,
+      "baseline_aggregate_correct": 0,
+      "fault_files": 2,
+      "fault_aggregate_correct": 0,
+      "fault_aggregate_detected": 2,
+      "class_identification_supported": false,
+      "per_class": {
+        "正常": {
+          "windows": 1,
+          "correct": 0,
+          "detected": 1
+        }
+      },
+      "confusion": {
+        "正常 -> P5异常": 1
+      }
+    },
+    {
+      "algorithm": "pca_iforest",
+      "data_type": "derived",
+      "files": 3,
+      "success": 3,
+      "errors": 0,
+      "model_modes": {
+        "operational-pca-iforest": 3
+      },
+      "homogeneous_windows": 3793,
+      "normal_windows": 3486,
+      "fault_windows": 307,
+      "window_class_accuracy": null,
+      "window_binary_accuracy": 0.4281571315581334,
+      "normal_false_alarm_rate": 0.5854847963281699,
+      "fault_detection_recall": 0.5830618892508144,
+      "fault_class_accuracy": null,
+      "baseline_files": 1,
+      "baseline_aggregate_correct": 0,
+      "fault_files": 2,
+      "fault_aggregate_correct": 0,
+      "fault_aggregate_detected": 2,
+      "class_identification_supported": false,
+      "per_class": {
+        "正常": {
+          "windows": 3486,
+          "correct": 1445,
+          "detected": 2041
+        },
+        "泵气蚀": {
+          "windows": 129,
+          "correct": 0,
+          "detected": 1
+        },
+        "陀螺仪恒偏差": {
+          "windows": 178,
+          "correct": 0,
+          "detected": 178
+        }
+      },
+      "confusion": {
+        "正常 -> 正常": 1445,
+        "正常 -> 异常": 2041,
+        "泵气蚀 -> 正常": 128,
+        "泵气蚀 -> 异常": 1,
+        "陀螺仪恒偏差 -> 异常": 178
+      }
+    }
+  ]
+}

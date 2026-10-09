@@ -2,7 +2,7 @@
   <div class="analysis-page">
     <h2>故障诊断分析</h2>
     <el-radio-group v-model="mode" @change="onModeChange"><el-radio-button label="single">单个诊断</el-radio-button><el-radio-button label="batch">批量诊断</el-radio-button></el-radio-group>
-    <div class="controls"><el-select v-if="mode==='single'" v-model="id" filterable placeholder="选择 CSV 数据集" @change="clear"><el-option v-for="d in datasets" :key="d.id" :label="d.name" :value="d.id"/></el-select><el-select v-else v-model="batchIds" multiple collapse-tags filterable placeholder="批量诊断可多选数据集"><el-option v-for="d in datasets" :key="`batch-${d.id}`" :label="d.name" :value="d.id"/></el-select><el-select v-model="algorithm" @change="onAlgorithmChange"><el-option v-for="item in algorithmOptions" :key="item.key" :label="item.name" :value="item.key"/></el-select><el-button v-if="mode==='single'" type="primary" :loading="loading" :disabled="!id" @click="run">运行 {{algorithmName}}</el-button><el-button v-else type="success" :loading="batchLoading" :disabled="!batchIds.length" @click="runBatch">批量诊断</el-button></div>
+    <div class="controls"><el-select v-if="mode==='single'" v-model="id" filterable placeholder="选择 CSV 数据集" @change="clear"><el-option v-for="d in availableDatasets" :key="d.id" :label="d.name" :value="d.id"/></el-select><el-select v-else v-model="batchIds" multiple collapse-tags filterable placeholder="批量诊断可多选数据集"><el-option v-for="d in availableDatasets" :key="`batch-${d.id}`" :label="d.name" :value="d.id"/></el-select><el-select v-model="algorithm" @change="onAlgorithmChange"><el-option v-for="item in algorithmOptions" :key="item.key" :label="item.name" :value="item.key"/></el-select><el-button v-if="mode==='single'" type="primary" :loading="loading" :disabled="!id" @click="run">运行 {{algorithmName}}</el-button><el-button v-else type="success" :loading="batchLoading" :disabled="!batchIds.length" @click="runBatch">批量诊断</el-button></div>
     <el-alert v-if="selectedAlgorithm?.source==='plugin'" type="info" :closable="false" :title="`${selectedAlgorithm.name} · 插件 ${selectedAlgorithm.version}`" :description="selectedAlgorithm.description||'本地安装的诊断算法'" />
     <el-form v-if="selectedAlgorithm?.source==='plugin'&&pluginFields.length" class="plugin-parameters" inline label-position="top"><el-form-item v-for="field in pluginFields" :key="field.name" :label="field.name"><el-select v-if="field.definition.enum" v-model="pluginParameters[field.name]"><el-option v-for="choice in field.definition.enum" :key="String(choice)" :label="String(choice)" :value="choice"/></el-select><el-switch v-else-if="field.definition.type==='boolean'" v-model="pluginParameters[field.name]"/><el-input-number v-else-if="field.definition.type==='number'||field.definition.type==='integer'" v-model="pluginParameters[field.name]" :min="field.definition.minimum" :max="field.definition.maximum" :precision="field.definition.type==='integer'?0:undefined"/><el-input v-else v-model="pluginParameters[field.name]"/></el-form-item></el-form>
     <el-alert v-if="mode==='batch'&&batchReport" type="info" :closable="false" :title="`批量诊断完成: 成功 ${batchReport.success}, 失败 ${batchReport.failed}`" />
@@ -19,6 +19,16 @@
       </el-table>
     </el-card>
     <h3 v-if="result">当前详情：{{datasetName(activeDatasetId)}}</h3>
+    <template v-if="result?.event_summary">
+      <h3>窗口告警事件 · {{ result.event_summary.event_count }}</h3>
+      <el-table :data="result.detected_events || []" size="small" empty-text="未出现置信度达标的异常窗口">
+        <el-table-column prop="fault" label="模型预测" min-width="170" />
+        <el-table-column label="窗口开始 (s)" min-width="130"><template #default="scope">{{ seconds(scope.row.time_start) }}</template></el-table-column>
+        <el-table-column label="窗口结束 (s)" min-width="130"><template #default="scope">{{ seconds(scope.row.time_end) }}</template></el-table-column>
+        <el-table-column prop="window_count" label="窗口数" width="90" />
+        <el-table-column label="最高置信度" min-width="120"><template #default="scope">{{ percent(scope.row.max_confidence) }}</template></el-table-column>
+      </el-table>
+    </template>
     <el-alert v-if="selectedBatchError" type="error" :closable="false" :title="`${datasetName(activeDatasetId)}：${selectedBatchError}`" />
     <el-descriptions v-if="result&&selected" :column="2" border><el-descriptions-item label="数据来源">{{selected.source==='simulation'?'仿真':'离线上传'}}</el-descriptions-item><el-descriptions-item label="系统 / 部件">{{selected.system||'未记录'}} / {{selected.component||'未记录'}}</el-descriptions-item><el-descriptions-item label="PBS 单机产品">{{selected.structure_node_name||'未关联'}}</el-descriptions-item><el-descriptions-item label="故障标签(录入信息)">{{selected.fault_type||'未标注'}}</el-descriptions-item><el-descriptions-item label="注入时间(录入信息)">{{selected.injection_time??'未记录'}}</el-descriptions-item></el-descriptions>
     <el-alert v-if="result&&selected?.fault_type==='正常基线'" type="warning" :closable="false" title="此数据集标注为仿真正常基线" description="现有通用诊断算法可能对飞行工况变化产生误报。诊断结果仍按算法真实输出显示，使用前需完成测点映射和阈值标定。" />
@@ -27,6 +37,7 @@
     <template v-if="result">
       <div class="metrics"><div><small>末窗口预测</small><strong>{{result.pred_name}}</strong></div><div><small>全程聚合类别</small><strong>{{result.aggregate_pred_name}}</strong></div><div><small>末窗口最高概率</small><strong>{{percent(last?.confidence)}}</strong></div><div><small>诊断窗口数</small><strong>{{result.n_windows}}</strong></div></div>
       <p>末窗口反映最新状态,聚合类别反映全程窗口平均概率。当前数据已完成一次诊断运算,共生成 {{result.n_windows}} 个窗口;数据不足一个模型窗口时仅显示最后一个窗口。模型概率不等同于经过校准的可靠性保证。</p>
+      <el-descriptions v-if="result.data_quality" :column="3" border><el-descriptions-item label="时间字段">{{result.data_quality.time_column||'未提供'}}</el-descriptions-item><el-descriptions-item label="故障真值标签">{{result.data_quality.fault_flag_column||'无'}}（仅核对真值）</el-descriptions-item><el-descriptions-item label="数值参数列数">{{result.data_quality.numeric_parameter_columns?.length??0}}</el-descriptions-item><el-descriptions-item label="正常 / 故障采样点">{{result.data_quality.fault_label_summary?.counts?.['0']??0}} / {{result.data_quality.fault_label_summary?.counts?.['1']??0}}</el-descriptions-item><el-descriptions-item label="首次故障时间戳">{{result.data_quality.fault_label_summary?.first_fault_time??'无故障标签'}}</el-descriptions-item></el-descriptions>
       <h3>类别概率比较</h3><ReportChart :key="`probability-${activeDatasetId}`" :option="probabilityChart"/>
       <h3>窗口置信度与时间</h3><ReportChart :key="`timeline-${activeDatasetId}`" :option="timeline"/>
       <h3>窗口诊断明细</h3>
@@ -42,19 +53,22 @@
 <script setup>
 import {ref,computed,onMounted} from 'vue'
 import ReportChart from '../components/ReportChart.vue'
+import {isSimulinkDerived} from '../utils/datasetVisibility.js'
 const datasets=ref([]),id=ref(),batchIds=ref([]),mode=ref('single'),activeDatasetId=ref(null),result=ref(null),batchReport=ref(null),selectedBatchError=ref(''),error=ref(''),loading=ref(false),batchLoading=ref(false),page=ref(1),algorithm=ref('hier14')
+const availableDatasets=computed(()=>algorithm.value==='hier14'?datasets.value.filter(dataset=>!isSimulinkDerived(dataset)):datasets.value)
 const algorithmOptions=ref([{key:'hier14',name:'Hier14 层次时序诊断',source:'builtin'},{key:'msfg_teams_rt',name:'MSFG + TEAMS-RT 依赖诊断',source:'builtin'},{key:'pca_iforest',name:'PCA-iForest 偏离诊断',source:'builtin'}])
 const selectedAlgorithm=computed(()=>algorithmOptions.value.find(x=>x.key===algorithm.value)),algorithmName=computed(()=>selectedAlgorithm.value?.name||algorithm.value)
 const pluginParameters=ref({}),pluginFields=computed(()=>Object.entries(selectedAlgorithm.value?.parameters||{}).map(([name,definition])=>({name,definition})))
 const selected=computed(()=>datasets.value.find(d=>String(d.id)===String(activeDatasetId.value))),batchRows=computed(()=>batchReport.value?.results||[]),windows=computed(()=>result.value?.window_series||[]),last=computed(()=>windows.value.at(-1)),pageRows=computed(()=>windows.value.slice((page.value-1)*10,page.value*10))
 const percent=v=>v==null?'未提供':(100*Number(v)).toFixed(1)+'%'
+const seconds=v=>v==null?'未提供':Number(v).toFixed(3)
 const datasetName=datasetId=>datasets.value.find(d=>String(d.id)===String(datasetId))?.name||`数据集 #${datasetId}`
 const failureReason=computed(()=>/repo not found|不存在|Missing.*artifact/i.test(error.value)?'诊断运行依赖缺失,模型未执行。':/columns|rows|CSV/i.test(error.value)?'输入数据不符合模型要求。':'模型执行失败,请检查技术详情。')
 const probabilityChart=computed(()=>{const p=result.value?.class_probs||[],a=result.value?.aggregate_class_probs||[];return {tooltip:{trigger:'axis'},legend:{data:['末窗口','全程平均']},grid:{bottom:100,containLabel:true},xAxis:{type:'category',data:p.map(x=>x.name),axisLabel:{rotate:30}},yAxis:{type:'value',name:'概率 (%)',min:0,max:100},series:[{name:'末窗口',type:'bar',data:p.map(x=>x.prob*100),color:'#247bba'},{name:'全程平均',type:'bar',data:p.map(x=>(a.find(y=>y.name===x.name)?.prob??0)*100),color:'#239477'}]}})
 const timeline=computed(()=>({tooltip:{trigger:'axis'},grid:{containLabel:true,left:55,right:40,bottom:70},xAxis:{type:'value',name:'窗口结束时间 (s)'},yAxis:{type:'value',name:'最高类别概率 (%)',min:0,max:100},dataZoom:[{type:'inside'},{type:'slider'}],series:[{name:'窗口置信度',type:'line',data:windows.value.map(w=>[w.time_end,w.confidence*100]),color:'#247bba'}]}))
 function clear(){result.value=null;activeDatasetId.value=null;selectedBatchError.value='';error.value='';page.value=1}
 function onModeChange(){clear();batchReport.value=null}
-function onAlgorithmChange(){clear();batchReport.value=null;pluginParameters.value=Object.fromEntries(pluginFields.value.map(({name,definition})=>[name,definition.default??(definition.type==='boolean'?false:definition.type==='string'?'':definition.minimum??0)]))}
+function onAlgorithmChange(){const compatibleIds=new Set(availableDatasets.value.map(dataset=>String(dataset.id)));if(id.value!=null&&!compatibleIds.has(String(id.value)))id.value=undefined;batchIds.value=batchIds.value.filter(datasetId=>compatibleIds.has(String(datasetId)));clear();batchReport.value=null;pluginParameters.value=Object.fromEntries(pluginFields.value.map(({name,definition})=>[name,definition.default??(definition.type==='boolean'?false:definition.type==='string'?'':definition.minimum??0)]))}
 function showBatchResult(row){activeDatasetId.value=row.dataset_id;result.value=row.status==='success'?row.result:null;selectedBatchError.value=row.status==='success'?'':row.error||'诊断失败';error.value='';page.value=1}
 const csrfHeaders=()=>{const token=document.cookie.split('; ').find(x=>x.startsWith('csrftoken='))?.slice(10);return token?{'X-CSRFToken':decodeURIComponent(token)}:{}}
 onMounted(async()=>{try{const [datasetResponse,catalogResponse]=await Promise.all([fetch('/api/v1/datasets/',{credentials:'include'}),fetch('/api/v1/integrations/algorithm-assets/algorithms/?category=diagnosis',{credentials:'include'})]);if(!datasetResponse.ok)throw Error('数据集加载失败');datasets.value=await datasetResponse.json();if(catalogResponse.ok){const catalog=await catalogResponse.json();if(catalog.ok&&catalog.results?.length)algorithmOptions.value=catalog.results}}catch(e){error.value=e.message}})

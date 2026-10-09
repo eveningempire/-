@@ -1,0 +1,656 @@
+{
+  "date": "2026-10-09",
+  "single_results": [
+    {
+      "request": {
+        "dataset_id": 553,
+        "component_id": "1",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 3.353,
+      "rul_value": 2266.2570858304553,
+      "unit": "s",
+      "current_hi": 0.8058805396706492,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P1",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.805051561596453,
+          0.9999999985937681
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.6236059707435007,
+          3.4875965764753865
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1",
+          "pca.pkl": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677",
+          "hi_meta.json": "20fd1b72dd5a927db109f03ba2cbca957fc64e29a6d6fdd0bbd97c0330cff5cb"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": true,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 554,
+        "component_id": "1",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.489,
+      "rul_value": 2266.2570858304553,
+      "unit": "s",
+      "current_hi": 0.8058805396706492,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P1",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.805051561596453,
+          0.9999999985937681
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.6236059707435007,
+          3.4875965764753865
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1",
+          "pca.pkl": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677",
+          "hi_meta.json": "20fd1b72dd5a927db109f03ba2cbca957fc64e29a6d6fdd0bbd97c0330cff5cb"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": false,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 553,
+        "component_id": "10",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.896,
+      "rul_value": 62.40043162465483,
+      "unit": "s",
+      "current_hi": 0.2225843507138649,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P9",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.9020833333333333,
+        "raw_hi_range": [
+          -0.038939970081906014,
+          0.9999999985013948
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.3317556056811113,
+          3.341115724714666
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "2c6bae04b8fb29509148fff4bea9e5a1f2b55321de2691436138d642cbe2aae2",
+          "pca.pkl": "27184c52e6c224e6730fd8b8d8c6f47c78aa3d3072f9700054538ff0765d52f1",
+          "hi_meta.json": "9e0efbb571ce81ce113e46cc5ee611d119abdd51441a737426646c782fe3299f"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": true,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 554,
+        "component_id": "10",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.699,
+      "rul_value": 62.40043162465483,
+      "unit": "s",
+      "current_hi": 0.2225843507138649,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P9",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.9020833333333333,
+        "raw_hi_range": [
+          -0.038939970081906014,
+          0.9999999985013948
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.3317556056811113,
+          3.341115724714666
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "2c6bae04b8fb29509148fff4bea9e5a1f2b55321de2691436138d642cbe2aae2",
+          "pca.pkl": "27184c52e6c224e6730fd8b8d8c6f47c78aa3d3072f9700054538ff0765d52f1",
+          "hi_meta.json": "9e0efbb571ce81ce113e46cc5ee611d119abdd51441a737426646c782fe3299f"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": false,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 49,
+        "component_id": "1",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.607,
+      "rul_value": 2266.2570858304553,
+      "unit": "s",
+      "current_hi": 0.805896584791046,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P1",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.8050435209311251,
+          0.9999999985937681
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.6236059707435007,
+          3.4875965764753865
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1",
+          "pca.pkl": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677",
+          "hi_meta.json": "20fd1b72dd5a927db109f03ba2cbca957fc64e29a6d6fdd0bbd97c0330cff5cb"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 50,
+        "source_dataset_name": "正常基线 fc0 派生参数",
+        "paired_dataset": true,
+        "source_row_count": 19068,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 50,
+        "component_id": "1",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.469,
+      "rul_value": 2266.2570858304553,
+      "unit": "s",
+      "current_hi": 0.805896584791046,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P1",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.8050435209311251,
+          0.9999999985937681
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.6236059707435007,
+          3.4875965764753865
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1",
+          "pca.pkl": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677",
+          "hi_meta.json": "20fd1b72dd5a927db109f03ba2cbca957fc64e29a6d6fdd0bbd97c0330cff5cb"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 50,
+        "source_dataset_name": "正常基线 fc0 派生参数",
+        "paired_dataset": false,
+        "source_row_count": 19068,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 554,
+        "component_id": "5",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.9,
+      "rul_value": 3638.7426515952984,
+      "unit": "s",
+      "current_hi": 0.8110019871516525,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P5",
+        "feature_order": [
+          "rms",
+          "mean",
+          "max",
+          "min"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.7998349747411824,
+          1.0
+        ],
+        "reversed": true,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.710447339446146,
+          3.713375544758959
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "e4c912f6d60dc009f8abf2b8b4d51bd4a3409ff2e7e73d98fcbcd6dfd2d0e50d",
+          "pca.pkl": "54b2339008721faa1f17c75105c4368d5a02073b9472621a73d67aa4ec4345a4",
+          "hi_meta.json": "32351604ab6e9616b9aa5a17caad25657019ea44dea03da377056da7df7d72b5"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": false,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 554,
+        "component_id": "6",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.974,
+      "rul_value": 8928.749480002778,
+      "unit": "s",
+      "current_hi": 0.9052776049093438,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P6",
+        "feature_order": [
+          "mean",
+          "rms",
+          "max",
+          "min"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.8996805459014878,
+          1.0
+        ],
+        "reversed": true,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.7097807387603923,
+          3.530073949332807
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "7d08dd519430a317ce4f6cadade2cea602f828973c84fc829c2fe3a8ee440d18",
+          "pca.pkl": "d797636f6e31bb06785ccf0c957c46cc43ab76e1156f918fac6b83d0fc96f0c8",
+          "hi_meta.json": "ba36c0a577ad2fa22e46e3f0db935ce0ed159664d12d8bd238c235d5592af056"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": false,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 554,
+        "component_id": "11",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 1.017,
+      "rul_value": 4230.5418982522315,
+      "unit": "s",
+      "current_hi": 0.8622969360564345,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P12",
+        "feature_order": [
+          "max",
+          "rms",
+          "mean",
+          "min"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.8604808609350114,
+          1.0
+        ],
+        "reversed": true,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.5725751236973275,
+          3.5914848572650566
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "d60097e55bb750c6ec2bb3f5bb305b35106c7633ab7d203d1dd36c5f25fd0e4a",
+          "pca.pkl": "ec61ee8dd1c9fb4350d3449d01de741838f235f17dedb485c7935683384522d6",
+          "hi_meta.json": "973756f7ecda52aded01ce8f558a73a1788ad489cf5c7f8abec32f90bae018bf"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": false,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 554,
+        "component_id": "14",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.662,
+      "rul_value": 2282.9060603660378,
+      "unit": "s",
+      "current_hi": 0.8058805396706492,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P16",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.805051561596453,
+          0.9999999985937681
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.6236059707435007,
+          3.4875965764753865
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1",
+          "pca.pkl": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677",
+          "hi_meta.json": "20fd1b72dd5a927db109f03ba2cbca957fc64e29a6d6fdd0bbd97c0330cff5cb"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": false,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    },
+    {
+      "request": {
+        "dataset_id": 554,
+        "component_id": "15",
+        "algorithm": "health_main_ensemble"
+      },
+      "http_status": 200,
+      "status": "success",
+      "seconds": 0.989,
+      "rul_value": 4100.322246588585,
+      "unit": "s",
+      "current_hi": 0.8603574686904446,
+      "hi_count": 480,
+      "rul_count": 430,
+      "source": {
+        "method": "trained_pca",
+        "input_signal": "P17",
+        "feature_order": [
+          "min",
+          "mean",
+          "rms",
+          "max"
+        ],
+        "window_seconds": 2.0,
+        "step_seconds": 1.0,
+        "time_column": "Time",
+        "clipped_fraction": 0.0,
+        "raw_hi_range": [
+          0.8590940849408794,
+          0.9999999985992972
+        ],
+        "reversed": false,
+        "calibration": "trained_scaler_pca",
+        "normalization_range": [
+          -3.5125447222674526,
+          3.6267286570501276
+        ],
+        "reference": "health-main/backend/algorithm/views.py:component_eval; algotest/lifepredict.py",
+        "preprocessing_assets": {
+          "scaler.pkl": "05496610bd8e6d6272da244b78d0d457233652c02da083349d1f2b4753716da4",
+          "pca.pkl": "f02acb0b430399bcc5fc74cff5560efb3db47d41cdc4694b4a2e72d044f39260",
+          "hi_meta.json": "23cf36ae32f3bbe74ffc2c827494dce8f65cabc7ac96cda2400fbe4af0a6cc00"
+        },
+        "window_time_kind": "center",
+        "source_dataset_id": 554,
+        "source_dataset_name": "123456-派生参数",
+        "paired_dataset": false,
+        "source_row_count": 18998,
+        "hi_count": 480,
+        "excluded_feature_columns": [
+          "Time",
+          "FaultFlag"
+        ]
+      },
+      "message": null
+    }
+  ],
+  "pair_predictions_equal": true,
+  "batch": {
+    "request": {
+      "dataset_ids": [
+        553,
+        49,
+        999999
+      ],
+      "component_id": "10"
+    },
+    "http_status": 200,
+    "total": 3,
+    "success": 2,
+    "failed": 1,
+    "results": [
+      {
+        "dataset_id": 553,
+        "status": "success",
+        "rul_value": 62.40043162465483,
+        "message": null
+      },
+      {
+        "dataset_id": 49,
+        "status": "success",
+        "rul_value": 4722.705703765027,
+        "message": null
+      },
+      {
+        "dataset_id": 999999,
+        "status": "error",
+        "rul_value": null,
+        "message": "Dataset matching query does not exist."
+      }
+    ]
+  }
+}

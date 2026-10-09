@@ -1,0 +1,30 @@
+{
+  "systemOptions": [
+    "控制",
+    "动力"
+  ],
+  "batch": {
+    "status": 200,
+    "total": 2,
+    "success": 2,
+    "failed": 0,
+    "datasetIds": [
+      543,
+      541
+    ]
+  },
+  "desktop": {
+    "width": 1440,
+    "scrollWidth": 1440
+  },
+  "mobile": {
+    "width": 390,
+    "scrollWidth": 390
+  },
+  "pageErrors": [],
+  "diagnosisOptions": [
+    "Hier14 层次时序诊断",
+    "MSFG + TEAMS-RT 依赖诊断",
+    "PCA-iForest 偏离诊断"
+  ]
+}

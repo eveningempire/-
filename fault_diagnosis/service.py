@@ -58,12 +58,12 @@ class DiagnosisService:
             module = importlib.util.module_from_spec(spec)
             sys.modules[spec.name] = module
             spec.loader.exec_module(module)
-            self.predictor = module
             # Load the real runtime at service startup so /status reflects
             # missing weights/dependencies immediately instead of failing on
             # the first user prediction.
             if hasattr(module, "_load_runtime"):
                 module._load_runtime()
+            self.predictor = module
         except Exception as exc:
             self.error = f"{type(exc).__name__}: {exc}"
 
@@ -73,35 +73,14 @@ class DiagnosisService:
 
     def predict(self, csv_path):
         if not self.predictor:
-            import csv
-            with open(csv_path, encoding='utf-8-sig', newline='') as f: rows=list(csv.DictReader(f))
-            if not rows: raise ValueError('CSV 文件没有数据行')
-            signals={}
-            for k in rows[0]:
-                vals=[]
-                for r in rows:
-                    try: vals.append(float(r[k]))
-                    except (TypeError,ValueError): pass
-                if vals: signals[k]=vals
-            if not signals: raise ValueError('CSV 没有数值信号')
-            changes=[]
-            for k,v in signals.items():
-                base=sum(v[:min(10,len(v))])/min(10,len(v)); changes.append((abs(v[-1]-base)/(abs(base)+1e-6),k,(v[-1]-base)/(abs(base)+1e-6)))
-            _,key,drift=max(changes); conf=min(.92,.55+0.35*min(1.0,abs(drift))); label='正常' if abs(drift)<=.15 else '异常趋势'
-            if 'pressure' in key.lower() and drift<-.15: label='推进系统压力下降'
-            elif 'temperature' in key.lower() and drift>.15: label='热控温度升高'
-            elif 'attitude' in key.lower() and abs(drift)>.15: label='姿态控制偏差'
-            window_size=max(10,min(30,len(rows))); stride=max(5,window_size//2); series=[]
-            for i,start in enumerate(range(0,max(1,len(rows)-window_size+1),stride)):
-                end=min(len(rows),start+window_size); segment=rows[start:end]; base=sum(float(x[key]) for x in segment[:min(5,len(segment))])/min(5,len(segment)); rel=(float(segment[-1][key])-base)/(abs(base)+1e-6); wc=min(.92,.55+.35*min(1.0,abs(rel))); wl='正常' if abs(rel)<=.15 else ('推进系统压力下降' if 'pressure' in key.lower() and rel<-.15 else '异常趋势')
-                series.append({'window_index':i,'time_start':segment[0].get('time',start),'time_end':segment[-1].get('time',end-1),'pred_name':wl,'confidence':round(wc,4),'evidence_signal':key,'relative_change':round(rel,4)})
-            probs=[{'name':label,'prob':round(conf,4)},{'name':'正常','prob':round(1-conf,4)}]
-            return {'pred_name':label,'aggregate_pred_name':label,'confidence':round(conf,4),'n_windows':len(series),'seq_len':window_size,'window_stride':stride,'sample_dt':None,'window_series':series,'class_probs':probs,'aggregate_class_probs':probs,'signal_series':{'name':key,'values':signals[key]},'model_mode':'health-main-fallback','model_error':self.error}
-        try:
-            return self.predictor.predict_scope_csv(str(csv_path))
-        except Exception as exc:
-            # Keep the UI usable when optional inference dependencies (for
-            # example PyYAML) are unavailable; clearly label the result.
-            self.error = f"Hier14 runtime unavailable: {type(exc).__name__}: {exc}"
-            self.predictor = None
-            return self.predict(csv_path)
+            raise RuntimeError(self.error or "Hier14 模型未加载")
+        # Reject incompatible data without replacing the trained model or poisoning later requests.
+        result = self.predictor.predict_scope_csv(str(csv_path))
+        result["model_mode"] = "trained-hier14"
+        result["model_source"] = str(self.predictor_path)
+        aggregate = result.get("aggregate_pred_name") or result.get("pred_name")
+        probabilities = result.get("aggregate_class_probs") or result.get("class_probs") or []
+        result["confidence"] = next((item["prob"] for item in probabilities if item["name"] == aggregate), None)
+        result["latest_confidence"] = next((item["prob"] for item in result.get("class_probs", [])
+                                            if item["name"] == result.get("pred_name")), None)
+        return result

@@ -8,6 +8,7 @@
 # Frontend dependencies/build caches
 frontend/node_modules/
 frontend/.vite/
+integrations/algorithm_assets/simulation/slprj/
 
 # Runtime output and local secrets
 logs/*

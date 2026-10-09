@@ -1,0 +1,75 @@
+{
+  "updates": [
+    {
+      "dataset_id": 49,
+      "old_name": "正常基线 fc0 原始状态量",
+      "new_name": "正常基线 fc0"
+    },
+    {
+      "dataset_id": 51,
+      "old_name": "正常基线 fc1 原始状态量",
+      "new_name": "正常基线 fc1"
+    },
+    {
+      "dataset_id": 53,
+      "old_name": "正常基线 fc2 原始状态量",
+      "new_name": "正常基线 fc2"
+    },
+    {
+      "dataset_id": 55,
+      "old_name": "正常基线 fc3 原始状态量",
+      "new_name": "正常基线 fc3"
+    },
+    {
+      "dataset_id": 57,
+      "old_name": "正常基线 fc4 原始状态量",
+      "new_name": "正常基线 fc4"
+    },
+    {
+      "dataset_id": 59,
+      "old_name": "正常基线 fc6 原始状态量",
+      "new_name": "正常基线 fc6"
+    },
+    {
+      "dataset_id": 61,
+      "old_name": "正常基线 fc9 原始状态量",
+      "new_name": "正常基线 fc9"
+    },
+    {
+      "dataset_id": 541,
+      "old_name": "联调验证-泵气蚀-fc0-t40-e100-原始状态量",
+      "new_name": "联调验证-泵气蚀-fc0-t40-e100"
+    },
+    {
+      "dataset_id": 543,
+      "old_name": "联调验证-无故障-fc0-t40-e100-原始状态量",
+      "new_name": "联调验证-无故障-fc0-t40-e100"
+    },
+    {
+      "dataset_id": 545,
+      "old_name": "联调验证-陀螺仪恒偏差-fc0-t180-e240-原始状态量",
+      "new_name": "联调验证-陀螺仪恒偏差-fc0-t180-e240"
+    },
+    {
+      "dataset_id": 547,
+      "old_name": "动力-泵气蚀-原始状态量",
+      "new_name": "动力-泵气蚀"
+    },
+    {
+      "dataset_id": 549,
+      "old_name": "动力-泵气蚀-原始状态量",
+      "new_name": "动力-泵气蚀"
+    },
+    {
+      "dataset_id": 551,
+      "old_name": "动力-泵气蚀-原始状态量",
+      "new_name": "动力-泵气蚀"
+    },
+    {
+      "dataset_id": 553,
+      "old_name": "123456-原始状态量",
+      "new_name": "123456"
+    }
+  ],
+  "files_and_pairing_unchanged": true
+}

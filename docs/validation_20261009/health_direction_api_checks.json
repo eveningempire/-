@@ -1,0 +1,358 @@
+[
+  {
+    "endpoint": "evaluate",
+    "payload": {
+      "dataset_id": 534,
+      "algorithm": "cdpca_ga"
+    },
+    "http_status": 200,
+    "seconds": 10.255,
+    "result": {
+      "algorithm": "CDPCA-GA",
+      "level": "component",
+      "count": 17881,
+      "current_hi": 1.522997974471263e-08,
+      "early10pct_mean": 1.0,
+      "late10pct_mean": 0.390928288590604,
+      "reference": {
+        "kind": "normal_dataset",
+        "time_aligned": true,
+        "sample_count": 17857,
+        "dataset_id": 60,
+        "dataset_name": "正常基线 fc6 派生参数",
+        "provenance": "import_manifest_same_flight"
+      },
+      "time_alignment": null,
+      "dataset_id": 534,
+      "normal_label_mean": 1.0,
+      "fault_label_mean": 0.37508749816556597
+    }
+  },
+  {
+    "endpoint": "evaluate",
+    "payload": {
+      "dataset_id": 534,
+      "algorithm": "ae_gmm"
+    },
+    "http_status": 200,
+    "seconds": 15.035,
+    "result": {
+      "algorithm": "AE-GMM",
+      "level": "component",
+      "count": 17881,
+      "current_hi": 1.522997974471263e-08,
+      "early10pct_mean": 1.0,
+      "late10pct_mean": 0.3389071001118569,
+      "reference": {
+        "kind": "normal_dataset",
+        "time_aligned": true,
+        "sample_count": 17857,
+        "dataset_id": 60,
+        "dataset_name": "正常基线 fc6 派生参数",
+        "provenance": "import_manifest_same_flight"
+      },
+      "time_alignment": null,
+      "dataset_id": 534,
+      "normal_label_mean": 1.0,
+      "fault_label_mean": 0.3226461945834167
+    }
+  },
+  {
+    "endpoint": "batch-evaluate",
+    "payload": {
+      "dataset_ids": [
+        533,
+        60,
+        510,
+        78,
+        542,
+        546,
+        554,
+        999999
+      ],
+      "algorithm": "cdpca_ga"
+    },
+    "http_status": 200,
+    "seconds": 158.65,
+    "total": 8,
+    "success": 7,
+    "failed": 1,
+    "results": [
+      {
+        "algorithm": "CDPCA-GA",
+        "level": "component",
+        "count": 17881,
+        "current_hi": 0.4502535660691663,
+        "early10pct_mean": 1.0,
+        "late10pct_mean": 0.8463093310961969,
+        "reference": {
+          "kind": "normal_dataset",
+          "time_aligned": true,
+          "sample_count": 17857,
+          "dataset_id": 59,
+          "dataset_name": "正常基线 fc6",
+          "provenance": "import_manifest_same_flight"
+        },
+        "time_alignment": null,
+        "dataset_id": 533,
+        "normal_label_mean": 1.0,
+        "fault_label_mean": 0.9131489724501368
+      },
+      {
+        "algorithm": "CDPCA-GA",
+        "level": "component",
+        "count": 17857,
+        "current_hi": 1.0,
+        "early10pct_mean": 1.0,
+        "late10pct_mean": 1.0,
+        "reference": {
+          "kind": "normal_dataset",
+          "time_aligned": true,
+          "sample_count": 17857,
+          "dataset_id": 60,
+          "dataset_name": "正常基线 fc6 派生参数",
+          "provenance": "import_manifest_same_flight"
+        },
+        "time_alignment": null,
+        "dataset_id": 60,
+        "normal_label_mean": 1.0,
+        "fault_label_mean": null
+      },
+      {
+        "algorithm": "CDPCA-GA",
+        "level": "component",
+        "count": 17923,
+        "current_hi": 0.0038132909563458432,
+        "early10pct_mean": 1.0,
+        "late10pct_mean": 0.7826879034598215,
+        "reference": {
+          "kind": "normal_dataset",
+          "time_aligned": true,
+          "sample_count": 17857,
+          "dataset_id": 60,
+          "dataset_name": "正常基线 fc6 派生参数",
+          "provenance": "import_manifest_same_flight"
+        },
+        "time_alignment": null,
+        "dataset_id": 510,
+        "normal_label_mean": 1.0,
+        "fault_label_mean": 0.7641476276192377
+      },
+      {
+        "algorithm": "CDPCA-GA",
+        "level": "component",
+        "count": 17923,
+        "current_hi": 0.03711384543281862,
+        "early10pct_mean": 1.0,
+        "late10pct_mean": 0.9567019056919642,
+        "reference": {
+          "kind": "normal_dataset",
+          "time_aligned": true,
+          "sample_count": 17857,
+          "dataset_id": 60,
+          "dataset_name": "正常基线 fc6 派生参数",
+          "provenance": "import_manifest_same_flight"
+        },
+        "time_alignment": null,
+        "dataset_id": 78,
+        "normal_label_mean": 1.0,
+        "fault_label_mean": 0.9762636332734651
+      },
+      {
+        "algorithm": "CDPCA-GA",
+        "level": "component",
+        "count": 18998,
+        "current_hi": 0.9999999963886728,
+        "early10pct_mean": 1.0,
+        "late10pct_mean": 1.0,
+        "reference": {
+          "kind": "normal_dataset",
+          "time_aligned": true,
+          "sample_count": 19017,
+          "dataset_id": 544,
+          "dataset_name": "联调验证-无故障-fc0-t40-e100-派生参数",
+          "provenance": "registered_simulink_same_flight"
+        },
+        "time_alignment": null,
+        "dataset_id": 542,
+        "normal_label_mean": 0.9982381959126145,
+        "fault_label_mean": 0.6576083994923857
+      },
+      {
+        "algorithm": "CDPCA-GA",
+        "level": "component",
+        "count": 19014,
+        "current_hi": 0.9999999951969847,
+        "early10pct_mean": 1.0,
+        "late10pct_mean": 1.0,
+        "reference": {
+          "kind": "normal_dataset",
+          "time_aligned": true,
+          "sample_count": 19017,
+          "dataset_id": 544,
+          "dataset_name": "联调验证-无故障-fc0-t40-e100-派生参数",
+          "provenance": "registered_simulink_same_flight"
+        },
+        "time_alignment": null,
+        "dataset_id": 546,
+        "normal_label_mean": 0.9981619899522117,
+        "fault_label_mean": 0.5968338696136701
+      },
+      {
+        "algorithm": "CDPCA-GA",
+        "level": "component",
+        "count": 18998,
+        "current_hi": 3.8216862845842435e-06,
+        "early10pct_mean": 1.0,
+        "late10pct_mean": 0.09306596840442342,
+        "reference": {
+          "kind": "normal_dataset",
+          "time_aligned": true,
+          "sample_count": 19017,
+          "dataset_id": 544,
+          "dataset_name": "联调验证-无故障-fc0-t40-e100-派生参数",
+          "provenance": "registered_simulink_same_flight"
+        },
+        "time_alignment": null,
+        "dataset_id": 554,
+        "normal_label_mean": 1.0,
+        "fault_label_mean": 0.09294534800360256
+      },
+      {
+        "dataset_id": 999999,
+        "status": "failed",
+        "error": "数据集不存在"
+      }
+    ]
+  },
+  {
+    "endpoint": "evaluate",
+    "payload": {
+      "dataset_ids": [
+        541,
+        543
+      ],
+      "system": "动力",
+      "algorithm": "gcn_rbd"
+    },
+    "http_status": 200,
+    "seconds": 28.395,
+    "result": {
+      "algorithm": "GCN + RBD 系统健康评估",
+      "level": "system",
+      "count": 29964,
+      "current_hi": 0.889472,
+      "early10pct_mean": 0.9009588998664887,
+      "late10pct_mean": 0.7564785116822429,
+      "reference": null,
+      "time_alignment": "timestamp_interpolation_on_common_range",
+      "component_results": [
+        {
+          "algorithm": "CDPCA-GA",
+          "level": "component",
+          "count": 18998,
+          "current_hi": 0.8526291782399062,
+          "early10pct_mean": 1.0,
+          "late10pct_mean": 0.6935055002632965,
+          "reference": {
+            "kind": "normal_dataset",
+            "time_aligned": true,
+            "sample_count": 19017,
+            "dataset_id": 543,
+            "dataset_name": "联调验证-无故障-fc0-t40-e100",
+            "provenance": "registered_simulink_same_flight"
+          },
+          "time_alignment": null,
+          "dataset_id": 541,
+          "normal_label_mean": 0.9485225072821235,
+          "fault_label_mean": 0.7179065385786803
+        },
+        {
+          "algorithm": "CDPCA-GA",
+          "level": "component",
+          "count": 19017,
+          "current_hi": 1.0,
+          "early10pct_mean": 1.0,
+          "late10pct_mean": 1.0,
+          "reference": {
+            "kind": "normal_dataset",
+            "time_aligned": true,
+            "sample_count": 19017,
+            "dataset_id": 543,
+            "dataset_name": "联调验证-无故障-fc0-t40-e100",
+            "provenance": "registered_simulink_same_flight"
+          },
+          "time_alignment": null,
+          "dataset_id": 543,
+          "normal_label_mean": 1.0,
+          "fault_label_mean": null
+        }
+      ]
+    }
+  },
+  {
+    "endpoint": "evaluate",
+    "payload": {
+      "dataset_ids": [
+        545,
+        553
+      ],
+      "system": "控制",
+      "algorithm": "gcn_rbd"
+    },
+    "http_status": 200,
+    "seconds": 32.946,
+    "result": {
+      "algorithm": "GCN + RBD 系统健康评估",
+      "level": "system",
+      "count": 30002,
+      "current_hi": 0.763157,
+      "early10pct_mean": 0.9973216086666666,
+      "late10pct_mean": 0.5896901593333334,
+      "reference": null,
+      "time_alignment": "timestamp_interpolation_on_common_range",
+      "component_results": [
+        {
+          "algorithm": "CDPCA-GA",
+          "level": "component",
+          "count": 19014,
+          "current_hi": 0.804575859312663,
+          "early10pct_mean": 1.0,
+          "late10pct_mean": 0.6272959384534456,
+          "reference": {
+            "kind": "normal_dataset",
+            "time_aligned": true,
+            "sample_count": 19017,
+            "dataset_id": 543,
+            "dataset_name": "联调验证-无故障-fc0-t40-e100",
+            "provenance": "registered_simulink_same_flight"
+          },
+          "time_alignment": null,
+          "dataset_id": 545,
+          "normal_label_mean": 0.9445963844504349,
+          "fault_label_mean": 0.9791907343982169
+        },
+        {
+          "algorithm": "CDPCA-GA",
+          "level": "component",
+          "count": 18998,
+          "current_hi": 0.8616016066888831,
+          "early10pct_mean": 1.0,
+          "late10pct_mean": 0.6989888341232228,
+          "reference": {
+            "kind": "normal_dataset",
+            "time_aligned": true,
+            "sample_count": 19017,
+            "dataset_id": 543,
+            "dataset_name": "联调验证-无故障-fc0-t40-e100",
+            "provenance": "registered_simulink_same_flight"
+          },
+          "time_alignment": null,
+          "dataset_id": 553,
+          "normal_label_mean": 1.0,
+          "fault_label_mean": 0.9486782867006904
+        }
+      ]
+    }
+  }
+]

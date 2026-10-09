@@ -16,6 +16,10 @@ class FaultWorkflowTask(models.Model):
     current_stage = models.CharField(max_length=30, default="created")
     dataset_id = models.IntegerField(null=True, blank=True)
     latest_result = models.JSONField(default=dict, blank=True)
+    simulation_backend = models.CharField(max_length=30, default="demo")
+    end_time = models.FloatField(null=True, blank=True)
+    flight_count = models.IntegerField(default=0)
+    simulation_output = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

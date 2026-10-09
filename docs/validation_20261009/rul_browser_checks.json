@@ -1,0 +1,87 @@
+{
+  "singleDerived": {
+    "datasetId": 554,
+    "model": 1,
+    "rul": 2266.2570858304553
+  },
+  "singleRaw": {
+    "datasetId": 553,
+    "sourceDatasetId": 554,
+    "model": 3,
+    "rul": 8889.208104458305
+  },
+  "batch": {
+    "total": 2,
+    "success": 2,
+    "failed": 0
+  },
+  "desktop": {
+    "width": 1440,
+    "scrollWidth": 1440
+  },
+  "mobile": {
+    "width": 390,
+    "scrollWidth": 390
+  },
+  "batchMobile": {
+    "width": 390,
+    "scrollWidth": 390
+  },
+  "canvases": {
+    "derivedCharts": [
+      {
+        "width": 1098,
+        "height": 390,
+        "ink": 34159
+      },
+      {
+        "width": 1098,
+        "height": 390,
+        "ink": 44219
+      }
+    ],
+    "mobileCharts": [
+      {
+        "width": 330,
+        "height": 390,
+        "ink": 10719
+      },
+      {
+        "width": 330,
+        "height": 390,
+        "ink": 14041
+      }
+    ],
+    "batchCharts": [
+      {
+        "width": 1098,
+        "height": 390,
+        "ink": 35230
+      },
+      {
+        "width": 1098,
+        "height": 390,
+        "ink": 42762
+      }
+    ]
+  },
+  "dataManagement": {
+    "headers": [
+      "文件",
+      "来源",
+      "故障类型",
+      "系统",
+      "PBS 关联",
+      "操作"
+    ],
+    "defaultCount": 1,
+    "showDerivedCount": 2,
+    "selectionCleared": true,
+    "rawName": "123456"
+  },
+  "diagnosis": {
+    "rawAvailable": true,
+    "derivedExcluded": true
+  },
+  "pageErrors": []
+}

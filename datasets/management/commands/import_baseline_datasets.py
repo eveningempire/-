@@ -100,7 +100,7 @@ class Command(BaseCommand):
                                 partial.unlink()
                     with transaction.atomic():
                         dataset = Dataset.objects.create(
-                            name=f"正常基线 fc{flight} {'派生参数' if processed else '原始状态量'}",
+                            name=f"正常基线 fc{flight}{' 派生参数' if processed else ''}",
                             file=relative,
                             source="simulation",
                             fault_type="正常基线",
