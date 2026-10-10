@@ -49,6 +49,12 @@ class AlgorithmPluginApiTests(TestCase):
         self.dataset = Dataset(name="plugin-data", source="test")
         content = "time,pressure\n" + "\n".join(f"{i},1.0" for i in range(12)) + "\n"
         self.dataset.file.save("plugin-data.csv", ContentFile(content.encode()), save=True)
+        header = ["Time"] + [f"P{i}" for i in range(1, 18)] + ["FaultFlag"]
+        p_rows = [",".join(header)]
+        for index in range(120):
+            p_rows.append(",".join([str(index), "1.0"] + ["1.0"] * 16 + ["0"]))
+        self.p_dataset = Dataset(name="plugin-pvalues", source="test", component="派生参数")
+        self.p_dataset.file.save("plugin-pvalues.csv", ContentFile(("\n".join(p_rows) + "\n").encode()), save=True)
 
     def test_catalog_detail_and_plugin_execution(self):
         keys = {item["key"] for item in list_algorithms()[0]}
@@ -61,7 +67,7 @@ class AlgorithmPluginApiTests(TestCase):
         response = client.post("/api/v1/integrations/algorithm-assets/algorithms/fixture_pressure/run/", json.dumps(payload), content_type="application/json")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()["result"]["decision"], "normal")
-        builtin = client.post("/api/v1/integrations/algorithm-assets/algorithms/msfg_teams_rt/run/", json.dumps({"dataset_id": self.dataset.pk}), content_type="application/json")
+        builtin = client.post("/api/v1/integrations/algorithm-assets/algorithms/msfg_teams_rt/run/", json.dumps({"dataset_id": self.p_dataset.pk}), content_type="application/json")
         self.assertEqual(builtin.status_code, 200, builtin.content)
         batch = client.post("/api/v1/integrations/algorithm-assets/algorithms/fixture_pressure/batch-run/", json.dumps({"dataset_ids": [self.dataset.pk, 999999], "parameters": payload["parameters"]}), content_type="application/json")
         self.assertEqual(batch.status_code, 200)

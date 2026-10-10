@@ -20,9 +20,24 @@ KEY_RE = re.compile(r"^[a-z][a-z0-9_]{2,63}$")
 TYPES = {"number", "integer", "boolean", "string"}
 CATEGORIES = {"diagnosis", "health_assessment", "rul"}
 BUILTINS = {
-    "hier14": {"name": "Hier14 层次时序诊断", "category": "diagnosis"},
-    "msfg_teams_rt": {"name": "MSFG + TEAMS-RT 依赖诊断", "category": "diagnosis"},
-    "pca_iforest": {"name": "PCA-iForest 偏离诊断", "category": "diagnosis"},
+    "hier14": {
+        "name": "Hier14 层次时序诊断",
+        "category": "diagnosis",
+        "min_rows": 8,
+        "data_requirement": "原始状态量 scope CSV（含时间列与 Hier14 模型测点），不要使用「派生参数 / P_values」数据集。",
+    },
+    "msfg_teams_rt": {
+        "name": "MSFG + TEAMS-RT 依赖诊断",
+        "category": "diagnosis",
+        "min_rows": 1,
+        "data_requirement": "P_values /「派生参数」CSV（含 P1–P17），或已登记同名「任务名-派生参数」的 scope 数据集（将自动解析派生文件）。",
+    },
+    "pca_iforest": {
+        "name": "PCA-iForest 异常检测",
+        "category": "diagnosis",
+        "min_rows": 8,
+        "data_requirement": "含多路数值测点的时序 CSV（至少 8 行），建议使用 scope 状态量，而非派生 P 参数。",
+    },
     "health_main_ensemble": {"name": "health-main RUL 集成模型", "category": "rul", "parameters": {"component_id": {"type": "string", "default": "14"}, "threshold": {"type": "number", "default": 0.2, "minimum": 0, "maximum": 1}}},
     "hi_linear": {"name": "线性 HI 趋势外推", "category": "rul", "parameters": {"horizon": {"type": "integer", "default": 100, "minimum": 1, "maximum": 10000}, "threshold": {"type": "number", "default": 0.2, "minimum": 0, "maximum": 1}}},
     "cdpca_ga": {"name": "CDPCA-GA 健康评估", "category": "health_assessment"},

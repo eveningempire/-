@@ -68,10 +68,11 @@ def import_algorithm(request):
 def _run_builtin(record, dataset, parameters):
     key = record["key"]
     if key in {"hier14", "msfg_teams_rt", "pca_iforest"}:
-        from fault_diagnosis.views import _quality_for_csv, _run_algorithm, _standardize_result
+        from fault_diagnosis.views import _diagnosis_csv_path, _quality_for_csv, _run_algorithm, _standardize_result
         if not dataset.file.name.lower().endswith(".csv"):
             raise ValueError("故障诊断算法只接受 CSV 数据集")
-        return _standardize_result(_run_algorithm(key, dataset.file.path), _quality_for_csv(dataset.file.path))
+        diag_path = _diagnosis_csv_path(key, dataset.file.path, dataset)
+        return _standardize_result(_run_algorithm(key, dataset.file.path, dataset=dataset), _quality_for_csv(diag_path))
     if key in {"cdpca_ga", "ae_gmm", "gcn_rbd"}:
         if not dataset.file.name.lower().endswith(".csv"):
             raise ValueError("健康评估算法只接受 CSV 数据集")

@@ -8,7 +8,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .service import DiagnosisService
-from .route_algorithms import msfg_teams_rt, pca_iforest
+from .route_algorithms import pca_iforest
+from .msfg_teams_pvalues import msfg_teams_pvalues, resolve_p_values_path
+
+
+def _diagnosis_csv_path(algorithm, csv_path, dataset=None):
+    if algorithm == "msfg_teams_rt":
+        return str(resolve_p_values_path(Path(csv_path), dataset))
+    return str(csv_path)
 
 
 def _quality_for_csv(csv_path):
@@ -80,21 +87,27 @@ def predict(request):
                     tmp.write(chunk)
                 csv_path = Path(tmp.name)
             try:
-                quality = _quality_for_csv(csv_path)
+                diag_path = _diagnosis_csv_path(algorithm, csv_path)
+                quality = _quality_for_csv(diag_path)
                 result = _standardize_result(_run_algorithm(algorithm, csv_path), quality)
             finally:
                 csv_path.unlink(missing_ok=True)
         else:
             body = json.loads(request.body.decode("utf-8") or "{}")
             algorithm = body.get("algorithm", "hier14")
+            dataset = None
             if body.get('dataset_id'):
+                from datasets.models import Dataset
                 from datasets.services import path_for
+                dataset = Dataset.objects.get(pk=body['dataset_id'])
                 csv_path = path_for(body['dataset_id'])
-            else: csv_path = body.get("csv_path")
+            else:
+                csv_path = body.get("csv_path")
             if not csv_path:
                 return JsonResponse({"ok": False, "error": "请上传 CSV 文件或提供 csv_path"}, status=400)
-            quality = _quality_for_csv(csv_path)
-            result = _standardize_result(_run_algorithm(algorithm, csv_path), quality)
+            diag_path = _diagnosis_csv_path(algorithm, csv_path, dataset)
+            quality = _quality_for_csv(diag_path)
+            result = _standardize_result(_run_algorithm(algorithm, csv_path, dataset=dataset), quality)
         return JsonResponse({"ok": True, "model": result.get("algorithm", algorithm), "result": result})
     except Exception as exc:
         return JsonResponse({"ok": False, "error": str(exc), "model": algorithm or "unknown"}, status=503)
@@ -124,8 +137,9 @@ def batch_predict(request):
             item = {'dataset_id': dataset_id}
             try:
                 dataset = Dataset.objects.get(pk=dataset_id)
-                quality = _quality_for_csv(dataset.file.path)
-                item.update({'status': 'success', 'result': _standardize_result(_run_algorithm(algorithm, dataset.file.path), quality)})
+                diag_path = _diagnosis_csv_path(algorithm, dataset.file.path, dataset)
+                quality = _quality_for_csv(diag_path)
+                item.update({'status': 'success', 'result': _standardize_result(_run_algorithm(algorithm, dataset.file.path, dataset=dataset), quality)})
             except Dataset.DoesNotExist:
                 item.update({'status': 'failed', 'error': '数据集不存在'})
             except Exception as exc:
@@ -136,10 +150,11 @@ def batch_predict(request):
         return JsonResponse({'ok': False, 'error': str(exc)}, status=400)
 
 
-def _run_algorithm(algorithm, csv_path):
+def _run_algorithm(algorithm, csv_path, dataset=None):
     if algorithm == "hier14":
         result = DiagnosisService.instance().predict(csv_path); result.setdefault("algorithm", "Hier14"); return result
-    if algorithm == "msfg_teams_rt": return msfg_teams_rt(csv_path)
+    if algorithm == "msfg_teams_rt":
+        return msfg_teams_pvalues(csv_path, dataset=dataset)
     if algorithm == "pca_iforest": return pca_iforest(csv_path)
     raise ValueError("未知诊断算法,可选 hier14、msfg_teams_rt、pca_iforest")
 
