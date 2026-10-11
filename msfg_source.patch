@@ -1,0 +1,986 @@
+﻿diff --git a/algorithm_integration/plugin_registry.py b/algorithm_integration/plugin_registry.py
+index 0987b6e..4837fee 100644
+--- a/algorithm_integration/plugin_registry.py
++++ b/algorithm_integration/plugin_registry.py
+@@ -20,9 +20,24 @@ KEY_RE = re.compile(r"^[a-z][a-z0-9_]{2,63}$")
+ TYPES = {"number", "integer", "boolean", "string"}
+ CATEGORIES = {"diagnosis", "health_assessment", "rul"}
+ BUILTINS = {
+-    "hier14": {"name": "Hier14 灞傛鏃跺簭璇婃柇", "category": "diagnosis"},
+-    "msfg_teams_rt": {"name": "MSFG + TEAMS-RT 渚濊禆璇婃柇", "category": "diagnosis"},
+-    "pca_iforest": {"name": "PCA-iForest 鍋忕璇婃柇", "category": "diagnosis"},
++    "hier14": {
++        "name": "Hier14 灞傛鏃跺簭璇婃柇",
++        "category": "diagnosis",
++        "min_rows": 8,
++        "data_requirement": "鍘熷鐘舵€侀噺 scope CSV锛堝惈鏃堕棿鍒椾笌 Hier14 妯″瀷娴嬬偣锛夛紝涓嶈浣跨敤銆屾淳鐢熷弬鏁?/ P_values銆嶆暟鎹泦銆?,
++    },
++    "msfg_teams_rt": {
++        "name": "MSFG + TEAMS-RT 渚濊禆璇婃柇",
++        "category": "diagnosis",
++        "min_rows": 1,
++        "data_requirement": "P_values /銆屾淳鐢熷弬鏁般€岰SV锛堝惈 P1鈥揚17锛夛紝鎴栧凡鐧昏鍚屽悕銆屼换鍔″悕-娲剧敓鍙傛暟銆嶇殑 scope 鏁版嵁闆嗭紙灏嗚嚜鍔ㄨВ鏋愭淳鐢熸枃浠讹級銆?,
++    },
++    "pca_iforest": {
++        "name": "PCA-iForest 寮傚父妫€娴?,
++        "category": "diagnosis",
++        "min_rows": 8,
++        "data_requirement": "鍚璺暟鍊兼祴鐐圭殑鏃跺簭 CSV锛堣嚦灏?8 琛岋級锛屽缓璁娇鐢?scope 鐘舵€侀噺锛岃€岄潪娲剧敓 P 鍙傛暟銆?,
++    },
+     "health_main_ensemble": {"name": "health-main RUL 闆嗘垚妯″瀷", "category": "rul", "parameters": {"component_id": {"type": "string", "default": "14"}, "threshold": {"type": "number", "default": 0.2, "minimum": 0, "maximum": 1}}},
+     "hi_linear": {"name": "绾挎€?HI 瓒嬪娍澶栨帹", "category": "rul", "parameters": {"horizon": {"type": "integer", "default": 100, "minimum": 1, "maximum": 10000}, "threshold": {"type": "number", "default": 0.2, "minimum": 0, "maximum": 1}}},
+     "cdpca_ga": {"name": "CDPCA-GA 鍋ュ悍璇勪及", "category": "health_assessment"},
+diff --git a/algorithm_integration/plugin_views.py b/algorithm_integration/plugin_views.py
+index 39b8ffd..d05d880 100644
+--- a/algorithm_integration/plugin_views.py
++++ b/algorithm_integration/plugin_views.py
+@@ -68,10 +68,11 @@ def import_algorithm(request):
+ def _run_builtin(record, dataset, parameters):
+     key = record["key"]
+     if key in {"hier14", "msfg_teams_rt", "pca_iforest"}:
+-        from fault_diagnosis.views import _quality_for_csv, _run_algorithm, _standardize_result
++        from fault_diagnosis.views import _diagnosis_csv_path, _quality_for_csv, _run_algorithm, _standardize_result
+         if not dataset.file.name.lower().endswith(".csv"):
+             raise ValueError("鏁呴殰璇婃柇绠楁硶鍙帴鍙?CSV 鏁版嵁闆?)
+-        return _standardize_result(_run_algorithm(key, dataset.file.path), _quality_for_csv(dataset.file.path))
++        diag_path = _diagnosis_csv_path(key, dataset.file.path, dataset)
++        return _standardize_result(_run_algorithm(key, dataset.file.path, dataset=dataset), _quality_for_csv(diag_path))
+     if key in {"cdpca_ga", "ae_gmm", "gcn_rbd"}:
+         if not dataset.file.name.lower().endswith(".csv"):
+             raise ValueError("鍋ュ悍璇勪及绠楁硶鍙帴鍙?CSV 鏁版嵁闆?)
+diff --git a/algorithm_integration/test_plugin_api.py b/algorithm_integration/test_plugin_api.py
+index 4ab0a0e..403caba 100644
+--- a/algorithm_integration/test_plugin_api.py
++++ b/algorithm_integration/test_plugin_api.py
+@@ -49,6 +49,12 @@ class AlgorithmPluginApiTests(TestCase):
+         self.dataset = Dataset(name="plugin-data", source="test")
+         content = "time,pressure\n" + "\n".join(f"{i},1.0" for i in range(12)) + "\n"
+         self.dataset.file.save("plugin-data.csv", ContentFile(content.encode()), save=True)
++        header = ["Time"] + [f"P{i}" for i in range(1, 18)] + ["FaultFlag"]
++        p_rows = [",".join(header)]
++        for index in range(120):
++            p_rows.append(",".join([str(index), "1.0"] + ["1.0"] * 16 + ["0"]))
++        self.p_dataset = Dataset(name="plugin-pvalues", source="test", component="娲剧敓鍙傛暟")
++        self.p_dataset.file.save("plugin-pvalues.csv", ContentFile(("\n".join(p_rows) + "\n").encode()), save=True)
+ 
+     def test_catalog_detail_and_plugin_execution(self):
+         keys = {item["key"] for item in list_algorithms()[0]}
+@@ -61,7 +67,7 @@ class AlgorithmPluginApiTests(TestCase):
+         response = client.post("/api/v1/integrations/algorithm-assets/algorithms/fixture_pressure/run/", json.dumps(payload), content_type="application/json")
+         self.assertEqual(response.status_code, 200, response.content)
+         self.assertEqual(response.json()["result"]["decision"], "normal")
+-        builtin = client.post("/api/v1/integrations/algorithm-assets/algorithms/msfg_teams_rt/run/", json.dumps({"dataset_id": self.dataset.pk}), content_type="application/json")
++        builtin = client.post("/api/v1/integrations/algorithm-assets/algorithms/msfg_teams_rt/run/", json.dumps({"dataset_id": self.p_dataset.pk}), content_type="application/json")
+         self.assertEqual(builtin.status_code, 200, builtin.content)
+         batch = client.post("/api/v1/integrations/algorithm-assets/algorithms/fixture_pressure/batch-run/", json.dumps({"dataset_ids": [self.dataset.pk, 999999], "parameters": payload["parameters"]}), content_type="application/json")
+         self.assertEqual(batch.status_code, 200)
+diff --git a/fault_diagnosis/msfg_teams_pvalues.py b/fault_diagnosis/msfg_teams_pvalues.py
+new file mode 100644
+index 0000000..7784d9b
+--- /dev/null
++++ b/fault_diagnosis/msfg_teams_pvalues.py
+@@ -0,0 +1,342 @@
++"""MSFG + TEAMS-RT on P_values.csv (health-main / 涓€闄?route).
++
++Pipeline: expert P1鈥揚17 anomaly rules 鈫?abstract test vector T 鈫?D_power / D_control
++鈫?teams_rt_fault_rows 鈫?13 Simulink fault names.
++"""
++from __future__ import annotations
++
++import csv
++import math
++from pathlib import Path
++from typing import Dict, List, Optional, Sequence, Tuple
++
++import numpy as np
++
++from datasets.models import Dataset
++
++FAULT_ALL: List[str] = [
++    "娉垫皵铓€",
++    "娑¤疆杞€熶笅闄?,
++    "绠¤矾鍫靛",
++    "涓婚榾闂ㄥ崱婊?,
++    "鐕冩皵娉勬紡",
++    "鐕冪儳涓嶇ǔ瀹?,
++    "鍠风鍫靛",
++    "TVC鍋忚涓嶈冻",
++    "RCS鎺ㄥ姏涓嶈冻",
++    "鏍呮牸鑸靛亸瑙掍笉瓒?,
++    "鎺у埗鍣ㄦ棤淇″彿",
++    "闄€铻轰华鎭掑亸宸?,
++    "闄€铻轰华鍗℃",
++]
++
++D_POWER: List[List[int]] = [
++    [1, 0, 0, 0, 0, 0, 1],
++    [1, 1, 0, 0, 0, 0, 1],
++    [0, 0, 1, 0, 0, 0, 1],
++    [0, 0, 1, 1, 0, 0, 1],
++    [0, 0, 0, 0, 1, 0, 1],
++    [0, 0, 0, 0, 0, 1, 1],
++    [0, 0, 0, 0, 0, 0, 1],
++]
++
++D_CONTROL: List[List[int]] = [
++    [1, 0, 0, 0, 1],
++    [0, 0, 1, 0, 1],
++    [0, 1, 0, 0, 1],
++    [0, 0, 1, 1, 1],
++    [0, 0, 0, 0, 1],
++    [0, 0, 0, 0, 1],
++]
++
++POWER_TEST_NAMES = [f"鍔ㄥ姏娴嬬偣{i + 1}" for i in range(7)]
++CONTROL_TEST_NAMES = [f"鎺у埗娴嬬偣{i + 1}" for i in range(5)]
++
++P_RULES: Dict[str, dict] = {}
++for key, (relation, threshold, duration) in {
++    "P1": ("<=", 0.8, 1.0),
++    "P2": ("<=", 0.8, 1.0),
++    "P3": ("<=", 0.8, 1.0),
++    "P4": ("<=", 0.9, 1.0),
++    "P5": (">=", 0.1, 1.0),
++    "P6": (">=", 1.2, 1.0),
++    "P7": ("<=", 0.9, 1.0),
++    "P8": ("<=", 0.8, 1.0),
++    "P9": ("<=", 0.8, 1.0),
++    "P10": ("<=", 0.8, 1.0),
++    "P11": ("<=", 0.5, 1.0),
++    "P12": (">=", 0.2, 1.0),
++    "P13": ("<=", 0.5, 1.0),
++    "P14": ("<=", 0.8, 1.0),
++    "P15": ("<=", 0.9, 1.0),
++    "P16": ("<=", 0.8, 1.0),
++    "P17": ("<=", 0.8, 1.0),
++}.items():
++    P_RULES[key] = {"relation": relation, "threshold": threshold, "duration": duration}
++
++
++def teams_rt_fault_rows(d_matrix: Sequence[Sequence[int]], test_vector: Sequence[int]) -> dict:
++    """TEAMS-RT (rows=faults, cols=tests). T=1 means test failed (health-main fault1)."""
++    d = np.array(d_matrix, dtype=int)
++    t = np.array(test_vector, dtype=int)
++    num_faults, num_tests = d.shape
++    unknown = set(range(num_faults))
++    good: set[int] = set()
++    bad: set[int] = set()
++    suspected: set[int] = set()
++
++    for t_idx in range(num_tests):
++        if t[t_idx] == 0:
++            for fault in np.where(d[:, t_idx] == 1)[0]:
++                if fault in unknown:
++                    unknown.remove(fault)
++                    good.add(fault)
++
++    bad_candidates: set[int] = set()
++    for t_idx in range(num_tests):
++        if t[t_idx] == 1:
++            related = [f for f in np.where(d[:, t_idx] == 1)[0] if f in unknown]
++            if len(related) == 1:
++                bad_candidates.add(related[0])
++    for fault in bad_candidates:
++        if fault in unknown:
++            unknown.remove(fault)
++            bad.add(fault)
++
++    for t_idx in range(num_tests):
++        if t[t_idx] == 1:
++            related = [f for f in np.where(d[:, t_idx] == 1)[0] if f in unknown]
++            for fault in related:
++                unknown.remove(fault)
++                suspected.add(fault)
++
++    return {
++        "Good": sorted(f + 1 for f in good),
++        "Bad": sorted(f + 1 for f in bad),
++        "Suspected": sorted(f + 1 for f in suspected),
++        "Unknown": sorted(f + 1 for f in unknown),
++    }
++
++
++def _read_p_values(csv_path: Path) -> Tuple[List[dict], float]:
++    with csv_path.open(encoding="utf-8-sig", newline="") as handle:
++        rows = list(csv.DictReader(handle))
++    if len(rows) < 8:
++        raise ValueError("P_values 璇婃柇鑷冲皯闇€瑕?8 琛屾暟鎹?)
++    time_key = next((k for k in rows[0] if k.strip().lower() in {"time", "timestamp", "t"}), None)
++    if not time_key:
++        raise ValueError("P_values CSV 缂哄皯 Time 鍒?)
++    times = []
++    for row in rows:
++        try:
++            times.append(float(row[time_key]))
++        except (TypeError, ValueError):
++            times.append(math.nan)
++    finite = [t for t in times if math.isfinite(t)]
++    if len(finite) < 2:
++        dt = 0.1
++    else:
++        diffs = [finite[i + 1] - finite[i] for i in range(len(finite) - 1) if finite[i + 1] > finite[i]]
++        dt = float(np.median(diffs)) if diffs else 0.1
++        if not math.isfinite(dt) or dt <= 0:
++            dt = 0.1
++    missing = [f"P{i}" for i in range(1, 18) if f"P{i}" not in rows[0]]
++    if missing:
++        raise ValueError(f"P_values CSV 缂哄皯鍒? {', '.join(missing[:5])}{'...' if len(missing) > 5 else ''}")
++    return rows, dt
++
++
++def detect_p_anomalies(rows: List[dict], dt: float) -> Tuple[Dict[str, int], List[dict]]:
++    evidence = []
++    status_map: Dict[str, int] = {}
++    for name, rule in P_RULES.items():
++        values = []
++        for row in rows:
++            try:
++                value = float(row[name])
++                if not math.isfinite(value):
++                    raise ValueError
++                values.append(value)
++            except (TypeError, ValueError):
++                values = []
++                break
++        if not values:
++            status_map[name] = 0
++            evidence.append({"signal": name, "status": 0, "threshold": rule["threshold"], "relation": rule["relation"], "failed": False})
++            continue
++        relation, threshold, duration_limit = rule["relation"], rule["threshold"], rule["duration"]
++        if relation == "<=":
++            mask = [v <= threshold for v in values]
++        else:
++            mask = [v >= threshold for v in values]
++        consecutive = 0.0
++        status = 0
++        for flag in mask:
++            if flag:
++                consecutive += dt
++                if consecutive >= duration_limit:
++                    status = 1
++                    break
++            else:
++                consecutive = 0.0
++        status_map[name] = status
++        evidence.append({
++            "signal": name,
++            "status": status,
++            "threshold": threshold,
++            "relation": relation,
++            "latest": round(float(values[-1]), 6),
++            "failed": bool(status),
++        })
++    return status_map, evidence
++
++
++def build_test_vectors(p_status: Dict[str, int]) -> Tuple[List[int], List[int]]:
++    """Map P1鈥揚17 anomaly flags to health-main abstract tests (Home.vue anomaly_handle)."""
++    power = [0, 0, 0, 0, 0, 0, 0]
++    control = [0, 0, 0, 0, 0]
++
++    def on(parameter: str):
++        return p_status.get(parameter, 0) == 1
++
++    if on("P1"):
++        power[0] = power[6] = 1
++    if on("P2"):
++        power[0] = power[1] = power[6] = 1
++    if on("P3"):
++        power[2] = power[6] = 1
++    if on("P4"):
++        power[2] = power[3] = power[6] = 1
++    if on("P5"):
++        power[4] = power[6] = 1
++    if on("P6"):
++        power[5] = power[6] = 1
++    if on("P7"):
++        power[6] = 1
++    if on("P8"):
++        control[0] = control[4] = 1
++    if on("P9"):
++        control[1] = control[4] = 1
++    if on("P10"):
++        control[2] = control[4] = 1
++    if on("P11"):
++        control[2] = control[3] = control[4] = 1
++    if on("P12"):
++        control[4] = 1
++    if on("P13"):
++        control[4] = 1
++    if on("P14") or on("P15") or on("P16") or on("P17"):
++        power[6] = 1
++    return power, control
++
++
++def resolve_p_values_path(csv_path: Path, dataset: Optional[Dataset] = None) -> Path:
++    path = Path(csv_path).resolve()
++    name_lower = path.name.lower()
++    if "p_values" in name_lower or name_lower.endswith("p_values.csv"):
++        return path
++    if dataset is not None:
++        if dataset.component == "娲剧敓鍙傛暟":
++            return path
++        sibling_name = f"{dataset.name}-娲剧敓鍙傛暟"[:200]
++        sibling = Dataset.objects.filter(name=sibling_name, source=dataset.source).exclude(pk=dataset.pk).first()
++        if sibling and sibling.file:
++            return Path(sibling.file.path).resolve()
++        sibling = Dataset.objects.filter(component="娲剧敓鍙傛暟", source=dataset.source, name__startswith=dataset.name.split("-")[0]).order_by("-id").first()
++        if sibling and sibling.file:
++            return Path(sibling.file.path).resolve()
++    alt = path.parent / "P_values.csv"
++    if alt.is_file():
++        return alt.resolve()
++    raise ValueError(
++        "MSFG+TEAMS锛堜竴闄級闇€瑕?P_values.csv锛涜閫夋嫨銆屾淳鐢熷弬鏁般€嶆暟鎹泦锛?
++        "鎴栦笌 scope_data 鍚屼换鍔＄殑娲剧敓 CSV锛堝悕绉伴€氬父涓恒€屼换鍔″悕-娲剧敓鍙傛暟銆嶏級銆?
++    )
++
++
++def _indices_to_names(indices: Sequence[int], offset: int) -> List[str]:
++    names = []
++    for index in indices:
++        pos = index - 1 + offset
++        if 0 <= pos < len(FAULT_ALL):
++            names.append(FAULT_ALL[pos])
++    return names
++
++
++def _pick_label(bad: List[str], suspected: List[str], p_abnormal: bool) -> Tuple[str, float]:
++    if bad:
++        return bad[0], 1.0
++    if suspected:
++        return suspected[0], 0.75
++    if p_abnormal:
++        return "璇婃柇涓嶇‘瀹?, 0.5
++    return "姝ｅ父", 1.0
++
++
++def msfg_teams_pvalues(csv_path, dataset: Optional[Dataset] = None):
++    resolved = resolve_p_values_path(Path(csv_path), dataset)
++    rows, dt = _read_p_values(resolved)
++    p_status, p_evidence = detect_p_anomalies(rows, dt)
++    power_t, control_t = build_test_vectors(p_status)
++    p_abnormal = any(p_status.values())
++
++    power_result = teams_rt_fault_rows(D_POWER, power_t)
++    control_result = teams_rt_fault_rows(D_CONTROL, control_t)
++
++    bad = _indices_to_names(power_result["Bad"], 0) + _indices_to_names(control_result["Bad"], 7)
++    suspected = _indices_to_names(power_result["Suspected"], 0) + _indices_to_names(control_result["Suspected"], 7)
++    good = _indices_to_names(power_result["Good"], 0) + _indices_to_names(control_result["Good"], 7)
++    unknown = _indices_to_names(power_result["Unknown"], 0) + _indices_to_names(control_result["Unknown"], 7)
++
++    label, confidence = _pick_label(bad, suspected, p_abnormal)
++    abnormal = label not in {"姝ｅ父", "璇婃柇涓嶇‘瀹?} or (label == "璇婃柇涓嶇‘瀹? and p_abnormal)
++
++    combined_d = [row + [0] * len(CONTROL_TEST_NAMES) for row in D_POWER]
++    for row in D_CONTROL:
++        combined_d.append([0] * len(POWER_TEST_NAMES) + row)
++    tests = POWER_TEST_NAMES + CONTROL_TEST_NAMES
++    faults = FAULT_ALL[:]
++
++    if not p_abnormal and not bad and not suspected:
++        class_probs = [{"name": "姝ｅ父", "prob": 1.0}]
++    else:
++        ranked = bad + [n for n in suspected if n not in bad]
++        if not ranked:
++            ranked = ["璇婃柇涓嶇‘瀹?]
++        class_probs = [{"name": n, "prob": (1.0 if n in bad else 0.75)} for n in ranked[:6]]
++        if label not in ranked and label != "姝ｅ父":
++            class_probs = [{"name": label, "prob": confidence}] + class_probs
++
++    time_start = rows[0].get("Time", rows[0].get("time", 0))
++    time_end = rows[-1].get("Time", rows[-1].get("time", len(rows) - 1))
++
++    return {
++        "algorithm": "MSFG + TEAMS-RT 渚濊禆璇婃柇",
++        "pred_name": label if abnormal or label == "璇婃柇涓嶇‘瀹? else "姝ｅ父",
++        "aggregate_pred_name": label if abnormal or label == "璇婃柇涓嶇‘瀹? else "姝ｅ父",
++        "confidence": confidence,
++        "n_windows": 1,
++        "seq_len": len(rows),
++        "window_stride": len(rows),
++        "sample_dt": round(dt, 6),
++        "window_series": [{
++            "window_index": 0,
++            "time_start": time_start,
++            "time_end": time_end,
++            "pred_name": label if abnormal or label == "璇婃柇涓嶇‘瀹? else "姝ｅ父",
++            "confidence": confidence,
++        }],
++        "class_probs": class_probs[:5] if len(class_probs) > 6 else class_probs,
++        "aggregate_class_probs": class_probs[:5] if len(class_probs) > 6 else class_probs,
++        "evidence": p_evidence,
++        "p_anomaly_tests": {"power": power_t, "control": control_t},
++        "diagnostic_sets": {
++            "good": good,
++            "bad": bad,
++            "suspect": suspected,
++            "unknown": unknown,
++        },
++        "d_matrix": {"tests": tests, "faults": faults, "values": combined_d},
++        "input_csv": str(resolved),
++        "model_mode": "operational-msfg-teams-yiyuan-p-values",
++    }
+diff --git a/fault_diagnosis/route_algorithms.py b/fault_diagnosis/route_algorithms.py
+index 9fac4c0..02cbea1 100644
+--- a/fault_diagnosis/route_algorithms.py
++++ b/fault_diagnosis/route_algorithms.py
+@@ -1,27 +1,15 @@
+-"""Operational adapters for the project-route MSFG/TEAMS-RT and PCA-iForest methods."""
++"""Operational adapters for PCA-iForest anomaly detection."""
+ from __future__ import annotations
+ 
+ import csv
+-import importlib.util
+ import math
+-from functools import lru_cache
+-from pathlib import Path
+ 
+ import numpy as np
+ from sklearn.decomposition import PCA
+ from sklearn.ensemble import IsolationForest
+ from sklearn.preprocessing import StandardScaler
+-from datasets.schema import column_role, timestamp_value
+-
+ 
+-SIGNAL_TESTS = {
+-    "pressure": {"name": "鎺ㄨ繘鍘嬪姏娴嬬偣", "fault": "鎺ㄨ繘鍓備緵缁欐硠婕?, "direction": "low"},
+-    "temperature": {"name": "鍔ㄥ姏娓╁害娴嬬偣", "fault": "鍔ㄥ姏娉垫晥鐜囦笅闄?, "direction": "high"},
+-    "bus_voltage": {"name": "鐢垫簮姣嶇嚎鐢靛帇娴嬬偣", "fault": "鐢垫簮姣嶇嚎娆犲帇", "direction": "low"},
+-    "battery_capacity": {"name": "鐢垫睜瀹归噺娴嬬偣", "fault": "钃勭數姹犲閲忚“鍑?, "direction": "low"},
+-    "attitude_error": {"name": "濮挎€佽宸祴鐐?, "fault": "濮挎€佷紶鎰熷櫒鍋忕疆", "direction": "abs"},
+-    "control_error": {"name": "鎺у埗璇樊娴嬬偣", "fault": "鎺у埗鎵ц鍣ㄨ繜婊?, "direction": "abs"},
+-}
++from datasets.schema import column_role, timestamp_value
+ 
+ 
+ def _read_numeric(csv_path):
+@@ -37,73 +25,28 @@ def _read_numeric(csv_path):
+         try:
+             for row in rows:
+                 value = float(row[key])
+-                if not math.isfinite(value): raise ValueError
++                if not math.isfinite(value):
++                    raise ValueError
+                 values.append(value)
+         except (TypeError, ValueError, KeyError):
+             continue
+         numeric[key] = np.asarray(values, dtype=float)
+-    signals = {key: numeric[key] for key in SIGNAL_TESTS if key in numeric}
+-    if not signals:
+-        excluded = {"time", "timestamp", "rul", "hi", "hi_norm", "health_index"}
+-        signals = {key: value for key, value in numeric.items() if key.strip().lower() not in excluded}
+-    if not signals:
++    if not numeric:
+         raise ValueError("CSV 涓病鏈夊彲璇婃柇鐨勬暟鍊间俊鍙?)
+-    return rows, signals
+-
+-
+-@lru_cache(maxsize=1)
+-def _teams_module():
+-    path = Path(__file__).resolve().parent.parent / "integrations" / "algorithm_assets" / "algorithms" / "legacy_reference" / "teamsrt.py"
+-    spec = importlib.util.spec_from_file_location("phm_teamsrt_runtime", path)
+-    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+-    return module
+-
+-
+-def msfg_teams_rt(csv_path):
+-    rows, signals = _read_numeric(csv_path)
+-    keys = list(signals)
+-    faults = [SIGNAL_TESTS.get(key, {}).get("fault", f"{key}寮傚父") for key in keys]
+-    tests = [SIGNAL_TESTS.get(key, {}).get("name", key) for key in keys]
+-    matrix = np.eye(len(keys), dtype=int)
+-    test_results, evidence = [], []
+-    baseline_count = max(5, min(len(rows) // 3, 30))
+-    for key in keys:
+-        values = signals[key]; baseline = values[:baseline_count]
+-        center, spread = float(np.mean(baseline)), float(np.std(baseline))
+-        latest = float(np.mean(values[-min(5, len(values)):]))
+-        robust_scale = max(spread, abs(center) * 0.03, 1e-6)
+-        z_score = (latest - center) / robust_scale
+-        direction = SIGNAL_TESTS.get(key, {}).get("direction", "abs")
+-        failed = z_score < -3 if direction == "low" else z_score > 3 if direction == "high" else abs(z_score) > 3
+-        test_results.append(1 if failed else 0)
+-        evidence.append({"signal": key, "test": tests[len(evidence)], "baseline": round(center, 6), "latest": round(latest, 6), "z_score": round(z_score, 4), "failed": failed})
+-    teams = _teams_module().dmatrixDiag(matrix, np.asarray(test_results), faults, tests)
+-    candidates = []
+-    for fault, detail in teams.get("faultprocess", {}).items():
+-        candidates.append({"name": fault, "state": detail.get("state"), "probability": round(float(detail.get("probability", 0)), 6), "testsource": detail.get("testsource", [])})
+-    candidates.sort(key=lambda item: (item["state"] == "b", item["probability"]), reverse=True)
+-    top = candidates[0] if candidates else {"name": "姝ｅ父", "probability": 1.0}
+-    abnormal = any(test_results)
+-    label = top["name"] if abnormal else "姝ｅ父"
+-    confidence = top["probability"] if abnormal else 1.0
+-    class_probs = [{"name": item["name"], "prob": item["probability"]} for item in candidates] or [{"name": "姝ｅ父", "prob": 1.0}]
+-    return {"algorithm": "MSFG + TEAMS-RT", "pred_name": label, "aggregate_pred_name": label, "confidence": confidence,
+-            "n_windows": 1, "seq_len": len(rows), "window_stride": len(rows), "sample_dt": None,
+-            "window_series": [{"window_index": 0, "time_start": timestamp_value(rows[0], 0), "time_end": timestamp_value(rows[-1], len(rows)-1), "pred_name": label, "confidence": confidence}],
+-            "class_probs": class_probs, "aggregate_class_probs": class_probs,
+-            "evidence": evidence, "diagnostic_sets": {"good": teams.get("g", []), "bad": teams.get("b", []), "suspect": teams.get("s", []), "unknown": teams.get("u", [])},
+-            "d_matrix": {"tests": tests, "faults": faults, "values": matrix.tolist()}, "model_mode": "operational-msfg-teams-rt"}
++    return rows, numeric
+ 
+ 
+ def _window_matrix(signals, window_size, stride):
+-    keys = list(signals); length = len(next(iter(signals.values())))
++    keys = list(signals)
++    length = len(next(iter(signals.values())))
+     starts = list(range(0, max(1, length - window_size + 1), stride))
+-    if not starts or starts[-1] + window_size < length: starts.append(max(0, length - window_size))
++    if not starts or starts[-1] + window_size < length:
++        starts.append(max(0, length - window_size))
+     features = []
+     for start in starts:
+         row = []
+         for key in keys:
+-            segment = signals[key][start:start + window_size]
++            segment = signals[key][start : start + window_size]
+             row.extend([np.mean(segment), np.std(segment), np.min(segment), np.max(segment), segment[-1] - segment[0]])
+         features.append(row)
+     return np.asarray(features, dtype=float), starts, keys
+@@ -111,26 +54,64 @@ def _window_matrix(signals, window_size, stride):
+ 
+ def pca_iforest(csv_path):
+     rows, signals = _read_numeric(csv_path)
+-    window_size = max(8, min(30, len(rows) // 5)); stride = max(2, window_size // 2)
++    window_size = max(8, min(30, len(rows) // 5))
++    stride = max(2, window_size // 2)
+     matrix, starts, keys = _window_matrix(signals, window_size, stride)
+-    if len(matrix) < 4: raise ValueError("PCA鈥搃Forest 鑷冲皯闇€瑕佸舰鎴?4 涓粦鍔ㄧ獥鍙?)
+-    baseline_count = max(3, min(len(matrix) // 2, max(3, int(len(matrix) * .4))))
+-    scaler = StandardScaler().fit(matrix[:baseline_count]); scaled = scaler.transform(matrix)
++    if len(matrix) < 4:
++        raise ValueError("PCA鈥搃Forest 鑷冲皯闇€瑕佸舰鎴?4 涓粦鍔ㄧ獥鍙?)
++    baseline_count = max(3, min(len(matrix) // 2, max(3, int(len(matrix) * 0.4))))
++    scaler = StandardScaler().fit(matrix[:baseline_count])
++    scaled = scaler.transform(matrix)
+     components = max(1, min(3, scaled.shape[1], baseline_count - 1))
+-    pca = PCA(n_components=components, random_state=42).fit(scaled[:baseline_count]); embedded = pca.transform(scaled)
++    pca = PCA(n_components=components, random_state=42).fit(scaled[:baseline_count])
++    embedded = pca.transform(scaled)
+     forest = IsolationForest(n_estimators=200, contamination="auto", random_state=42).fit(embedded[:baseline_count])
+     raw_scores = -forest.score_samples(embedded)
+-    reference = raw_scores[:baseline_count]; threshold = float(np.mean(reference) + 3 * max(np.std(reference), 1e-6))
++    reference = raw_scores[:baseline_count]
++    threshold = float(np.mean(reference) + 3 * max(np.std(reference), 1e-6))
+     anomaly = raw_scores > threshold
+     denomin = max(float(raw_scores.max() - raw_scores.min()), 1e-9)
+     scores = (raw_scores - raw_scores.min()) / denomin
+     windows = []
+     for index, start in enumerate(starts):
+-        end = min(len(rows)-1, start+window_size-1)
+-        windows.append({"window_index": index, "time_start": timestamp_value(rows[start], start), "time_end": timestamp_value(rows[end], end), "pred_name": "寮傚父" if anomaly[index] else "姝ｅ父", "confidence": round(float(scores[index] if anomaly[index] else 1-scores[index]), 6), "anomaly_score": round(float(raw_scores[index]), 6)})
+-    latest = windows[-1]; aggregate = "寮傚父" if anomaly[max(baseline_count, len(anomaly)//2):].mean() >= .3 else "姝ｅ父"
++        end = min(len(rows) - 1, start + window_size - 1)
++        windows.append({
++            "window_index": index,
++            "time_start": timestamp_value(rows[start], start),
++            "time_end": timestamp_value(rows[end], end),
++            "pred_name": "寮傚父" if anomaly[index] else "姝ｅ父",
++            "confidence": round(float(scores[index] if anomaly[index] else 1 - scores[index]), 6),
++            "anomaly_score": round(float(raw_scores[index]), 6),
++        })
++    latest = windows[-1]
++    aggregate = "寮傚父" if anomaly[max(baseline_count, len(anomaly) // 2) :].mean() >= 0.3 else "姝ｅ父"
+     loadings = np.abs(pca.components_[0]).reshape(len(keys), 5).mean(axis=1)
+-    evidence = sorted(({"signal": key, "pca_loading": round(float(loadings[i]), 6), "latest_mean": round(float(np.mean(signals[key][-window_size:])), 6)} for i, key in enumerate(keys)), key=lambda item: item["pca_loading"], reverse=True)
+-    abnormal_prob = float(np.clip(scores[-1], 0, 1)); probs = [{"name": "寮傚父", "prob": abnormal_prob}, {"name": "姝ｅ父", "prob": 1-abnormal_prob}]
++    evidence = sorted(
++        (
++            {"signal": key, "pca_loading": round(float(loadings[i]), 6), "latest_mean": round(float(np.mean(signals[key][-window_size:])), 6)}
++            for i, key in enumerate(keys)
++        ),
++        key=lambda item: item["pca_loading"],
++        reverse=True,
++    )
++    abnormal_prob = float(np.clip(scores[-1], 0, 1))
++    probs = [{"name": "寮傚父", "prob": abnormal_prob}, {"name": "姝ｅ父", "prob": 1 - abnormal_prob}]
+     explained = float(np.nan_to_num(pca.explained_variance_ratio_, nan=0.0).sum())
+-    return {"algorithm": "PCA鈥搃Forest", "pred_name": latest["pred_name"], "aggregate_pred_name": aggregate, "confidence": latest["confidence"], "n_windows": len(windows), "seq_len": window_size, "window_stride": stride, "sample_dt": None, "window_series": windows, "class_probs": probs, "aggregate_class_probs": probs, "evidence": evidence, "explained_variance": round(explained, 6), "baseline_windows": baseline_count, "anomaly_threshold": round(threshold, 6), "model_mode": "operational-pca-iforest"}
++    return {
++        "algorithm": "PCA鈥搃Forest 寮傚父妫€娴?,
++        "pred_name": latest["pred_name"],
++        "aggregate_pred_name": aggregate,
++        "confidence": latest["confidence"],
++        "n_windows": len(windows),
++        "seq_len": window_size,
++        "window_stride": stride,
++        "sample_dt": None,
++        "window_series": windows,
++        "class_probs": probs,
++        "aggregate_class_probs": probs,
++        "evidence": evidence,
++        "explained_variance": round(explained, 6),
++        "baseline_windows": baseline_count,
++        "anomaly_threshold": round(threshold, 6),
++        "model_mode": "operational-pca-iforest",
++    }
+diff --git a/fault_diagnosis/test_msfg_teams_pvalues.py b/fault_diagnosis/test_msfg_teams_pvalues.py
+new file mode 100644
+index 0000000..33780f9
+--- /dev/null
++++ b/fault_diagnosis/test_msfg_teams_pvalues.py
+@@ -0,0 +1,48 @@
++import json
++from django.core.files.base import ContentFile
++from django.test import Client, TestCase
++
++from datasets.models import Dataset
++
++
++def _p_values_csv(p1_tail: float, rows: int = 120):
++    header = ["Time"] + [f"P{i}" for i in range(1, 18)] + ["FaultFlag"]
++    lines = [",".join(header)]
++    for index in range(rows):
++        p1 = 1.0 if index < 70 else p1_tail
++        vals = [str(index), str(p1)] + ["1.0"] * 16 + ["0"]
++        lines.append(",".join(vals))
++    return "\n".join(lines) + "\n"
++
++
++class MsfgTeamsPvaluesTests(TestCase):
++    def setUp(self):
++        self.client = Client()
++        self.dataset = Dataset(name="pvalues-test", source="test", component="娲剧敓鍙傛暟")
++        self.dataset.file.save("pvalues-test.csv", ContentFile(_p_values_csv(0.5).encode()), save=True)
++
++    def run_algorithm(self, dataset_id=None):
++        dataset_id = dataset_id or self.dataset.id
++        return self.client.post(
++            "/api/v1/fault-diagnosis/predict/",
++            data=json.dumps({"dataset_id": dataset_id, "algorithm": "msfg_teams_rt"}),
++            content_type="application/json",
++        )
++
++    def test_p1_anomaly_reports_bengqixi(self):
++        response = self.run_algorithm()
++        self.assertEqual(response.status_code, 200, response.content)
++        result = response.json()["result"]
++        self.assertEqual(result["algorithm"], "MSFG + TEAMS-RT 渚濊禆璇婃柇")
++        self.assertIn(result["pred_name"], {"娉垫皵铓€", "娑¤疆杞€熶笅闄?, "鍠风鍫靛"})
++        self.assertEqual(len(result["d_matrix"]["faults"]), 13)
++        self.assertTrue(any(item["signal"] == "P1" and item["failed"] for item in result["evidence"]))
++
++    def test_resolve_sibling_p_values(self):
++        scope = Dataset(name="sim-task", source="simulation", component="鍘熷鐘舵€侀噺")
++        scope.file.save("scope_data.csv", ContentFile(b"time,FaultFlag\n0,0\n1,0\n"), save=True)
++        derived = Dataset(name="sim-task-娲剧敓鍙傛暟", source="simulation", component="娲剧敓鍙傛暟")
++        derived.file.save("pvalues.csv", ContentFile(_p_values_csv(0.5).encode()), save=True)
++        response = self.run_algorithm(dataset_id=scope.id)
++        self.assertEqual(response.status_code, 200, response.content)
++        self.assertIn("pvalues", response.json()["result"]["input_csv"].lower())
+diff --git a/fault_diagnosis/tests_route_algorithms.py b/fault_diagnosis/tests_route_algorithms.py
+index 97ad1b9..e9465c8 100644
+--- a/fault_diagnosis/tests_route_algorithms.py
++++ b/fault_diagnosis/tests_route_algorithms.py
+@@ -4,6 +4,16 @@ from django.test import Client, TestCase
+ from datasets.models import Dataset
+ 
+ 
++def _p_values_csv(p1_tail: float, rows: int = 120):
++    header = ["Time"] + [f"P{i}" for i in range(1, 18)] + ["FaultFlag"]
++    lines = [",".join(header)]
++    for index in range(rows):
++        p1 = 1.0 if index < 70 else p1_tail
++        vals = [str(index), str(p1)] + ["1.0"] * 16 + ["0"]
++        lines.append(",".join(vals))
++    return "\n".join(lines) + "\n"
++
++
+ class RouteAlgorithmTests(TestCase):
+     def setUp(self):
+         rows = ["time,pressure,temperature,bus_voltage,battery_capacity,attitude_error,control_error"]
+@@ -12,23 +22,30 @@ class RouteAlgorithmTests(TestCase):
+             rows.append(f"{index},{pressure},0.4,1.0,1.0,0.0,0.02")
+         self.dataset = Dataset(name="route-algorithm-test", source="test")
+         self.dataset.file.save("route-algorithm-test.csv", ContentFile(("\n".join(rows)+"\n").encode()), save=True)
++        self.p_dataset = Dataset(name="route-pvalues-test", source="test", component="娲剧敓鍙傛暟")
++        self.p_dataset.file.save("route-pvalues-test.csv", ContentFile(_p_values_csv(0.5).encode()), save=True)
+         self.client = Client()
+ 
+-    def run_algorithm(self, algorithm):
+-        return self.client.post("/api/v1/fault-diagnosis/predict/", data=json.dumps({"dataset_id": self.dataset.id, "algorithm": algorithm}), content_type="application/json")
++    def run_algorithm(self, algorithm, dataset_id=None):
++        dataset_id = dataset_id or self.dataset.id
++        return self.client.post(
++            "/api/v1/fault-diagnosis/predict/",
++            data=json.dumps({"dataset_id": dataset_id, "algorithm": algorithm}),
++            content_type="application/json",
++        )
+ 
+-    def test_msfg_teams_rt_reports_pressure_fault_and_matrix(self):
+-        response = self.run_algorithm("msfg_teams_rt")
++    def test_msfg_teams_rt_reports_yiyuan_fault_and_matrix(self):
++        response = self.run_algorithm("msfg_teams_rt", self.p_dataset.id)
+         self.assertEqual(response.status_code, 200, response.content)
+         result = response.json()["result"]
+-        self.assertEqual(result["algorithm"], "MSFG + TEAMS-RT")
+-        self.assertEqual(result["pred_name"], "鎺ㄨ繘鍓備緵缁欐硠婕?)
+-        self.assertEqual(len(result["d_matrix"]["values"]), 6)
++        self.assertEqual(result["algorithm"], "MSFG + TEAMS-RT 渚濊禆璇婃柇")
++        self.assertIn(result["pred_name"], {"娉垫皵铓€", "娑¤疆杞€熶笅闄?, "鍠风鍫靛"})
++        self.assertEqual(len(result["d_matrix"]["faults"]), 13)
+ 
+     def test_pca_iforest_returns_window_evidence(self):
+         response = self.run_algorithm("pca_iforest")
+         self.assertEqual(response.status_code, 200, response.content)
+         result = response.json()["result"]
+-        self.assertEqual(result["algorithm"], "PCA鈥搃Forest")
++        self.assertEqual(result["algorithm"], "PCA鈥搃Forest 寮傚父妫€娴?)
+         self.assertGreater(result["n_windows"], 3)
+         self.assertTrue(result["evidence"])
+diff --git a/fault_diagnosis/views.py b/fault_diagnosis/views.py
+index a0ce4c3..5e16388 100644
+--- a/fault_diagnosis/views.py
++++ b/fault_diagnosis/views.py
+@@ -8,7 +8,14 @@ from django.http import JsonResponse
+ from django.views.decorators.csrf import csrf_exempt
+ 
+ from .service import DiagnosisService
+-from .route_algorithms import msfg_teams_rt, pca_iforest
++from .route_algorithms import pca_iforest
++from .msfg_teams_pvalues import msfg_teams_pvalues, resolve_p_values_path
++
++
++def _diagnosis_csv_path(algorithm, csv_path, dataset=None):
++    if algorithm == "msfg_teams_rt":
++        return str(resolve_p_values_path(Path(csv_path), dataset))
++    return str(csv_path)
+ 
+ 
+ def _quality_for_csv(csv_path):
+@@ -80,21 +87,27 @@ def predict(request):
+                     tmp.write(chunk)
+                 csv_path = Path(tmp.name)
+             try:
+-                quality = _quality_for_csv(csv_path)
++                diag_path = _diagnosis_csv_path(algorithm, csv_path)
++                quality = _quality_for_csv(diag_path)
+                 result = _standardize_result(_run_algorithm(algorithm, csv_path), quality)
+             finally:
+                 csv_path.unlink(missing_ok=True)
+         else:
+             body = json.loads(request.body.decode("utf-8") or "{}")
+             algorithm = body.get("algorithm", "hier14")
++            dataset = None
+             if body.get('dataset_id'):
++                from datasets.models import Dataset
+                 from datasets.services import path_for
++                dataset = Dataset.objects.get(pk=body['dataset_id'])
+                 csv_path = path_for(body['dataset_id'])
+-            else: csv_path = body.get("csv_path")
++            else:
++                csv_path = body.get("csv_path")
+             if not csv_path:
+                 return JsonResponse({"ok": False, "error": "璇蜂笂浼?CSV 鏂囦欢鎴栨彁渚?csv_path"}, status=400)
+-            quality = _quality_for_csv(csv_path)
+-            result = _standardize_result(_run_algorithm(algorithm, csv_path), quality)
++            diag_path = _diagnosis_csv_path(algorithm, csv_path, dataset)
++            quality = _quality_for_csv(diag_path)
++            result = _standardize_result(_run_algorithm(algorithm, csv_path, dataset=dataset), quality)
+         return JsonResponse({"ok": True, "model": result.get("algorithm", algorithm), "result": result})
+     except Exception as exc:
+         return JsonResponse({"ok": False, "error": str(exc), "model": algorithm or "unknown"}, status=503)
+@@ -124,8 +137,9 @@ def batch_predict(request):
+             item = {'dataset_id': dataset_id}
+             try:
+                 dataset = Dataset.objects.get(pk=dataset_id)
+-                quality = _quality_for_csv(dataset.file.path)
+-                item.update({'status': 'success', 'result': _standardize_result(_run_algorithm(algorithm, dataset.file.path), quality)})
++                diag_path = _diagnosis_csv_path(algorithm, dataset.file.path, dataset)
++                quality = _quality_for_csv(diag_path)
++                item.update({'status': 'success', 'result': _standardize_result(_run_algorithm(algorithm, dataset.file.path, dataset=dataset), quality)})
+             except Dataset.DoesNotExist:
+                 item.update({'status': 'failed', 'error': '鏁版嵁闆嗕笉瀛樺湪'})
+             except Exception as exc:
+@@ -136,10 +150,11 @@ def batch_predict(request):
+         return JsonResponse({'ok': False, 'error': str(exc)}, status=400)
+ 
+ 
+-def _run_algorithm(algorithm, csv_path):
++def _run_algorithm(algorithm, csv_path, dataset=None):
+     if algorithm == "hier14":
+         result = DiagnosisService.instance().predict(csv_path); result.setdefault("algorithm", "Hier14"); return result
+-    if algorithm == "msfg_teams_rt": return msfg_teams_rt(csv_path)
++    if algorithm == "msfg_teams_rt":
++        return msfg_teams_pvalues(csv_path, dataset=dataset)
+     if algorithm == "pca_iforest": return pca_iforest(csv_path)
+     raise ValueError("鏈煡璇婃柇绠楁硶,鍙€?hier14銆乵sfg_teams_rt銆乸ca_iforest")
+ 
+diff --git a/frontend/dist/index.html b/frontend/dist/index.html
+index 1303d47..b8e4061 100644
+--- a/frontend/dist/index.html
++++ b/frontend/dist/index.html
+@@ -5,8 +5,8 @@
+     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>閲嶅浣跨敤杩愯浇鍣ㄥ彂灏勫満鍋ュ悍绠＄悊骞冲彴</title>
+-    <script type="module" crossorigin src="/static/assets/index-dbe918d5.js"></script>
+-    <link rel="stylesheet" href="/static/assets/index-4d22c02c.css">
++    <script type="module" crossorigin src="/static/assets/index-6bf89129.js"></script>
++    <link rel="stylesheet" href="/static/assets/index-fd8f421e.css">
+   </head>
+   <body>
+     <div id="app"></div>
+diff --git a/frontend/src/utils/datasetVisibility.js b/frontend/src/utils/datasetVisibility.js
+index bc9cb31..ed06443 100644
+--- a/frontend/src/utils/datasetVisibility.js
++++ b/frontend/src/utils/datasetVisibility.js
+@@ -1,2 +1,67 @@
+ export const isSimulinkDerived = dataset =>
+   dataset?.source === 'simulation' && dataset?.component === '娲剧敓鍙傛暟'
++
++const isDerivedParameterDataset = dataset =>
++  dataset?.component === '娲剧敓鍙傛暟' || /p_values|娲剧敓鍙傛暟/i.test(dataset?.name || '')
++
++export const diagnosisDataRequirements = {
++  hier14:
++    '鍘熷鐘舵€侀噺 scope CSV锛堝惈鏃堕棿鍒椾笌 Hier14 妯″瀷娴嬬偣锛夛紝涓嶈浣跨敤銆屾淳鐢熷弬鏁?/ P_values銆嶆暟鎹泦銆?,
++  msfg_teams_rt:
++    'P_values /銆屾淳鐢熷弬鏁般€岰SV锛堝惈 P1鈥揚17锛夛紝鎴栧凡鐧昏鍚屽悕銆屼换鍔″悕-娲剧敓鍙傛暟銆嶇殑 scope 鏁版嵁闆嗭紙灏嗚嚜鍔ㄨВ鏋愭淳鐢熸枃浠讹級銆?,
++  pca_iforest:
++    '鍚璺暟鍊兼祴鐐圭殑鏃跺簭 CSV锛堣嚦灏?8 琛岋級锛屽缓璁娇鐢?scope 鐘舵€侀噺锛岃€岄潪娲剧敓 P 鍙傛暟銆?,
++}
++
++export function isMsfgCompatible(dataset, allDatasets) {
++  if (!dataset) return false
++  if (isDerivedParameterDataset(dataset)) return true
++  const siblingName = `${dataset.name}-娲剧敓鍙傛暟`
++  if (allDatasets.some(d => d.id !== dataset.id && d.name === siblingName && d.source === dataset.source)) {
++    return true
++  }
++  const prefix = (dataset.name || '').split('-')[0]
++  if (
++    prefix &&
++    allDatasets.some(
++      d =>
++        d.id !== dataset.id &&
++        d.component === '娲剧敓鍙傛暟' &&
++        d.source === dataset.source &&
++        (d.name === siblingName || d.name.startsWith(prefix)),
++    )
++  ) {
++    return true
++  }
++  return false
++}
++
++export function isHier14Compatible(dataset) {
++  if (!dataset) return false
++  return !isSimulinkDerived(dataset) && dataset.component !== '娲剧敓鍙傛暟'
++}
++
++export function isPcaCompatible(dataset) {
++  if (!dataset) return false
++  return dataset.component !== '娲剧敓鍙傛暟' && !/p_values/i.test(dataset.name || '')
++}
++
++export function datasetsForDiagnosisAlgorithm(algorithm, datasets, pluginRecord) {
++  const all = datasets || []
++  if (pluginRecord?.source === 'plugin') return all
++  if (algorithm === 'hier14') return all.filter(isHier14Compatible)
++  if (algorithm === 'msfg_teams_rt') return all.filter(d => isMsfgCompatible(d, all))
++  if (algorithm === 'pca_iforest') return all.filter(isPcaCompatible)
++  return all
++}
++
++export function diagnosisDataRequirementText(algorithm, pluginRecord) {
++  if (pluginRecord?.data_requirement) return pluginRecord.data_requirement
++  if (pluginRecord?.source === 'plugin') {
++    const minRows = pluginRecord.min_rows
++    return minRows && minRows > 1
++      ? `CSV 鏁版嵁闆嗭紝寤鸿涓嶅皯浜?${minRows} 琛屻€俙
++      : '骞冲彴鐧昏鐨?CSV 鏁版嵁闆嗐€?
++  }
++  return diagnosisDataRequirements[algorithm] || 'CSV 鏁版嵁闆嗐€?
++}
+diff --git a/frontend/src/views/Hier14Diagnosis.vue b/frontend/src/views/Hier14Diagnosis.vue
+index f51d4e8..0de5f25 100644
+--- a/frontend/src/views/Hier14Diagnosis.vue
++++ b/frontend/src/views/Hier14Diagnosis.vue
+@@ -2,7 +2,8 @@
+   <div class="analysis-page">
+     <h2>鏁呴殰璇婃柇鍒嗘瀽</h2>
+     <el-radio-group v-model="mode" @change="onModeChange"><el-radio-button label="single">鍗曚釜璇婃柇</el-radio-button><el-radio-button label="batch">鎵归噺璇婃柇</el-radio-button></el-radio-group>
+-    <div class="controls"><el-select v-if="mode==='single'" v-model="id" filterable placeholder="閫夋嫨 CSV 鏁版嵁闆? @change="clear"><el-option v-for="d in availableDatasets" :key="d.id" :label="d.name" :value="d.id"/></el-select><el-select v-else v-model="batchIds" multiple collapse-tags filterable placeholder="鎵归噺璇婃柇鍙閫夋暟鎹泦"><el-option v-for="d in availableDatasets" :key="`batch-${d.id}`" :label="d.name" :value="d.id"/></el-select><el-select v-model="algorithm" @change="onAlgorithmChange"><el-option v-for="item in algorithmOptions" :key="item.key" :label="item.name" :value="item.key"/></el-select><el-button v-if="mode==='single'" type="primary" :loading="loading" :disabled="!id" @click="run">杩愯 {{algorithmName}}</el-button><el-button v-else type="success" :loading="batchLoading" :disabled="!batchIds.length" @click="runBatch">鎵归噺璇婃柇</el-button></div>
++    <div class="controls"><el-select v-if="mode==='single'" v-model="id" filterable :placeholder="datasetPlaceholder" @change="clear"><el-option v-for="d in availableDatasets" :key="d.id" :label="d.name" :value="d.id"/></el-select><el-select v-else v-model="batchIds" multiple collapse-tags filterable :placeholder="datasetPlaceholder" @change="clear"><el-option v-for="d in availableDatasets" :key="`batch-${d.id}`" :label="d.name" :value="d.id"/></el-select><el-select v-model="algorithm" @change="onAlgorithmChange"><el-option v-for="item in algorithmOptions" :key="item.key" :label="item.name" :value="item.key"/></el-select><el-button v-if="mode==='single'" type="primary" :loading="loading" :disabled="!id" @click="run">杩愯 {{algorithmName}}</el-button><el-button v-else type="success" :loading="batchLoading" :disabled="!batchIds.length" @click="runBatch">鎵归噺璇婃柇</el-button></div>
++    <el-alert v-if="dataRequirementHint" class="data-requirement" type="info" :closable="false" :title="`鏁版嵁瑕佹眰 路 ${algorithmName}`" :description="dataRequirementHint" />
+     <el-alert v-if="selectedAlgorithm?.source==='plugin'" type="info" :closable="false" :title="`${selectedAlgorithm.name} 路 鎻掍欢 ${selectedAlgorithm.version}`" :description="selectedAlgorithm.description||'鏈湴瀹夎鐨勮瘖鏂畻娉?" />
+     <el-form v-if="selectedAlgorithm?.source==='plugin'&&pluginFields.length" class="plugin-parameters" inline label-position="top"><el-form-item v-for="field in pluginFields" :key="field.name" :label="field.name"><el-select v-if="field.definition.enum" v-model="pluginParameters[field.name]"><el-option v-for="choice in field.definition.enum" :key="String(choice)" :label="String(choice)" :value="choice"/></el-select><el-switch v-else-if="field.definition.type==='boolean'" v-model="pluginParameters[field.name]"/><el-input-number v-else-if="field.definition.type==='number'||field.definition.type==='integer'" v-model="pluginParameters[field.name]" :min="field.definition.minimum" :max="field.definition.maximum" :precision="field.definition.type==='integer'?0:undefined"/><el-input v-else v-model="pluginParameters[field.name]"/></el-form-item></el-form>
+     <el-alert v-if="mode==='batch'&&batchReport" type="info" :closable="false" :title="`鎵归噺璇婃柇瀹屾垚: 鎴愬姛 ${batchReport.success}, 澶辫触 ${batchReport.failed}`" />
+@@ -19,6 +20,12 @@
+       </el-table>
+     </el-card>
+     <h3 v-if="result">褰撳墠璇︽儏锛歿{datasetName(activeDatasetId)}}</h3>
++    <el-alert v-if="selectedBatchError" type="error" :closable="false" :title="`${datasetName(activeDatasetId)}锛?{selectedBatchError}`" />
++    <el-descriptions v-if="result&&selected" :column="2" border><el-descriptions-item label="鏁版嵁鏉ユ簮">{{selected.source==='simulation'?'浠跨湡':'绂荤嚎涓婁紶'}}</el-descriptions-item><el-descriptions-item label="绯荤粺 / 閮ㄤ欢">{{selected.system||'鏈褰?}} / {{selected.component||'鏈褰?}}</el-descriptions-item><el-descriptions-item label="PBS 鍗曟満浜у搧">{{selected.structure_node_name||'鏈叧鑱?}}</el-descriptions-item><el-descriptions-item label="鏁呴殰鏍囩(褰曞叆淇℃伅)">{{selected.fault_type||'鏈爣娉?}}</el-descriptions-item><el-descriptions-item label="娉ㄥ叆鏃堕棿(褰曞叆淇℃伅)">{{selected.injection_time??'鏈褰?}}</el-descriptions-item></el-descriptions>
++    <template v-if="result">
++      <h3>璇婃柇缁撴灉</h3>
++      <div class="metrics metrics-summary"><div><small>鏈獥鍙ｉ娴?/small><strong>{{result.pred_name}}</strong></div><div><small>鍏ㄥ眬璇婃柇缁撴灉</small><strong>{{result.aggregate_pred_name}}</strong></div><div><small>璇婃柇绐楀彛鏁?/small><strong>{{result.n_windows}}</strong></div></div>
++    </template>
+     <template v-if="result?.event_summary">
+       <h3>绐楀彛鍛婅浜嬩欢 路 {{ result.event_summary.event_count }}</h3>
+       <el-table :data="result.detected_events || []" size="small" empty-text="鏈嚭鐜扮疆淇″害杈炬爣鐨勫紓甯哥獥鍙?>
+@@ -29,20 +36,14 @@
+         <el-table-column label="鏈€楂樼疆淇″害" min-width="120"><template #default="scope">{{ percent(scope.row.max_confidence) }}</template></el-table-column>
+       </el-table>
+     </template>
+-    <el-alert v-if="selectedBatchError" type="error" :closable="false" :title="`${datasetName(activeDatasetId)}锛?{selectedBatchError}`" />
+-    <el-descriptions v-if="result&&selected" :column="2" border><el-descriptions-item label="鏁版嵁鏉ユ簮">{{selected.source==='simulation'?'浠跨湡':'绂荤嚎涓婁紶'}}</el-descriptions-item><el-descriptions-item label="绯荤粺 / 閮ㄤ欢">{{selected.system||'鏈褰?}} / {{selected.component||'鏈褰?}}</el-descriptions-item><el-descriptions-item label="PBS 鍗曟満浜у搧">{{selected.structure_node_name||'鏈叧鑱?}}</el-descriptions-item><el-descriptions-item label="鏁呴殰鏍囩(褰曞叆淇℃伅)">{{selected.fault_type||'鏈爣娉?}}</el-descriptions-item><el-descriptions-item label="娉ㄥ叆鏃堕棿(褰曞叆淇℃伅)">{{selected.injection_time??'鏈褰?}}</el-descriptions-item></el-descriptions>
+     <el-alert v-if="result&&selected?.fault_type==='姝ｅ父鍩虹嚎'" type="warning" :closable="false" title="姝ゆ暟鎹泦鏍囨敞涓轰豢鐪熸甯稿熀绾? description="鐜版湁閫氱敤璇婃柇绠楁硶鍙兘瀵归琛屽伐鍐靛彉鍖栦骇鐢熻鎶ャ€傝瘖鏂粨鏋滀粛鎸夌畻娉曠湡瀹炶緭鍑烘樉绀猴紝浣跨敤鍓嶉渶瀹屾垚娴嬬偣鏄犲皠鍜岄槇鍊兼爣瀹氥€? />
+     <el-alert v-if="error" title="璇婃柇鏈畬鎴?灏氭棤妯″瀷缁撹" type="error" :closable="false" show-icon><p>{{failureReason}}</p><p>琛ラ綈 Hier14 婧愮爜銆佹潈閲嶅強绗﹀悎妯″瀷瀛楁瑕佹眰鐨?CSV 鍚庨噸鏂拌繍琛屻€傛暟鎹泦鐨勬晠闅滄爣绛句笉浠ｈ〃棰勬祴缁撴灉銆?/p><details><summary>鎶€鏈鎯?/summary><pre>{{error}}</pre></details></el-alert>
+     <el-empty v-if="!result&&!error&&!selectedBatchError&&!(mode==='batch'&&batchReport)" :description="mode==='batch'?'璇烽€夋嫨鎵归噺缁撴灉涓殑涓€椤规煡鐪嬭鎯?:'灏氭棤璇婃柇缁撴灉'"/>
+     <template v-if="result">
+-      <div class="metrics"><div><small>鏈獥鍙ｉ娴?/small><strong>{{result.pred_name}}</strong></div><div><small>鍏ㄧ▼鑱氬悎绫诲埆</small><strong>{{result.aggregate_pred_name}}</strong></div><div><small>鏈獥鍙ｆ渶楂樻鐜?/small><strong>{{percent(last?.confidence)}}</strong></div><div><small>璇婃柇绐楀彛鏁?/small><strong>{{result.n_windows}}</strong></div></div>
+-      <p>鏈獥鍙ｅ弽鏄犳渶鏂扮姸鎬?鑱氬悎绫诲埆鍙嶆槧鍏ㄧ▼绐楀彛骞冲潎姒傜巼銆傚綋鍓嶆暟鎹凡瀹屾垚涓€娆¤瘖鏂繍绠?鍏辩敓鎴?{{result.n_windows}} 涓獥鍙?鏁版嵁涓嶈冻涓€涓ā鍨嬬獥鍙ｆ椂浠呮樉绀烘渶鍚庝竴涓獥鍙ｃ€傛ā鍨嬫鐜囦笉绛夊悓浜庣粡杩囨牎鍑嗙殑鍙潬鎬т繚璇併€?/p>
++      <p>鏈獥鍙ｅ弽鏄犳渶鏂扮姸鎬?鍏ㄥ眬璇婃柇缁撴灉鍙嶆槧鍏ㄧ▼缁煎悎鍒ゅ畾銆傚綋鍓嶆暟鎹凡瀹屾垚涓€娆¤瘖鏂繍绠?鍏辩敓鎴?{{result.n_windows}} 涓獥鍙?鏁版嵁涓嶈冻涓€涓ā鍨嬬獥鍙ｆ椂浠呮樉绀烘渶鍚庝竴涓獥鍙ｃ€傛ā鍨嬫鐜囦笉绛夊悓浜庣粡杩囨牎鍑嗙殑鍙潬鎬т繚璇併€?/p>
+       <el-descriptions v-if="result.data_quality" :column="3" border><el-descriptions-item label="鏃堕棿瀛楁">{{result.data_quality.time_column||'鏈彁渚?}}</el-descriptions-item><el-descriptions-item label="鏁呴殰鐪熷€兼爣绛?>{{result.data_quality.fault_flag_column||'鏃?}}锛堜粎鏍稿鐪熷€硷級</el-descriptions-item><el-descriptions-item label="鏁板€煎弬鏁板垪鏁?>{{result.data_quality.numeric_parameter_columns?.length??0}}</el-descriptions-item><el-descriptions-item label="姝ｅ父 / 鏁呴殰閲囨牱鐐?>{{result.data_quality.fault_label_summary?.counts?.['0']??0}} / {{result.data_quality.fault_label_summary?.counts?.['1']??0}}</el-descriptions-item><el-descriptions-item label="棣栨鏁呴殰鏃堕棿鎴?>{{result.data_quality.fault_label_summary?.first_fault_time??'鏃犳晠闅滄爣绛?}}</el-descriptions-item></el-descriptions>
+       <h3>绫诲埆姒傜巼姣旇緝</h3><ReportChart :key="`probability-${activeDatasetId}`" :option="probabilityChart"/>
+       <h3>绐楀彛缃俊搴︿笌鏃堕棿</h3><ReportChart :key="`timeline-${activeDatasetId}`" :option="timeline"/>
+-      <h3>绐楀彛璇婃柇鏄庣粏</h3>
+-      <el-table :data="pageRows" stripe><el-table-column prop="window_index" label="绐楀彛" width="90"/><el-table-column prop="time_start" label="璧峰鏃堕棿 (s)"/><el-table-column prop="time_end" label="缁撴潫鏃堕棿 (s)"/><el-table-column prop="pred_name" label="棰勬祴绫诲埆"/><el-table-column label="鏈€楂樻鐜?><template #default="s">{{percent(s.row.confidence)}}</template></el-table-column></el-table>
+-      <el-pagination v-model:current-page="page" :page-size="10" :total="windows.length" layout="prev, pager, next"/>
+       <h3 v-if="result.evidence?.length">璇婃柇璇佹嵁</h3><el-table v-if="result.evidence?.length" :data="result.evidence" size="small"><el-table-column prop="signal" label="淇″彿"/><el-table-column prop="test" label="娴嬬偣"/><el-table-column prop="baseline" label="鍩哄噯"/><el-table-column prop="latest" label="褰撳墠"/><el-table-column prop="z_score" label="鍋忕Z鍊?/><el-table-column prop="pca_loading" label="PCA璐＄尞"/></el-table>
+       <h3 v-if="result.d_matrix">MSFG 渚濊禆鐭╅樀</h3><div v-if="result.d_matrix" class="matrix"><table><thead><tr><th>鏁呴殰 / 娴嬬偣</th><th v-for="t in result.d_matrix.tests" :key="t">{{t}}</th></tr></thead><tbody><tr v-for="(f,i) in result.d_matrix.faults" :key="f"><th>{{f}}</th><td v-for="(v,j) in result.d_matrix.values[i]" :key="j" :class="{hit:v}">{{v}}</td></tr></tbody></table></div>
+       <h3>杩愯渚濇嵁</h3><el-descriptions :column="2" border><el-descriptions-item label="绠楁硶">{{result.algorithm||algorithmName}}</el-descriptions-item><el-descriptions-item label="绐楀彛闀垮害">{{result.seq_len}} 鏍锋湰</el-descriptions-item><el-descriptions-item label="婊戝姩姝ラ暱">{{result.window_stride}} 鏍锋湰</el-descriptions-item><el-descriptions-item label="杩愯妯″紡">{{result.model_mode}}</el-descriptions-item></el-descriptions>
+@@ -53,28 +54,30 @@
+ <script setup>
+ import {ref,computed,onMounted} from 'vue'
+ import ReportChart from '../components/ReportChart.vue'
+-import {isSimulinkDerived} from '../utils/datasetVisibility.js'
+-const datasets=ref([]),id=ref(),batchIds=ref([]),mode=ref('single'),activeDatasetId=ref(null),result=ref(null),batchReport=ref(null),selectedBatchError=ref(''),error=ref(''),loading=ref(false),batchLoading=ref(false),page=ref(1),algorithm=ref('hier14')
+-const availableDatasets=computed(()=>algorithm.value==='hier14'?datasets.value.filter(dataset=>!isSimulinkDerived(dataset)):datasets.value)
+-const algorithmOptions=ref([{key:'hier14',name:'Hier14 灞傛鏃跺簭璇婃柇',source:'builtin'},{key:'msfg_teams_rt',name:'MSFG + TEAMS-RT 渚濊禆璇婃柇',source:'builtin'},{key:'pca_iforest',name:'PCA-iForest 鍋忕璇婃柇',source:'builtin'}])
++import {datasetsForDiagnosisAlgorithm,diagnosisDataRequirementText} from '../utils/datasetVisibility.js'
++const datasets=ref([]),id=ref(),batchIds=ref([]),mode=ref('single'),activeDatasetId=ref(null),result=ref(null),batchReport=ref(null),selectedBatchError=ref(''),error=ref(''),loading=ref(false),batchLoading=ref(false),algorithm=ref('hier14')
++const algorithmOptions=ref([{key:'hier14',name:'Hier14 灞傛鏃跺簭璇婃柇',source:'builtin'},{key:'msfg_teams_rt',name:'MSFG + TEAMS-RT 渚濊禆璇婃柇',source:'builtin'},{key:'pca_iforest',name:'PCA-iForest 寮傚父妫€娴?,source:'builtin'}])
+ const selectedAlgorithm=computed(()=>algorithmOptions.value.find(x=>x.key===algorithm.value)),algorithmName=computed(()=>selectedAlgorithm.value?.name||algorithm.value)
++const availableDatasets=computed(()=>datasetsForDiagnosisAlgorithm(algorithm.value,datasets.value,selectedAlgorithm.value))
++const dataRequirementHint=computed(()=>diagnosisDataRequirementText(algorithm.value,selectedAlgorithm.value))
++const datasetPlaceholder=computed(()=>availableDatasets.value.length?'閫夋嫨绗﹀悎褰撳墠绠楁硶鐨勬暟鎹泦':'褰撳墠绠楁硶涓嬫殏鏃犵鍚堟潯浠剁殑鏁版嵁闆?)
+ const pluginParameters=ref({}),pluginFields=computed(()=>Object.entries(selectedAlgorithm.value?.parameters||{}).map(([name,definition])=>({name,definition})))
+-const selected=computed(()=>datasets.value.find(d=>String(d.id)===String(activeDatasetId.value))),batchRows=computed(()=>batchReport.value?.results||[]),windows=computed(()=>result.value?.window_series||[]),last=computed(()=>windows.value.at(-1)),pageRows=computed(()=>windows.value.slice((page.value-1)*10,page.value*10))
++const selected=computed(()=>datasets.value.find(d=>String(d.id)===String(activeDatasetId.value))),batchRows=computed(()=>batchReport.value?.results||[]),windows=computed(()=>result.value?.window_series||[])
+ const percent=v=>v==null?'鏈彁渚?:(100*Number(v)).toFixed(1)+'%'
+ const seconds=v=>v==null?'鏈彁渚?:Number(v).toFixed(3)
+ const datasetName=datasetId=>datasets.value.find(d=>String(d.id)===String(datasetId))?.name||`鏁版嵁闆?#${datasetId}`
+ const failureReason=computed(()=>/repo not found|涓嶅瓨鍦▅Missing.*artifact/i.test(error.value)?'璇婃柇杩愯渚濊禆缂哄け,妯″瀷鏈墽琛屻€?:/columns|rows|CSV/i.test(error.value)?'杈撳叆鏁版嵁涓嶇鍚堟ā鍨嬭姹傘€?:'妯″瀷鎵ц澶辫触,璇锋鏌ユ妧鏈鎯呫€?)
+-const probabilityChart=computed(()=>{const p=result.value?.class_probs||[],a=result.value?.aggregate_class_probs||[];return {tooltip:{trigger:'axis'},legend:{data:['鏈獥鍙?,'鍏ㄧ▼骞冲潎']},grid:{bottom:100,containLabel:true},xAxis:{type:'category',data:p.map(x=>x.name),axisLabel:{rotate:30}},yAxis:{type:'value',name:'姒傜巼 (%)',min:0,max:100},series:[{name:'鏈獥鍙?,type:'bar',data:p.map(x=>x.prob*100),color:'#247bba'},{name:'鍏ㄧ▼骞冲潎',type:'bar',data:p.map(x=>(a.find(y=>y.name===x.name)?.prob??0)*100),color:'#239477'}]}})
++const probabilityChart=computed(()=>{const p=result.value?.class_probs||[],a=result.value?.aggregate_class_probs||[];return {tooltip:{trigger:'axis'},legend:{data:['鏈獥鍙?,'鍏ㄥ眬骞冲潎']},grid:{bottom:100,containLabel:true},xAxis:{type:'category',data:p.map(x=>x.name),axisLabel:{rotate:30}},yAxis:{type:'value',name:'姒傜巼 (%)',min:0,max:100},series:[{name:'鏈獥鍙?,type:'bar',data:p.map(x=>x.prob*100),color:'#247bba'},{name:'鍏ㄥ眬骞冲潎',type:'bar',data:p.map(x=>(a.find(y=>y.name===x.name)?.prob??0)*100),color:'#239477'}]}})
+ const timeline=computed(()=>({tooltip:{trigger:'axis'},grid:{containLabel:true,left:55,right:40,bottom:70},xAxis:{type:'value',name:'绐楀彛缁撴潫鏃堕棿 (s)'},yAxis:{type:'value',name:'鏈€楂樼被鍒鐜?(%)',min:0,max:100},dataZoom:[{type:'inside'},{type:'slider'}],series:[{name:'绐楀彛缃俊搴?,type:'line',data:windows.value.map(w=>[w.time_end,w.confidence*100]),color:'#247bba'}]}))
+-function clear(){result.value=null;activeDatasetId.value=null;selectedBatchError.value='';error.value='';page.value=1}
++function clear(){result.value=null;activeDatasetId.value=null;selectedBatchError.value='';error.value=''}
+ function onModeChange(){clear();batchReport.value=null}
+ function onAlgorithmChange(){const compatibleIds=new Set(availableDatasets.value.map(dataset=>String(dataset.id)));if(id.value!=null&&!compatibleIds.has(String(id.value)))id.value=undefined;batchIds.value=batchIds.value.filter(datasetId=>compatibleIds.has(String(datasetId)));clear();batchReport.value=null;pluginParameters.value=Object.fromEntries(pluginFields.value.map(({name,definition})=>[name,definition.default??(definition.type==='boolean'?false:definition.type==='string'?'':definition.minimum??0)]))}
+-function showBatchResult(row){activeDatasetId.value=row.dataset_id;result.value=row.status==='success'?row.result:null;selectedBatchError.value=row.status==='success'?'':row.error||'璇婃柇澶辫触';error.value='';page.value=1}
++function showBatchResult(row){activeDatasetId.value=row.dataset_id;result.value=row.status==='success'?row.result:null;selectedBatchError.value=row.status==='success'?'':row.error||'璇婃柇澶辫触';error.value=''}
+ const csrfHeaders=()=>{const token=document.cookie.split('; ').find(x=>x.startsWith('csrftoken='))?.slice(10);return token?{'X-CSRFToken':decodeURIComponent(token)}:{}}
+ onMounted(async()=>{try{const [datasetResponse,catalogResponse]=await Promise.all([fetch('/api/v1/datasets/',{credentials:'include'}),fetch('/api/v1/integrations/algorithm-assets/algorithms/?category=diagnosis',{credentials:'include'})]);if(!datasetResponse.ok)throw Error('鏁版嵁闆嗗姞杞藉け璐?);datasets.value=await datasetResponse.json();if(catalogResponse.ok){const catalog=await catalogResponse.json();if(catalog.ok&&catalog.results?.length)algorithmOptions.value=catalog.results}}catch(e){error.value=e.message}})
+ async function run(){if(mode.value!=='single')return;clear();loading.value=true;const datasetId=id.value,algorithmKey=algorithm.value;try{const plugin=selectedAlgorithm.value?.source==='plugin';const url=plugin?`/api/v1/integrations/algorithm-assets/algorithms/${algorithmKey}/run/`:'/api/v1/fault-diagnosis/predict/';const body=plugin?{dataset_id:datasetId,parameters:pluginParameters.value}:{dataset_id:datasetId,algorithm:algorithmKey};const r=await fetch(url,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json',...csrfHeaders()},body:JSON.stringify(body)});const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'璇婃柇澶辫触');if(mode.value!=='single'||algorithm.value!==algorithmKey||id.value!==datasetId)return;activeDatasetId.value=datasetId;result.value=j.result}catch(e){if(mode.value==='single'&&algorithm.value===algorithmKey&&id.value===datasetId)error.value=e.message}finally{loading.value=false}}
+ async function runBatch(){if(mode.value!=='batch')return;clear();batchLoading.value=true;batchReport.value=null;const algorithmKey=algorithm.value;try{const plugin=selectedAlgorithm.value?.source==='plugin';const url=plugin?`/api/v1/integrations/algorithm-assets/algorithms/${algorithmKey}/batch-run/`:'/api/v1/fault-diagnosis/batch-predict/';const body=plugin?{dataset_ids:batchIds.value,parameters:pluginParameters.value}:{dataset_ids:batchIds.value,algorithm:algorithmKey};const r=await fetch(url,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json',...csrfHeaders()},body:JSON.stringify(body)});const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'鎵归噺璇婃柇澶辫触');if(mode.value!=='batch'||algorithm.value!==algorithmKey)return;batchReport.value=j;const first=j.results?.find(item=>item.status==='success')||j.results?.[0];if(first)showBatchResult(first)}catch(e){if(mode.value==='batch'&&algorithm.value===algorithmKey)error.value=e.message}finally{batchLoading.value=false}}
+ </script>
+ <style scoped>
+-.analysis-page{max-width:1250px;min-width:0;color:#253448}.controls{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.controls .el-select{width:360px;max-width:100%}.plugin-parameters{margin:16px 0;padding:12px;background:#f6f9fc}.plugin-parameters .el-form-item{margin-right:16px}.plugin-parameters .el-select,.plugin-parameters .el-input{width:190px}.batch-results{margin-top:20px}.batch-head{display:flex;gap:16px;align-items:center}.batch-head span{font-size:13px;color:#718198;font-weight:normal}.batch-error{color:#c45656;font-size:12px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-block:1px solid #dce4ec;margin:24px 0;padding:24px 0;gap:20px}.metrics small,.metrics strong{display:block}.metrics strong{font-size:22px;margin-top:10px;overflow-wrap:anywhere}.el-alert{margin-top:20px}h3{font-size:17px;margin-top:28px}p{line-height:1.7}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto}details{margin:20px 0}.el-pagination{margin:16px 0}@media(max-width:800px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
++.analysis-page{max-width:1250px;min-width:0;color:#253448}.controls{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.data-requirement{margin:0 0 16px}.controls .el-select{width:360px;max-width:100%}.plugin-parameters{margin:16px 0;padding:12px;background:#f6f9fc}.plugin-parameters .el-form-item{margin-right:16px}.plugin-parameters .el-select,.plugin-parameters .el-input{width:190px}.batch-results{margin-top:20px}.batch-head{display:flex;gap:16px;align-items:center}.batch-head span{font-size:13px;color:#718198;font-weight:normal}.batch-error{color:#c45656;font-size:12px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-block:1px solid #dce4ec;margin:24px 0;padding:24px 0;gap:20px}.metrics-summary{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}.metrics small,.metrics strong{display:block}.metrics strong{font-size:22px;margin-top:10px;overflow-wrap:anywhere}.el-alert{margin-top:20px}h3{font-size:17px;margin-top:28px}p{line-height:1.7}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto}details{margin:20px 0}.el-pagination{margin:16px 0}@media(max-width:800px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ .matrix{overflow:auto;margin:12px 0 22px}.matrix table{border-collapse:collapse;min-width:760px;font-size:12px}.matrix th,.matrix td{border:1px solid #d9e2ec;padding:8px;text-align:center}.matrix th{background:#f5f8fc}.matrix td.hit{background:#ffe7e7;color:#c43838;font-weight:700}</style>

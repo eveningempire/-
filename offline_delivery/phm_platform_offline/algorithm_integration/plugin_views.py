@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import zipfile
+from pathlib import Path
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
@@ -69,9 +70,10 @@ def _run_builtin(record, dataset, parameters):
     key = record["key"]
     if key in {"hier14", "msfg_teams_rt", "pca_iforest"}:
         from fault_diagnosis.views import _quality_for_csv, _run_algorithm, _standardize_result
+        from fault_diagnosis.msfg_teams_pvalues import resolve_p_values_path
         if not dataset.file.name.lower().endswith(".csv"):
             raise ValueError("故障诊断算法只接受 CSV 数据集")
-        return _standardize_result(_run_algorithm(key, dataset.file.path), _quality_for_csv(dataset.file.path))
+        return _standardize_result(_run_algorithm(key, dataset.file.path, dataset=dataset), _quality_for_csv(resolve_p_values_path(Path(dataset.file.path), dataset) if key == "msfg_teams_rt" else dataset.file.path))
     if key in {"cdpca_ga", "ae_gmm", "gcn_rbd"}:
         if not dataset.file.name.lower().endswith(".csv"):
             raise ValueError("健康评估算法只接受 CSV 数据集")

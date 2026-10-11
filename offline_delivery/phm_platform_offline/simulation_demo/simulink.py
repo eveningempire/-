@@ -31,7 +31,12 @@ def fault_catalog():
 def validate_parameters(body):
     if not isinstance(body, dict):
         raise ValueError("参数必须是 JSON 对象")
+    # Keep the explicit project-archive API compatible; the offline workbench
+    # sends ``python_proxy`` when the user requests generated proxy data.
     backend = body.get("simulation_backend", "project_archive" if body.get("mode", "offline") == "offline" else "simulink")
+    if backend == "python_proxy":
+        from .python_proxy import validate_parameters as validate_proxy
+        return validate_proxy(body)
     if backend == "project_archive":
         from .project_archive import validate_parameters as validate_archive
         return validate_archive(body)
@@ -84,7 +89,7 @@ def runtime_status():
     return {"backend": "simulink", "available": not problems and model_exists,
             **detected, "model": model, "model_exists": model_exists,
             "model_release": "R2023a", "duration": 480, "allow_newer_model": allow_newer_model(),
-            "compatibility_warning": None,
+            "compatibility_warning": detected.get("compatibility_warning"),
             "error": "; ".join(problems) or None}
 
 
@@ -92,7 +97,11 @@ def allow_newer_model():
     override = os.environ.get("SIMULINK_ALLOW_NEWER_MODEL")
     if override is not None:
         return override.lower() in ("true", "1", "yes")
-    return False
+    path = settings.BASE_DIR / "integrations" / "algorithm_assets" / "simulation" / "runtime.json"
+    try:
+        return bool(json.loads(path.read_text(encoding="utf-8")).get("allow_newer_model", False))
+    except (OSError, ValueError, TypeError):
+        return False
 
 
 def output_dir(task):

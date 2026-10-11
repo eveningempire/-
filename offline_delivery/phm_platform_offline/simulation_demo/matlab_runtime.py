@@ -13,9 +13,25 @@ def config_path():
     return settings.BASE_DIR / 'config' / 'matlab_runtime.json'
 
 
+def simulation_runtime_path():
+    return settings.BASE_DIR / 'integrations' / 'algorithm_assets' / 'simulation' / 'runtime.json'
+
+
 def read_config():
     path = config_path()
     return json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {}
+
+
+def read_simulation_config():
+    path = simulation_runtime_path()
+    return json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {}
+
+
+def allow_newer_model():
+    override = os.environ.get('SIMULINK_ALLOW_NEWER_MODEL')
+    if override is not None:
+        return override.lower() in ('true', '1', 'yes')
+    return bool(read_simulation_config().get('allow_newer_model', False))
 
 
 def release_at(root):
@@ -64,6 +80,7 @@ def engine_status():
     found = installations()
     selected = os.environ.get('PHM_MATLAB_ROOT') or read_config().get('matlab_root')
     problems = []
+    compatibility_warning = None
     engine = None
     actual_root = None
     try:
@@ -86,11 +103,17 @@ def engine_status():
     elif release is None:
         problems.append('无法确认 MATLAB 版本，请检查安装目录的 VersionInfo.xml')
     elif release < 'R2023a':
-        problems.append(f'当前 MATLAB {release} 不能保证打开 R2023a 模型；需要兼容版本或经验证的模型转换')
+        message = f'模型为 R2023a，本机使用 {release}。已启用兼容加载，求解结果仍需进行跨版本验收'
+        if allow_newer_model() and engine is not None:
+            compatibility_warning = message
+        else:
+            problems.append(f'当前 MATLAB {release} 不能直接保证打开 R2023a 模型；请使用兼容加载或匹配版本')
     return {'matlab_engine': engine is not None, 'matlab_root': root, 'engine_root': actual_root,
             'matlab_release': release, 'installations': found, 'problems': problems,
-            'setup_hint': 'Engine 必须安装在本包创建的 .venv 中，并与所选 MATLAB 和 Python 3.10 匹配。MATLAB 2012 不支持这条 Python Engine 调用路径。',
-            'engine_setup_directory': str(Path(root) / 'extern' / 'engines' / 'python') if root else None}
+            'compatibility_warning': compatibility_warning,
+            'setup_hint': '页面检测的是当前 Django 服务使用的 Python 环境。请将所选 MATLAB 目录下 extern/engines/python 安装到该环境；仅填写安装目录不会自动安装 Engine。',
+            'engine_setup_directory': str(Path(root) / 'extern' / 'engines' / 'python') if root else None,
+            'engine_python': str(Path(engine.__file__).resolve()) if engine is not None and getattr(engine, '__file__', None) else None}
 
 
 def save_root(root):
@@ -116,7 +139,7 @@ def start_engine(options):
         if Path(actual_root).resolve() != Path(status['matlab_root']).resolve():
             raise RuntimeError('Engine 启动了不同目录的 MATLAB，请重新安装匹配的 Engine')
         release = str(engine.version('-release'))
-        if release.removeprefix('R') < '2023a':
+        if release.removeprefix('R') < '2023a' and not allow_newer_model():
             raise RuntimeError(f'实际启动版本为 {release}，与 R2023a 模型不兼容')
         if not engine.license('test', 'Simulink'):
             raise RuntimeError('当前 MATLAB 没有可用的 Simulink 许可证')
