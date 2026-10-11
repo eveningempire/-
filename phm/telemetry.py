@@ -58,6 +58,9 @@ def sessions(request):
         return Response({'detail': '不支持的实时检测算法'}, status=400)
     try:
         window = max(8, min(1000, int(request.data.get('algorithm_window_size', 30))))
+        if algorithm == 'hier14':
+            # The trained model takes 128 points after 4x downsampling.
+            window = max(512, window)
         stride = max(1, min(window, int(request.data.get('algorithm_stride', 10))))
     except (TypeError, ValueError):
         return Response({'detail': '窗口长度和步长必须是整数'}, status=400)

@@ -33,7 +33,9 @@ ASSET_SCENARIOS = {
 
 
 def _asset_directory():
-    return Path(settings.BASE_DIR) / "frontend" / "public" / "simulation-data"
+    frontend = Path(settings.BASE_DIR) / "frontend"
+    source = frontend / "public" / "simulation-data"
+    return source if source.is_dir() else frontend / "dist" / "simulation-data"
 
 
 def _ensure_asset_events():

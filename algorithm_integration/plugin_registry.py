@@ -23,7 +23,7 @@ BUILTINS = {
     "hier14": {"name": "Hier14 层次时序诊断", "category": "diagnosis"},
     "msfg_teams_rt": {"name": "MSFG + TEAMS-RT 依赖诊断", "category": "diagnosis"},
     "pca_iforest": {"name": "PCA-iForest 偏离诊断", "category": "diagnosis"},
-    "health_main_ensemble": {"name": "health-main RUL 集成模型", "category": "rul", "parameters": {"component_id": {"type": "string", "default": "14"}, "threshold": {"type": "number", "default": 0.2, "minimum": 0, "maximum": 1}}},
+    "health_main_ensemble": {"name": "多模型集成", "category": "rul", "parameters": {"component_id": {"type": "string", "default": "14"}, "threshold": {"type": "number", "default": 0.2, "minimum": 0, "maximum": 1}}},
     "hi_linear": {"name": "线性 HI 趋势外推", "category": "rul", "parameters": {"horizon": {"type": "integer", "default": 100, "minimum": 1, "maximum": 10000}, "threshold": {"type": "number", "default": 0.2, "minimum": 0, "maximum": 1}}},
     "cdpca_ga": {"name": "CDPCA-GA 健康评估", "category": "health_assessment"},
     "ae_gmm": {"name": "AE-GMM 健康评估", "category": "health_assessment"},
@@ -118,14 +118,14 @@ def public_record(record: dict) -> dict:
 
 def list_algorithms(category: str | None = None) -> tuple[list[dict], list[dict]]:
     plugins, errors = discover()
-    builtins = [dict(key=key, source="builtin", version="current", input_format="csv", **{"parameters": {}, **value}) for key, value in BUILTINS.items()]
+    builtins = [dict(key=key, source="builtin", version="1.1", input_format="csv", **{"parameters": {}, **value}) for key, value in BUILTINS.items()]
     records = builtins + [public_record(plugin) for plugin in plugins]
     return [item for item in records if category is None or item["category"] == category], errors
 
 
 def get_algorithm(key: str) -> dict:
     if key in BUILTINS:
-        return dict(key=key, source="builtin", version="current", input_format="csv", **{"parameters": {}, **BUILTINS[key]})
+        return dict(key=key, source="builtin", version="1.1", input_format="csv", **{"parameters": {}, **BUILTINS[key]})
     plugins, _ = discover()
     for plugin in plugins:
         if plugin["key"] == key:

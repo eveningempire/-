@@ -108,10 +108,10 @@ def model_catalog(request):
     from .trained_release_adapter import asset_status
     reflight = asset_status()
     return JsonResponse({"ok": True, "models": [
-        {"id": "msfg-teams", "name": "MSFG + TEAMS-RT 依赖诊断", "domain": "故障诊断", "status": "trained", "version": "1.0", "evidence": "已接入统一诊断接口,输出D矩阵、诊断集合与测点证据", "deployable": True},
-        {"id": "pca-iforest", "name": "PCA-iForest 偏离诊断", "domain": "异常诊断", "status": "trained", "version": "route-1.0", "evidence": "已接入统一诊断接口,基于基准窗口在线拟合PCA与Isolation Forest", "deployable": True},
-        {"id": "ae-gmm", "name": "AE-GMM 健康评估", "domain": "健康评估", "status": "development", "version": "1.0", "evidence": "platform_health.algorithms", "deployable": True},
-        {"id": "gcn-rbd", "name": "GCN + RBD 系统健康评估", "domain": "系统健康", "status": "development", "version": "1.0", "evidence": "platform_health.algorithms", "deployable": True},
-        {"id": "health-main-rul", "name": "health-main RUL 集成模型", "domain": "寿命预测", "status": "trained", "version": "health-main", "evidence": "15组训练权重、超参数、PCA/Scaler与集成器", "deployable": True},
-        {"id": "vae-gan-reflight", "name": "VAE-GAN + RF 再飞预测", "domain": "再飞评估", "status": "trained" if reflight["assets_present"] else "missing_assets", "version": "health-main", "evidence": "编码器、解码器、判别器及RF分类器;运行环境:" + ("就绪" if reflight["runtime_available"] else "待安装PyTorch"), "deployable": reflight["assets_present"] and reflight["runtime_available"]},
+        {"id": "msfg-teams", "name": "MSFG + TEAMS-RT 依赖诊断", "domain": "故障诊断", "status": "trained", "version": "1.1", "evidence": "已接入统一诊断接口,输出D矩阵、诊断集合与测点证据", "deployable": True},
+        {"id": "pca-iforest", "name": "PCA-iForest 偏离诊断", "domain": "异常诊断", "status": "trained", "version": "1.1", "evidence": "已接入统一诊断接口,基于基准窗口在线拟合PCA与Isolation Forest", "deployable": True},
+        {"id": "ae-gmm", "name": "AE-GMM 健康评估", "domain": "健康评估", "status": "development", "version": "1.1", "evidence": "platform_health.algorithms", "deployable": True},
+        {"id": "gcn-rbd", "name": "GCN + RBD 系统健康评估", "domain": "系统健康", "status": "development", "version": "1.1", "evidence": "platform_health.algorithms", "deployable": True},
+        {"id": "health-main-rul", "name": "多模型集成", "domain": "寿命预测", "status": "trained", "version": "1.1", "evidence": "15组训练权重、超参数、PCA/Scaler与集成器", "deployable": True},
+        {"id": "vae-gan-reflight", "name": "VAE-GAN + RF 再飞预测", "domain": "再飞评估", "status": "trained" if reflight["assets_present"] else "missing_assets", "version": "1.1", "evidence": "编码器、解码器、判别器及RF分类器;运行环境:" + ("就绪" if reflight["runtime_available"] else "待安装PyTorch"), "deployable": reflight["assets_present"] and reflight["runtime_available"]},
     ]})

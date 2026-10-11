@@ -117,7 +117,7 @@ def status(request):
         runtime={"available":True,"torch":torch.__version__}
     except Exception as exc:
         runtime={"available":False,"error":str(exc)}
-    return JsonResponse({"available":bool(models),"algorithm":"health-main RUL 集成模型","models":models,"asset_root":str(root),"runtime":runtime})
+    return JsonResponse({"available":bool(models),"algorithm":"多模型集成","models":models,"asset_root":str(root),"runtime":runtime})
 
 @csrf_exempt
 def demo(request):

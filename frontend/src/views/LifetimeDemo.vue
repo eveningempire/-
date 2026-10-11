@@ -64,7 +64,7 @@ import {isSelectableDataset} from '../utils/datasetVisibility.js'
 const route=useRoute()
 const unitLabels={s:'秒 (s)',h:'小时 (h)',hour:'小时 (h)',hours:'小时 (h)',sample_interval:'样本间隔'}
 const componentOptions=[['液氧泵','P1'],['液氧涡轮','P2'],['煤油管路','P3'],['煤油阀门','P4'],['燃气发生器','P5'],['燃烧室','P6'],['喷管','P7'],['TVC','P8'],['RCS','P10'],['栅格舵','P9'],['传感器','P12'],['液氧管路','P14'],['液氧阀门','P15'],['煤油泵','P16'],['煤油涡轮','P17']].map(([name,signal],index)=>({name,signal,id:String(index+1)}))
-const datasets=ref([]),mode=ref('single'),id=ref(),batchIds=ref([]),activeDatasetId=ref(null),result=ref(null),batchReport=ref(null),selectedBatchError=ref(''),error=ref(''),loading=ref(false),batchLoading=ref(false),componentId=ref(''),activeComponentId=ref(''),algorithm=ref('health_main_ensemble'),algorithmOptions=ref([{key:'health_main_ensemble',name:'health-main RUL 集成模型',source:'builtin'}]),pluginParameters=ref({})
+const datasets=ref([]),mode=ref('single'),id=ref(),batchIds=ref([]),activeDatasetId=ref(null),result=ref(null),batchReport=ref(null),selectedBatchError=ref(''),error=ref(''),loading=ref(false),batchLoading=ref(false),componentId=ref(''),activeComponentId=ref(''),algorithm=ref('health_main_ensemble'),algorithmOptions=ref([{key:'health_main_ensemble',name:'多模型集成',source:'builtin'}]),pluginParameters=ref({})
 const mobileQuery=window.matchMedia('(max-width: 650px)'),reportColumns=ref(mobileQuery.matches?1:2)
 const updateColumns=event=>{reportColumns.value=event.matches?1:2}
 const busy=computed(()=>loading.value||batchLoading.value)

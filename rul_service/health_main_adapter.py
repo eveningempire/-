@@ -74,7 +74,7 @@ def predict(path, asset_dir, prepared=None):
     rf, ada = ensemble['rf'].predict(stacked), ensemble['ada'].predict(stacked)
     if not np.isfinite(stacked).all() or not np.isfinite(rf).all() or not np.isfinite(ada).all():
         raise ValueError('训练模型产生非有限预测结果')
-    return {'algorithm': 'health-main RUL 集成模型', 'model_source': str(asset_dir),
+    return {'algorithm': '多模型集成', 'model_source': str(asset_dir),
             'sample_count': len(hi), 'sequence_length': sequence_length, 'hi_sequence': hi.tolist(),
             'hi_times': prepared['times'], 'rul_times': prepared['times'][sequence_length:],
             'hi_source': prepared['source'], 'ensemble_rul': {'RF': rf.tolist(), 'Ada': ada.tolist()},

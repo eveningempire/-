@@ -6,7 +6,15 @@ $env:USE_SQLITE = 'true'
 $env:DJANGO_DEBUG = 'True'
 $env:PIP_NO_INDEX = '1'
 $env:PIP_DISABLE_PIP_VERSION_CHECK = '1'
+$env:PYTHONNOUSERSITE = '1'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
+Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
 $Py = Join-Path $Root '.venv\Scripts\python.exe'
+$PortablePy = Join-Path $Root 'runtime\python310\python.exe'
+if (Test-Path -LiteralPath $PortablePy -PathType Leaf) {
+    $Py = $PortablePy
+}
 
 try {
     Write-Host 'PHM - 重复使用运载器健康管理原型系统' -ForegroundColor Cyan
@@ -51,6 +59,13 @@ try {
     if ($CheckOnly) {
         Write-Host 'PHM 启动检查通过。' -ForegroundColor Green
         exit 0
+    }
+    $engineSetup = Join-Path $Root 'configure_matlab_engine.py'
+    if (Test-Path -LiteralPath $engineSetup) {
+        & $Py $engineSetup
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host 'MATLAB Engine 配置未通过；请在实时故障注入页面查看环境状态。' -ForegroundColor Yellow
+        }
     }
     $url = "http://127.0.0.1:$Port/"
     $listeners = @(Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue)

@@ -111,10 +111,14 @@ def run_window_algorithm(session, cursor_id):
     if len(samples) < window:
         raise ValueError(f"算法窗口需要至少 {window} 个采样点")
     columns = list(session.columns or samples[0].values)
+    # Telemetry uses ``time``; the trained Hier14 adapter consumes ``Time``.
+    export_columns = ['Time' if key == 'time' and session.detection_algorithm == 'hier14' else key
+                      for key in columns]
     with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", newline="", encoding="utf-8-sig", delete=False) as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer = csv.DictWriter(handle, fieldnames=export_columns)
         writer.writeheader()
-        writer.writerows({key: sample.values.get(key) for key in columns} for sample in samples)
+        writer.writerows({export: sample.values.get(key) for key, export in zip(columns, export_columns)}
+                         for sample in samples)
         path = Path(handle.name)
     try:
         quality = _quality_for_csv(path)

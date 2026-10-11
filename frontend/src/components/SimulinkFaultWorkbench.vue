@@ -1,7 +1,7 @@
 <template>
   <div class="workbench">
     <header class="heading">
-      <h1>{{ mode === 'realtime' ? '实时故障注入' : '离线故障数据集生成' }}</h1>
+      <h1>{{ mode === 'realtime' ? '实时故障注入与退化仿真' : '离线故障数据集生成' }}</h1>
       <div class="runtime">
         <el-tag :type="available ? 'success' : 'warning'">{{ mode === 'offline' ? (available ? 'Python 代理已就绪 · 无需 MATLAB' : '代理数据不可用') : (available ? 'Engine 已连接' : 'Engine 未就绪') }}</el-tag>
         <span>{{ mode === 'offline' ? '正常基线 CSV + Python 代理扰动 · 480 s' : `rocket_sim · ${runtime.matlab_release || '需兼容 MATLAB/Simulink'} · 480 s` }}</span>

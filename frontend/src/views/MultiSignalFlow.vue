@@ -1,98 +1,95 @@
 <template>
   <div class="page">
-    <div class="head"><div><h2>多信号流图</h2><p>按数据集查看测量信号、PBS 所属单机和分析模块的接入条件。</p></div><el-button :loading="loading" @click="load">刷新数据</el-button></div>
-    <el-card shadow="never" class="selector"><el-select v-model="datasetId" filterable placeholder="选择已登记的 CSV 数据集" @change="loadSamples"><el-option v-for="item in selectableDatasets" :key="item.id" :label="`${item.name} · #${item.id}`" :value="item.id"/></el-select><el-tag v-if="selectedDataset" :type="selectedDataset.structure_node_id?'success':'warning'">{{selectedDataset.structure_node_name||'未关联 PBS'}}</el-tag><span v-if="sampleCount">已载入 {{sampleCount}} 行用于预览{{hasMore?'，仍有后续数据':''}}</span></el-card>
-    <el-alert v-if="error" :title="error" type="error" show-icon :closable="false"/>
-    <el-empty v-if="!selectedDataset&&!loading" description="请选择数据集"/>
-    <template v-if="selectedDataset">
-      <div class="summary"><el-card shadow="never"><small>PBS 关联</small><strong>{{selectedDataset.structure_node_name||'未建立'}}</strong><p>{{selectedDataset.structure_node_id?'已通过结构节点编号关联':'请在数据管理中点击“关联 PBS”'}}</p></el-card><el-card shadow="never"><small>健康评估输入</small><strong>{{numericSignals.length}} 路数值信号</strong><p>单机评估可处理数值信号；生成的 HI 仅属于本次所选数据集</p></el-card><el-card shadow="never"><small>寿命预测输入</small><strong>{{hiReady?'预览中满足行数':'预览中未满足'}}</strong><p>{{hiReady?'预览区间有至少 51 行 HI；仍需选择匹配部件模型':'训练寿命模型需要 CSV 中至少 51 行 HI'}}</p></el-card></div>
-      <el-card shadow="never" class="flow-card"><template #header><b>信号与分析接入关系</b></template><el-alert title="箭头只表示数据接入和已登记的结构关系，不表示已完成诊断、健康评估或寿命预测。" type="info" :closable="false"/><ReportChart v-if="flowOption.series[0].data.length" :key="`flow-${datasetId}`" :option="flowOption" :height="Math.max(500, 160 + Math.min(numericSignals.length, 10) * 36)"/></el-card>
-      <el-card shadow="never" class="trend-card"><template #header><div class="chart-head"><div><b>多信号趋势</b><p>为便于同图比较，每路信号在当前预览区间按自身最小值和最大值缩放到 0–1；悬停可查看原始数值。</p></div><span>预览 {{sampleCount}} 行{{hasMore?'（仅前 1000 行）':''}} · 最多显示 {{MAX_SIGNALS}} 路</span></div></template>
-        <el-select v-model="visibleSignals" multiple collapse-tags filterable placeholder="选择要比较的信号" class="signal-select"><el-option v-for="name in numericSignals" :key="name" :label="name" :value="name"/></el-select>
-        <ReportChart v-if="visibleSignals.length" :key="`trend-${datasetId}`" :option="trendOption" :height="460"/><el-empty v-else description="没有可显示的数值信号"/>
-      </el-card>
-      <el-card shadow="never" class="conditions"><template #header><b>当前数据的跨模块一致性</b></template><el-descriptions :column="1" border><el-descriptions-item label="结构标识">{{selectedDataset.structure_node_name||'未关联 PBS；系统/部件文本不能代替结构标识'}}</el-descriptions-item><el-descriptions-item label="健康评估">数值信号可作为算法输入，健康指数由运行时计算；图中不预设 HI 结果</el-descriptions-item><el-descriptions-item label="寿命预测">{{hiReady?'已有 HI 输入列；仍需核对所选部件模型与 PBS 单机一致':'当前预览未验证有至少 51 行 HI，不能直接断言可做训练模型寿命预测'}}</el-descriptions-item></el-descriptions><div class="links"><el-button type="primary" plain @click="go('/platform-health')">前往健康评估</el-button><el-button plain @click="go('/lifetime-prediction')">前往寿命预测</el-button><el-button plain @click="go('/data-management')">管理 PBS 关联</el-button></div></el-card>
+    <div class="head"><div><h2>多信号流图</h2><p>展示型号内部的管路、部件和连接端拓扑。图中的箭头来自系统配置文件，不代表 CSV 参数接入关系。</p></div><el-button :loading="loading" @click="loadConfig">刷新配置</el-button></div>
+    <el-card shadow="never" class="selector"><el-select v-model="selectedSystemId" filterable placeholder="选择型号/分系统" @change="selectedNodeId = ''"><el-option v-for="system in systems" :key="system.system_id" :label="system.name" :value="system.system_id" /></el-select><el-tag type="info">只读可视化</el-tag><span>节点 {{ currentGraph.nodes.length }} 个 · 连接 {{ currentGraph.edges.length }} 条</span></el-card>
+    <el-alert v-if="error" :title="error" type="error" show-icon :closable="false" />
+    <el-empty v-if="!loading && !systems.length && !error" description="配置文件中没有可显示的型号" />
+    <template v-if="systems.length">
+      <div class="summary"><el-card shadow="never"><small>当前型号</small><strong>{{ currentSystem?.name || '—' }}</strong><p>配置编号：{{ currentSystem?.system_id ?? '—' }}</p></el-card><el-card shadow="never"><small>拓扑节点</small><strong>{{ currentGraph.nodes.length }} 个</strong><p>包含部件、输入端、输出端和测试/故障节点</p></el-card><el-card shadow="never"><small>连接端</small><strong>{{ currentGraph.edges.length }} 条</strong><p>按配置中的 source/target 锚点绘制有向连接</p></el-card></div>
+    <el-card shadow="never" class="flow-card"><template #header><div class="chart-head"><div><b>管路与连接端拓扑</b><p>滚轮缩放，按住鼠标拖动空白区域移动整体，点击节点查看属性。</p></div><div class="legend"><span v-for="item in legendItems" :key="item.type"><i :style="{ background: item.color }" />{{ item.label }}</span></div></div></template><el-alert title="默认显示当前型号的全部节点和连接。" type="info" :closable="false" class="hint" /><div v-if="svgGraph.nodes.length" class="topology-wrap"><div class="view-controls"><el-button size="small" @click="zoomOut">−</el-button><span>{{ Math.round(view.scale * 100) }}%</span><el-button size="small" @click="zoomIn">+</el-button><el-button size="small" @click="resetView">重置视图</el-button></div><svg ref="topologyHost" class="topology-svg" :viewBox="svgGraph.viewBox" role="img" aria-label="多信号流拓扑图" @wheel.prevent="zoomGraph" @mousedown="startPan" @mousemove="movePan" @mouseup="endPan" @mouseleave="endPan"><defs><marker id="msfg-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8392a5" /></marker></defs><g :transform="viewTransform"><line v-for="edge in svgGraph.edges" :key="edge.id" :x1="edge.x1" :y1="edge.y1" :x2="edge.x2" :y2="edge.y2" stroke="#8392a5" stroke-width="2" marker-end="url(#msfg-arrow)" /><g v-for="node in svgGraph.nodes" :key="node.id" class="topology-node" @click.stop="selectedNodeId = node.id"><rect v-if="node.type === 'subsystem-node'" :x="node.x - 78" :y="node.y - 25" width="156" height="50" rx="8" :fill="node.color" /><circle v-else :cx="node.x" :cy="node.y" r="22" :fill="node.color" /><text :x="node.x" :y="node.type === 'subsystem-node' ? node.y + 5 : node.y + 40" text-anchor="middle" :fill="node.type === 'subsystem-node' ? '#fff' : '#344054'">{{ node.name }}</text></g></g></svg></div><el-empty v-else description="当前型号没有拓扑节点" /></el-card>
+      <el-card v-if="selectedNode" shadow="never" class="details"><template #header><b>节点详情</b></template><el-descriptions :column="2" border><el-descriptions-item label="名称">{{ selectedNode.name }}</el-descriptions-item><el-descriptions-item label="类型">{{ selectedNode.typeLabel }}</el-descriptions-item><el-descriptions-item label="节点 ID">{{ selectedNode.id }}</el-descriptions-item><el-descriptions-item label="坐标">({{ selectedNode.x }}, {{ selectedNode.y }})</el-descriptions-item><el-descriptions-item label="输入/输出端" :span="2">{{ selectedNode.portText || '配置中未标注' }}</el-descriptions-item></el-descriptions></el-card>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import ReportChart from '../components/ReportChart.vue'
-import { isSelectableDataset } from '../utils/datasetVisibility.js'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import bundledConfig from '../data/多信号流图配置.json'
 
-const MAX_SIGNALS = 8
-const router = useRouter(), route = useRoute()
-const datasets = ref([]), datasetId = ref(null), rows = ref([]), columns = ref([]), visibleSignals = ref([]), loading = ref(false), error = ref(''), hasMore = ref(false)
-const selectableDatasets = computed(() => datasets.value.filter(isSelectableDataset))
-const selectedDataset = computed(() => selectableDatasets.value.find(item => item.id === datasetId.value))
-const sampleCount = computed(() => rows.value.length)
-const numericSignals = computed(() => columns.value.filter(name => rows.value.some(row => row[name] !== '' && row[name] != null && Number.isFinite(Number(row[name]))) && !/^(time|timestamp|index)$/i.test(name)))
-const hiColumn = computed(() => columns.value.find(name => /^(hi_norm|hi|health_index|health|健康指数)$/i.test(name)))
-const hiReady = computed(() => Boolean(hiColumn.value && rows.value.filter(row => row[hiColumn.value] !== '' && row[hiColumn.value] != null && Number.isFinite(Number(row[hiColumn.value]))).length >= 51))
-const timeColumn = computed(() => columns.value.find(name => /^(time|timestamp)$/i.test(name)))
-
-const flowOption = computed(() => {
-  const signals = numericSignals.value.slice(0, 10)
-  if (hiReady.value && hiColumn.value && !signals.includes(hiColumn.value)) {
-    if (signals.length) signals[signals.length - 1] = hiColumn.value
-    else signals.push(hiColumn.value)
-  }
-  const data = [{ id: 'dataset', name: selectedDataset.value?.name || '数据集', category: 0, x: 100, y: 220, symbolSize: 90, itemStyle: { color: '#386da7' } }]
-  const links = []
-  if (selectedDataset.value?.structure_node_id) {
-    data.push({ id: 'pbs', name: selectedDataset.value.structure_node_name, category: 1, x: 100, y: 55, symbolSize: 86, itemStyle: { color: '#1f9d83' } })
-    links.push({ source: 'dataset', target: 'pbs', value: '已登记 PBS 关联' })
-  }
-  signals.forEach((name, index) => {
-    data.push({ id: `signal-${index}`, name, category: 2, x: 340 + (index % 2) * 135, y: 35 + Math.floor(index / 2) * 105, symbolSize: 64, itemStyle: { color: '#4b9bd2' } })
-    links.push({ source: 'dataset', target: `signal-${index}`, value: 'CSV 列' })
-  })
-  if (signals.length) {
-    data.push({ id: 'health-input', name: '健康评估输入', category: 3, x: 710, y: 155, symbolSize: 88, itemStyle: { color: '#9b75c4' } })
-    signals.forEach((_,index) => links.push({ source: `signal-${index}`, target: 'health-input', value: '可用数值输入' }))
-  }
-  if (hiReady.value && signals.includes(hiColumn.value)) {
-    data.push({ id: 'rul-input', name: '寿命预测输入', category: 4, x: 930, y: 290, symbolSize: 88, itemStyle: { color: '#d2963e' } })
-    links.push({ source: `signal-${signals.indexOf(hiColumn.value)}`, target: 'rul-input', value: 'CSV 已含 HI' })
-  }
-  return { tooltip: { formatter: params => params.dataType === 'edge' ? params.data.value : params.name }, legend: { data: ['数据集', 'PBS', '信号', '健康评估', '寿命预测'], bottom: 0 }, series: [{ type: 'graph', layout: 'none', roam: true, draggable: true, coordinateSystem: null, categories: [{ name: '数据集' }, { name: 'PBS' }, { name: '信号' }, { name: '健康评估' }, { name: '寿命预测' }], data, links, label: { show: true, position: 'bottom', width: 110, overflow: 'truncate' }, lineStyle: { color: 'source', opacity: 0.55, curveness: 0.08, width: 2 }, edgeSymbol: ['none', 'arrow'], edgeSymbolSize: [0, 8], emphasis: { focus: 'adjacency' } }] }
-})
-
-const trendOption = computed(() => {
-  const selected = visibleSignals.value.slice(0, MAX_SIGNALS)
-  const originals = {}
-  const series = selected.map(name => {
-    const values = rows.value.map(row => { const value = Number(row[name]); return row[name] === '' || row[name] == null || !Number.isFinite(value) ? null : value })
-    const finite = values.filter(value => value != null)
-    let minimum = Infinity, maximum = -Infinity
-    for (const value of finite) { if (value < minimum) minimum = value; if (value > maximum) maximum = value }
-    const spread = maximum - minimum
-    originals[name] = values
-    return { name, type: 'line', data: values.map((value, index) => [timeColumn.value && Number.isFinite(Number(rows.value[index][timeColumn.value])) ? Number(rows.value[index][timeColumn.value]) : index, value == null ? null : spread ? (value - minimum) / spread : 0.5]), connectNulls: false }
-  })
-  return { legend: { data: selected, type: 'scroll', top: 8 }, tooltip: { trigger: 'axis', formatter: params => params.map(item => `${item.marker}${item.seriesName}: ${originals[item.seriesName]?.[item.dataIndex] ?? '—'}`).join('<br>') }, grid: { top: 72, bottom: 105, left: 55, right: 45, containLabel: true }, xAxis: { type: 'value', name: timeColumn.value || '样本序号', scale: true }, yAxis: { type: 'value', name: '相对变化 (0–1)', min: 0, max: 1 }, dataZoom: [{ type: 'inside' }, { type: 'slider', bottom: 18 }], series }
-})
-
-async function load() {
-  loading.value = true; error.value = ''
-  try { const response = await fetch('/api/v1/datasets/', { credentials: 'include' }); if (!response.ok) throw Error('数据集目录加载失败'); datasets.value = await response.json(); const requested = Number(route.query.dataset_id); if (!datasetId.value && selectableDatasets.value.some(item => item.id === requested)) datasetId.value = requested; if (datasetId.value) await loadSamples() }
-  catch (exc) { error.value = exc.message }
-  finally { loading.value = false }
+const CONFIG_PATH = '3dmodel/多信号流图配置.json'
+const CONFIG_URLS = [...new Set([
+  `${import.meta.env.BASE_URL || '/'}${CONFIG_PATH}`,
+  `/${CONFIG_PATH}`,
+  `/static/${CONFIG_PATH}`
+])]
+const TYPE_META = { 'subsystem-node': { label: '部件/分系统', color: '#9673a6' }, 'input-node': { label: '输入端', color: '#67c23a' }, 'output-node': { label: '输出端', color: '#409eff' }, 'test-node': { label: '测试/故障节点', color: '#e6a23c' }, 'fault-node': { label: '故障节点', color: '#f56c6c' }, default: { label: '其他节点', color: '#909399' } }
+const systems = ref([]), selectedSystemId = ref(null), selectedNodeId = ref(''), loading = ref(false), error = ref('')
+const topologyHost = ref(null)
+const view = reactive({ scale: 1, panX: 0, panY: 0, dragging: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 })
+const currentSystem = computed(() => systems.value.find(item => item.system_id === selectedSystemId.value) || systems.value[0])
+const currentGraph = computed(() => currentSystem.value?.data || { nodes: [], edges: [] })
+const selectedNode = computed(() => currentGraph.value.nodes.find(node => node.id === selectedNodeId.value))
+const legendItems = computed(() => Object.entries(TYPE_META).filter(([type]) => type !== 'default').map(([type, meta]) => ({ type, ...meta })))
+const viewTransform = computed(() => `translate(${view.panX} ${view.panY}) scale(${view.scale})`)
+function typeMeta(type) { return TYPE_META[type] || TYPE_META.default }
+function nodeName(node) { return node?.text?.value || node?.properties?.name || node?.id || '未命名节点' }
+function parseProperties(value) { if (!value || typeof value !== 'string') return ''; const match = value.match(/input=([^;}]+).*output=([^;}]+)/i); return match ? `输入 ${match[1]} · 输出 ${match[2]}` : value }
+function normalizeSystem(system, index) {
+  const data = system?.data || {}, nodes = Array.isArray(data.nodes) ? data.nodes : [], edges = Array.isArray(data.edges) ? data.edges : []
+  const normalizedNodes = nodes.map(node => { const meta = typeMeta(node.type); return { id: node.id, name: nodeName(node), type: node.type || 'default', typeLabel: meta.label, x: Number.isFinite(Number(node.x)) ? Number(node.x) : index * 100, y: Number.isFinite(Number(node.y)) ? Number(node.y) : index * 100, color: node?.properties?.typeColor || meta.color, portText: parseProperties(node?.properties?.fields), properties: node.properties || {}, anchors: Array.isArray(node.anchors) ? node.anchors : [] } })
+  const nodeIds = new Set(normalizedNodes.map(node => node.id))
+  return { system_id: system.system_id ?? system.id ?? index, name: system.name || `型号/分系统 ${index + 1}`, parent_id: system.parent_id, data: { nodes: normalizedNodes, edges: edges.filter(edge => nodeIds.has(edge.sourceNodeId) && nodeIds.has(edge.targetNodeId)) } }
 }
-async function loadSamples() {
-  rows.value = []; columns.value = []; visibleSignals.value = []; error.value = ''
-  if (!datasetId.value) return
+const svgGraph = computed(() => {
+  const nodes = currentGraph.value.nodes, xValues = nodes.map(node => node.x), yValues = nodes.map(node => node.y), minX = Math.min(...xValues, 0), minY = Math.min(...yValues, 0), maxX = Math.max(...xValues, 1000), maxY = Math.max(...yValues, 600), width = Math.max(1000, maxX - minX + 240), height = Math.max(520, maxY - minY + 180)
+  const normalized = nodes.map(node => ({ ...node, x: node.x - minX + 120, y: node.y - minY + 80 }))
+  const byId = new Map(normalized.map(node => [node.id, node]))
+  const edges = currentGraph.value.edges.map(edge => { const source = byId.get(edge.sourceNodeId), target = byId.get(edge.targetNodeId); return source && target ? { id: edge.id, x1: source.x, y1: source.y, x2: target.x, y2: target.y } : null }).filter(Boolean)
+  return { nodes: normalized, edges, viewBox: `0 0 ${width} ${height}` }
+})
+function resetView() { view.scale = 1; view.panX = 0; view.panY = 0 }
+function zoomIn() { view.scale = Math.min(3, Number((view.scale + 0.15).toFixed(2))) }
+function zoomOut() { view.scale = Math.max(0.35, Number((view.scale - 0.15).toFixed(2))) }
+function zoomGraph(event) { event.deltaY < 0 ? zoomIn() : zoomOut() }
+function startPan(event) { if (event.button !== 0) return; view.dragging = true; view.moved = false; view.startX = event.clientX; view.startY = event.clientY; view.originX = view.panX; view.originY = view.panY }
+function movePan(event) { if (!view.dragging || !topologyHost.value) return; const rect = topologyHost.value.getBoundingClientRect(); const vb = svgGraph.value.viewBox.split(' ').map(Number); const dx = (event.clientX - view.startX) * vb[2] / rect.width / view.scale; const dy = (event.clientY - view.startY) * vb[3] / rect.height / view.scale; view.panX = view.originX + dx; view.panY = view.originY + dy; view.moved = Math.abs(dx) + Math.abs(dy) > 3 }
+function endPan() { view.dragging = false }
+watch(selectedSystemId, resetView)
+async function loadConfig() {
   loading.value = true
-  try { const response = await fetch(`/api/v1/datasets/${datasetId.value}/samples/?limit=1000`, { credentials: 'include' }); const body = await response.json(); if (!response.ok) throw Error(body.detail || 'CSV 读取失败'); columns.value = body.columns || []; rows.value = body.rows || []; hasMore.value = Boolean(body.has_more); visibleSignals.value = numericSignals.value.slice(0, 4) }
-  catch (exc) { error.value = exc.message }
-  finally { loading.value = false }
+  error.value = ''
+  try {
+    let body = null
+    let lastError = null
+    for (const url of CONFIG_URLS) {
+      try {
+        const response = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
+        const text = await response.text()
+        if (!response.ok || /^\s*</.test(text)) {
+          lastError = new Error(`配置地址不可用：${url}`)
+          continue
+        }
+        body = JSON.parse(text)
+        break
+      } catch (exc) {
+        lastError = exc
+      }
+    }
+    // 某些部署将未知静态路径回退到 index.html；此时使用随前端构建的同一份配置。
+    if (!body) body = bundledConfig
+    const rawSystems = Array.isArray(body.SystemData) ? body.SystemData : []
+    systems.value = rawSystems.map(normalizeSystem).filter(system => system.data.nodes.length)
+    const preferred = body.currentSystemId ?? systems.value[0]?.system_id
+    selectedSystemId.value = systems.value.some(system => system.system_id === preferred) ? preferred : systems.value[0]?.system_id ?? null
+    selectedNodeId.value = ''
+  } catch (exc) {
+    systems.value = []
+    error.value = exc.message || '配置加载失败'
+  } finally { loading.value = false }
 }
-function go(path) { router.push({ path, query: { dataset_id: datasetId.value } }) }
-onMounted(load)
+onMounted(loadConfig)
 </script>
 
 <style scoped>
-.page{max-width:1500px;min-width:0}.head,.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.head h2{margin:0 0 6px}.head p,.chart-head p{margin:0;color:#687c91}.selector{margin:18px 0}.selector :deep(.el-card__body){display:flex;align-items:center;gap:14px;flex-wrap:wrap}.selector .el-select{width:min(460px,100%)}.selector span,.chart-head span{font-size:12px;color:#718198}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:16px 0}.summary small,.summary strong{display:block}.summary small{color:#718198}.summary strong{font-size:20px;margin:9px 0}.summary p{color:#66788c;font-size:12px;margin:0}.flow-card,.trend-card,.conditions{margin-top:16px}.flow-card .el-alert{margin-bottom:16px}.signal-select{width:min(520px,100%);margin-bottom:16px}.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}@media(max-width:850px){.summary{grid-template-columns:1fr}.head,.chart-head{display:block}}
+.page{max-width:1500px;min-width:0}.head,.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.head h2{margin:0 0 6px}.head p,.chart-head p{margin:0;color:#687c91}.selector{margin:18px 0}.selector :deep(.el-card__body){display:flex;align-items:center;gap:14px;flex-wrap:wrap}.selector .el-select{width:min(460px,100%)}.selector span{font-size:12px;color:#718198}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:16px 0}.summary small,.summary strong{display:block}.summary small{color:#718198}.summary strong{font-size:20px;margin:9px 0}.summary p{color:#66788c;font-size:12px;margin:0}.flow-card,.details{margin-top:16px}.hint{margin-bottom:10px}.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#62748a}.legend span{display:inline-flex;align-items:center;gap:4px}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.topology-wrap{position:relative;width:100%;overflow:hidden;border:1px solid #e1e9f2;border-radius:8px;background:#fff;min-height:520px}.topology-svg{display:block;width:100%;min-width:900px;min-height:520px;cursor:grab}.topology-svg:active{cursor:grabbing}.topology-node{cursor:pointer}.topology-node:hover{filter:brightness(1.08)}.topology-node text{font-size:14px;pointer-events:none}.view-controls{position:absolute;right:12px;top:10px;z-index:2;display:flex;align-items:center;gap:6px;padding:4px 6px;background:rgba(255,255,255,.94);border:1px solid #dfe6ef;border-radius:6px}.view-controls span{min-width:42px;text-align:center;font-size:12px;color:#66788c}@media(max-width:850px){.summary{grid-template-columns:1fr}.head,.chart-head{display:block}.legend{margin-top:12px}}
 </style>

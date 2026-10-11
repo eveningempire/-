@@ -17,6 +17,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({ option: { type: Object, default: () => ({}) }, height: { type: Number, default: 390 } })
+const emit = defineEmits(['click'])
 const host = ref(null), expandedHost = ref(null), expanded = ref(false)
 let chart, largeChart, observer, largeObserver
 const displayOption = computed(() => {
@@ -47,6 +48,7 @@ function closeExpanded() { largeObserver?.disconnect(); largeChart?.dispose(); l
 onMounted(() => {
   chart = echarts.init(host.value)
   chart.setOption(displayOption.value, true)
+  chart.on('click', params => emit('click', params))
   observer = new ResizeObserver(() => chart?.resize())
   observer.observe(host.value)
 })
