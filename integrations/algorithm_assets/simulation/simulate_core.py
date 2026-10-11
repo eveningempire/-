@@ -261,7 +261,8 @@ def run_simulation(
     if own_engine:
         if matlab is None:
             raise RuntimeError("未安装 MATLAB Engine for Python；请在 MATLAB 对应 Python 环境安装 matlabengineforpython")
-        eng = matlab.engine.start_matlab("-nodesktop -nosplash")
+        from simulation_demo.matlab_runtime import start_engine
+        eng = start_engine("-nodesktop -nosplash")
 
     version_setting = None
     try:

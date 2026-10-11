@@ -31,7 +31,16 @@ def fault_catalog():
 def validate_parameters(body):
     if not isinstance(body, dict):
         raise ValueError("参数必须是 JSON 对象")
-    if body.get("simulation_backend", "simulink") != "simulink":
+    # Keep the explicit project-archive API compatible; the offline workbench
+    # sends ``python_proxy`` when the user requests generated proxy data.
+    backend = body.get("simulation_backend", "project_archive" if body.get("mode", "offline") == "offline" else "simulink")
+    if backend == "python_proxy":
+        from .python_proxy import validate_parameters as validate_proxy
+        return validate_proxy(body)
+    if backend == "project_archive":
+        from .project_archive import validate_parameters as validate_archive
+        return validate_archive(body)
+    if backend != "simulink":
         raise ValueError("新任务仅支持一院 Simulink 仿真")
     if "severity" in body:
         raise ValueError("一院仿真程序不支持严重度参数")
@@ -68,27 +77,19 @@ def model_path():
 
 
 def runtime_status():
-    problems = []
-    try:
-        import matlab.engine  # noqa: F401
-        engine = True
-    except (ImportError, OSError) as exc:
-        engine = False
-        problems.append(f"MATLAB Engine 不可用: {exc}")
+    from .matlab_runtime import engine_status
+    detected = engine_status()
+    problems = detected.pop('problems')
     try:
         model = str(model_path())
         model_exists = True
     except RuntimeError as exc:
         model, model_exists = "", False
         problems.append(str(exc))
-    configuration = settings.BASE_DIR / "integrations" / "algorithm_assets" / "simulation" / "runtime.json"
-    configured = json.loads(configuration.read_text(encoding="utf-8")) if configuration.is_file() else {}
-    return {"backend": "simulink", "available": engine and model_exists,
-            "matlab_engine": engine, "model": model, "model_exists": model_exists,
+    return {"backend": "simulink", "available": not problems and model_exists,
+            **detected, "model": model, "model_exists": model_exists,
             "model_release": "R2023a", "duration": 480, "allow_newer_model": allow_newer_model(),
-            "matlab_release": configured.get("matlab_release"),
-            "engine_version": configured.get("engine_version"),
-            "compatibility_warning": "模型为 R2023a，本机使用 R2022b 兼容加载；求解可运行，跨版本结果仍需验收" if configured.get("matlab_release") == "R2022b" and allow_newer_model() else None,
+            "compatibility_warning": detected.get("compatibility_warning"),
             "error": "; ".join(problems) or None}
 
 
@@ -96,10 +97,11 @@ def allow_newer_model():
     override = os.environ.get("SIMULINK_ALLOW_NEWER_MODEL")
     if override is not None:
         return override.lower() in ("true", "1", "yes")
-    configuration = settings.BASE_DIR / "integrations" / "algorithm_assets" / "simulation" / "runtime.json"
-    if configuration.is_file():
-        return json.loads(configuration.read_text(encoding="utf-8")).get("allow_newer_model") is True
-    return False
+    path = settings.BASE_DIR / "integrations" / "algorithm_assets" / "simulation" / "runtime.json"
+    try:
+        return bool(json.loads(path.read_text(encoding="utf-8")).get("allow_newer_model", False))
+    except (OSError, ValueError, TypeError):
+        return False
 
 
 def output_dir(task):
@@ -151,6 +153,7 @@ def _validate_export(path, header, parameters):
 
 def run_task(task, on_stage=None):
     params = validate_parameters({"subsystem": task.subsystem, "fault_mode": task.fault_mode,
+                                  "simulation_backend": "simulink",
                                   "injection_time": task.injection_time, "end_time": task.end_time,
                                   "flight_count": task.flight_count, "mode": task.mode})
     parameters = {"power_fault": params["fault_mode"] if params["subsystem"] == "动力" else "无故障",

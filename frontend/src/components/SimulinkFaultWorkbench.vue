@@ -3,16 +3,29 @@
     <header class="heading">
       <h1>{{ mode === 'realtime' ? '实时故障注入' : '离线故障数据集生成' }}</h1>
       <div class="runtime">
-        <el-tag :type="runtime.available ? 'success' : 'warning'">{{ runtime.available ? 'Engine 已配置' : 'Engine 未就绪' }}</el-tag>
-        <span>rocket_sim · {{ runtime.matlab_release || 'R2023a' }} · 480 s</span>
+        <el-tag :type="available ? 'success' : 'warning'">{{ mode === 'offline' ? (available ? 'Python 代理已就绪 · 无需 MATLAB' : '代理数据不可用') : (available ? 'Engine 已连接' : 'Engine 未就绪') }}</el-tag>
+        <span>{{ mode === 'offline' ? '正常基线 CSV + Python 代理扰动 · 480 s' : `rocket_sim · ${runtime.matlab_release || '需兼容 MATLAB/Simulink'} · 480 s` }}</span>
         <el-tooltip content="刷新运行环境"><el-button :icon="Refresh" circle aria-label="刷新运行环境" @click="loadCatalog" /></el-tooltip>
       </div>
     </header>
-    <el-alert v-if="runtime.error" :title="runtime.error" type="warning" :closable="false" show-icon class="runtime-error" />
-    <el-alert v-else-if="runtime.compatibility_warning" :title="runtime.compatibility_warning" type="warning" :closable="false" show-icon class="runtime-error" />
+    <p class="mode-description">{{ mode === 'realtime' ? '通过 MATLAB Engine 提交故障参数并求解模型，完成后生成离线 CSV 数据；本页面跟踪提交和求解进度。' : '无需 MATLAB；读取正常基线 CSV，按故障类型、强度和时刻生成 Python 代理故障数据。结果用于演示、算法联调和测试，不代表 Simulink 数值结果。' }}</p>
+    <el-alert v-if="currentRuntime.error" :title="currentRuntime.error" type="warning" :closable="false" show-icon class="runtime-error" />
+    <el-alert v-else-if="mode === 'realtime' && runtime.compatibility_warning" :title="runtime.compatibility_warning" type="warning" :closable="false" show-icon class="runtime-error" />
+    <el-alert v-if="mode === 'realtime'" title="当前实时故障注入是后台实时提交和进度跟踪；数据仍由同一份 Simulink 模型一次求解后导出 CSV，不是逐点在线 MATLAB 遥测。" type="info" :closable="false" class="runtime-error" />
+    <el-alert v-else title="Python 代理模式不调用 MATLAB/Engine：以正常基线 CSV 为底稿，对故障相关信号施加确定性扰动，并输出 scope_data.csv、P_values.csv 和 FaultFlag。代理结果不能替代真实 Simulink 结果。" type="info" :closable="false" class="runtime-error" />
+    <section v-if="mode === 'realtime'" class="configuration">
+      <h2>本机 MATLAB 配置</h2>
+      <p>项目模型按解压目录定位；MATLAB 安装目录从本机注册表、PATH 及配置中检测。页面检查的是当前 Django 服务使用的 Python 环境，Engine 必须安装在该环境中；支持导入不代表已验证模型求解成功。</p>
+      <el-select v-if="runtime.installations?.length" v-model="matlabRoot" placeholder="选择本机 MATLAB"><el-option v-for="item in runtime.installations" :key="item.root" :value="item.root" :label="`${item.release || '版本未知'} · ${item.root}`" /></el-select>
+      <el-input v-model="matlabRoot" placeholder="本机 MATLAB 安装根目录，例如 C:\Program Files\MATLAB\R2023a" />
+      <el-button :loading="configuringMatlab" :disabled="!canSubmit" @click="configureMatlab">保存目录并检查</el-button>
+      <p>{{ runtime.setup_hint }}</p>
+      <p v-if="runtime.engine_setup_directory">Engine 安装源目录：{{ runtime.engine_setup_directory }}；仅检测到 MATLAB 时不会自动安装 Engine。</p>
+      <el-alert title="当前模型保存于 R2023a。若本机版本较低，页面会显示兼容加载提示；请以实际求解结果和项目验收标准确认跨版本差异。无 MATLAB 时可使用离线项目数据导入。" type="info" :closable="false" />
+    </section>
 
     <section class="configuration">
-      <h2>注入参数</h2>
+      <h2>{{ mode === 'offline' ? '代理故障参数' : '注入参数' }}</h2>
       <el-form label-position="top" class="parameter-form">
         <el-form-item label="任务名称"><el-input v-model="form.name" maxlength="200" placeholder="动力故障仿真" /></el-form-item>
         <el-form-item label="子系统">
@@ -23,11 +36,14 @@
         </el-form-item>
         <el-form-item label="注入时刻 (s)"><el-input-number v-model="form.injection_time" :min="0" :max="479.99" :precision="2" controls-position="right" /></el-form-item>
         <el-form-item label="恢复时刻 (s)"><el-input-number v-model="form.end_time" :min="0.01" :max="480" :precision="2" controls-position="right" /></el-form-item>
-        <el-form-item label="飞行次数"><el-input-number v-model="form.flight_count" :min="0" :max="20" :precision="0" controls-position="right" /></el-form-item>
+        <el-form-item v-if="mode === 'offline'" label="代理故障强度"><el-input-number v-model="form.severity" :min="0.05" :max="1" :step="0.05" :precision="2" controls-position="right" /></el-form-item>
+        <el-form-item label="飞行次数">
+          <el-input-number v-model="form.flight_count" :min="0" :max="20" :precision="0" controls-position="right" />
+        </el-form-item>
       </el-form>
       <div class="commands">
         <el-button :icon="DocumentAdd" :loading="saving" :disabled="!canSubmit || starting" @click="createTask">保存任务</el-button>
-        <el-button type="primary" :icon="VideoPlay" :loading="saving || starting" :disabled="!canSubmit || !runtime.available || busy" @click="createAndRun">提交仿真</el-button>
+        <el-button type="primary" :icon="VideoPlay" :loading="saving || starting" :disabled="!canSubmit || !available || busy" @click="createAndRun">{{ mode === 'offline' ? '生成代理数据' : '提交仿真' }}</el-button>
       </div>
     </section>
 
@@ -46,10 +62,11 @@
           <span>{{ task.subsystem }} / {{ task.fault_mode }}</span>
           <span>{{ task.injection_time }}–{{ task.end_time }} s</span>
           <span>飞行次数 {{ task.flight_count }}</span>
-          <el-button v-if="['ready', 'failed'].includes(task.status) && task.simulation_backend === 'simulink'" :icon="VideoPlay" :disabled="!runtime.available || !canSubmit || saving" :loading="starting" @click="startTask">{{ task.status === 'failed' ? '重试' : '启动' }}</el-button>
+          <el-button v-if="['ready', 'failed'].includes(task.status) && task.simulation_backend === backend" :icon="VideoPlay" :disabled="!available || !canSubmit || saving" :loading="starting" @click="startTask">{{ task.status === 'failed' ? '重试' : '启动' }}</el-button>
         </div>
         <el-steps :active="stageIndex" :process-status="task.status === 'failed' ? 'error' : 'process'" finish-status="success" align-center>
-          <el-step title="排队" /><el-step title="启动引擎" /><el-step title="配置模型" /><el-step title="求解" /><el-step title="导出 CSV" /><el-step title="登记数据集" />
+          <template v-if="mode === 'offline'"><el-step title="排队" /><el-step title="读取基线" /><el-step title="生成代理数据" /><el-step title="登记数据集" /></template>
+          <template v-else><el-step title="排队" /><el-step title="启动引擎" /><el-step title="配置模型" /><el-step title="求解" /><el-step title="导出 CSV" /><el-step title="登记数据集" /></template>
         </el-steps>
         <el-alert v-if="task.latest_result?.error" :title="task.latest_result.error" type="error" :closable="false" show-icon />
         <el-alert v-if="pollError" :title="pollError" type="warning" :closable="false" show-icon />
@@ -90,17 +107,22 @@ import ReportChart from './ReportChart.vue'
 
 const props = defineProps({ mode: { type: String, default: 'offline' } })
 const options = ref({}), runtime = ref({ available: false }), canSubmit = ref(false)
-const form = ref({ name: '', subsystem: '动力', fault_mode: '泵气蚀', injection_time: 40, end_time: 480, flight_count: 0 })
+const archive = ref({ available: false, selections: [] })
+const matlabRoot = ref(''), configuringMatlab = ref(false)
+const backend = props.mode === 'offline' ? 'python_proxy' : 'simulink'
+const currentRuntime = computed(() => props.mode === 'offline' ? archive.value : runtime.value)
+const available = computed(() => currentRuntime.value.available)
+const form = ref({ name: '', subsystem: '动力', fault_mode: '泵气蚀', injection_time: 40, end_time: 480, flight_count: 0, severity: 0.5 })
 const task = ref(null), history = ref([]), saving = ref(false), starting = ref(false), pollError = ref('')
 const outputIndex = ref(0), signals = ref([])
 const key = `simulink-task-${props.mode}`
 let timer, disposed = false, selection = 0
 const busy = computed(() => ['queued', 'running'].includes(task.value?.status))
-const outputs = computed(() => task.value?.simulation_output?.datasets || [])
+const outputs = computed(() => (task.value?.simulation_output?.datasets || []).filter(item => item.component !== '派生参数'))
 const activeOutput = computed(() => outputs.value[outputIndex.value])
-const stageOrder = ['queued', 'starting_engine', 'configuring', 'solving', 'exporting', 'registering', 'completed']
+const stageOrder = props.mode === 'offline' ? ['queued', 'preparing', 'generating', 'registering', 'completed'] : ['queued', 'starting_engine', 'configuring', 'solving', 'exporting', 'registering', 'completed']
 const stageIndex = computed(() => Math.max(0, stageOrder.indexOf(task.value?.current_stage)))
-const stageLabel = computed(() => ({ queued: '等待执行', starting_engine: '启动 MATLAB', configuring: '配置故障块', solving: 'Simulink 求解中', exporting: '导出结果', registering: '登记数据集' }[task.value?.current_stage] || '运行中'))
+const stageLabel = computed(() => ({ queued: '等待执行', preparing: '读取正常基线', generating: '生成 Python 代理数据', importing: '导入包内项目数据', starting_engine: '启动 MATLAB', configuring: '配置故障块', solving: 'Simulink 求解中', exporting: '导出结果', registering: '登记数据集' }[task.value?.current_stage] || '运行中'))
 const statusLabel = status => ({ ready: '待启动', queued: '已排队', running: '运行中', completed: '已完成', failed: '失败' }[status] || status)
 const number = value => typeof value === 'number' ? Number(value.toPrecision(7)) : value
 const chart = computed(() => ({
@@ -124,8 +146,15 @@ function changeSubsystem() { form.value.fault_mode = options.value[form.value.su
 async function loadCatalog() {
   try {
     const result = await request('sample/')
-    options.value = result.subsystems; runtime.value = result.runtime; canSubmit.value = result.can_submit
+    options.value = result.subsystems; runtime.value = props.mode === 'offline' ? result.proxy : result.runtime; archive.value = result.archive; canSubmit.value = result.can_submit
+    matlabRoot.value = result.runtime.matlab_root || ''
   } catch (error) { ElMessage.error(error.message) }
+}
+async function configureMatlab() {
+  configuringMatlab.value = true
+  try { const result = await request('matlab/configure/', { matlab_root: matlabRoot.value }); runtime.value = result.runtime; ElMessage.success('目录已保存，运行条件见上方检查结果') }
+  catch (error) { ElMessage.error(error.message) }
+  finally { configuringMatlab.value = false }
 }
 async function createTask() {
   if (form.value.injection_time == null || form.value.end_time == null || form.value.injection_time >= form.value.end_time) {
@@ -134,7 +163,7 @@ async function createTask() {
   saving.value = true
   try {
     clearTimeout(timer); selection++
-    const result = await request('workflows/', { ...form.value, mode: props.mode, simulation_backend: 'simulink' })
+    const result = await request('workflows/', { ...form.value, mode: props.mode, simulation_backend: backend })
     acceptTask(result.task); outputIndex.value = 0; pollError.value = ''
     return true
   } catch (error) { ElMessage.error(error.message); return false }
@@ -166,7 +195,7 @@ async function selectTask(id) {
 onMounted(async () => {
   await loadCatalog()
   try {
-    history.value = (await request('workflows/')).results.filter(item => item.simulation_backend === 'simulink' && item.mode === props.mode)
+    history.value = (await request('workflows/')).results.filter(item => item.simulation_backend === backend && item.mode === props.mode)
     const saved = localStorage.getItem(key)
     const id = history.value.find(item => item.id === saved)?.id || history.value[0]?.id
     if (id) await selectTask(id)

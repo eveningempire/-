@@ -8,6 +8,7 @@ from collections import Counter, defaultdict
 from functools import lru_cache
 from pathlib import Path
 from django.conf import settings
+from datasets.schema import column_roles
 
 # The delivery bundle keeps the 3.45 GB source archive compressed under
 # ``integrations/simulation_assets``.  Keep an environment override for sites
@@ -72,4 +73,4 @@ def preview(member: str, limit: int = 50):
             for index, row in enumerate(reader):
                 if index >= limit: break
                 rows.append(row); fault_counts[row[-1] if row else ""] += 1
-    return {"member": member, "columns": columns, "rows": rows, "preview_rows": len(rows), "file_size_mb": round(info.file_size / 1048576, 2), "fault_flag_counts_in_preview": fault_counts}
+    return {"member": member, "columns": columns, **column_roles(columns), "rows": rows, "preview_rows": len(rows), "file_size_mb": round(info.file_size / 1048576, 2), "fault_flag_counts_in_preview": fault_counts}

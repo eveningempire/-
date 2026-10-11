@@ -7,7 +7,7 @@
     <el-form v-if="selectedAlgorithm?.source==='plugin'&&pluginFields.length" class="plugin-parameters" inline label-position="top"><el-form-item v-for="field in pluginFields" :key="field.name" :label="field.name"><el-select v-if="field.definition.enum" v-model="pluginParameters[field.name]"><el-option v-for="choice in field.definition.enum" :key="String(choice)" :label="String(choice)" :value="choice"/></el-select><el-switch v-else-if="field.definition.type==='boolean'" v-model="pluginParameters[field.name]"/><el-input-number v-else-if="field.definition.type==='number'||field.definition.type==='integer'" v-model="pluginParameters[field.name]" :min="field.definition.minimum" :max="field.definition.maximum" :precision="field.definition.type==='integer'?0:undefined"/><el-input v-else v-model="pluginParameters[field.name]"/></el-form-item></el-form>
     <el-alert v-if="mode==='batch'&&batchReport" type="info" :closable="false" :title="`批量诊断完成: 成功 ${batchReport.success}, 失败 ${batchReport.failed}`" />
     <el-card v-if="mode==='batch'&&batchReport" class="batch-results" shadow="never">
-      <template #header><div class="batch-head"><b>批量诊断结果</b><span>点击“查看详情”可加载该数据集的完整窗口和证据</span></div></template>
+      <template #header><div class="batch-head"><b>批量诊断结果</b><span>点击“查看详情”可加载该数据集的全局诊断结果和证据</span></div></template>
       <el-table :data="batchRows" stripe row-key="dataset_id" highlight-current-row :current-row-key="activeDatasetId" @row-click="showBatchResult">
         <el-table-column label="数据集" min-width="190"><template #default="s">{{datasetName(s.row.dataset_id)}}</template></el-table-column>
         <el-table-column label="处理状态" width="100"><template #default="s"><el-tag :type="s.row.status==='success'?'success':'danger'">{{s.row.status==='success'?'成功':'失败'}}</el-tag></template></el-table-column>
@@ -19,30 +19,16 @@
       </el-table>
     </el-card>
     <h3 v-if="result">当前详情：{{datasetName(activeDatasetId)}}</h3>
-    <template v-if="result?.event_summary">
-      <h3>窗口告警事件 · {{ result.event_summary.event_count }}</h3>
-      <el-table :data="result.detected_events || []" size="small" empty-text="未出现置信度达标的异常窗口">
-        <el-table-column prop="fault" label="模型预测" min-width="170" />
-        <el-table-column label="窗口开始 (s)" min-width="130"><template #default="scope">{{ seconds(scope.row.time_start) }}</template></el-table-column>
-        <el-table-column label="窗口结束 (s)" min-width="130"><template #default="scope">{{ seconds(scope.row.time_end) }}</template></el-table-column>
-        <el-table-column prop="window_count" label="窗口数" width="90" />
-        <el-table-column label="最高置信度" min-width="120"><template #default="scope">{{ percent(scope.row.max_confidence) }}</template></el-table-column>
-      </el-table>
-    </template>
     <el-alert v-if="selectedBatchError" type="error" :closable="false" :title="`${datasetName(activeDatasetId)}：${selectedBatchError}`" />
     <el-descriptions v-if="result&&selected" :column="2" border><el-descriptions-item label="数据来源">{{selected.source==='simulation'?'仿真':'离线上传'}}</el-descriptions-item><el-descriptions-item label="系统 / 部件">{{selected.system||'未记录'}} / {{selected.component||'未记录'}}</el-descriptions-item><el-descriptions-item label="PBS 单机产品">{{selected.structure_node_name||'未关联'}}</el-descriptions-item><el-descriptions-item label="故障标签(录入信息)">{{selected.fault_type||'未标注'}}</el-descriptions-item><el-descriptions-item label="注入时间(录入信息)">{{selected.injection_time??'未记录'}}</el-descriptions-item></el-descriptions>
     <el-alert v-if="result&&selected?.fault_type==='正常基线'" type="warning" :closable="false" title="此数据集标注为仿真正常基线" description="现有通用诊断算法可能对飞行工况变化产生误报。诊断结果仍按算法真实输出显示，使用前需完成测点映射和阈值标定。" />
     <el-alert v-if="error" title="诊断未完成,尚无模型结论" type="error" :closable="false" show-icon><p>{{failureReason}}</p><p>补齐 Hier14 源码、权重及符合模型字段要求的 CSV 后重新运行。数据集的故障标签不代表预测结果。</p><details><summary>技术详情</summary><pre>{{error}}</pre></details></el-alert>
     <el-empty v-if="!result&&!error&&!selectedBatchError&&!(mode==='batch'&&batchReport)" :description="mode==='batch'?'请选择批量结果中的一项查看详情':'尚无诊断结果'"/>
     <template v-if="result">
-      <div class="metrics"><div><small>末窗口预测</small><strong>{{result.pred_name}}</strong></div><div><small>全程聚合类别</small><strong>{{result.aggregate_pred_name}}</strong></div><div><small>末窗口最高概率</small><strong>{{percent(last?.confidence)}}</strong></div><div><small>诊断窗口数</small><strong>{{result.n_windows}}</strong></div></div>
-      <p>末窗口反映最新状态,聚合类别反映全程窗口平均概率。当前数据已完成一次诊断运算,共生成 {{result.n_windows}} 个窗口;数据不足一个模型窗口时仅显示最后一个窗口。模型概率不等同于经过校准的可靠性保证。</p>
+      <div class="metrics"><div><small>全局诊断结果</small><strong>{{globalDiagnosis}}</strong></div><div><small>全局诊断置信度</small><strong>{{percent(globalConfidence)}}</strong></div><div><small>诊断判定</small><strong>{{result.decision_label||'—'}}</strong></div><div><small>诊断窗口数</small><strong>{{result.n_windows}}</strong></div></div>
+      <p>全局诊断结果由算法对整段数据的诊断窗口进行聚合得到，是本次诊断的最终结论。窗口中间结果不作为单独诊断明细展示；模型概率不等同于经过校准的可靠性保证。</p>
       <el-descriptions v-if="result.data_quality" :column="3" border><el-descriptions-item label="时间字段">{{result.data_quality.time_column||'未提供'}}</el-descriptions-item><el-descriptions-item label="故障真值标签">{{result.data_quality.fault_flag_column||'无'}}（仅核对真值）</el-descriptions-item><el-descriptions-item label="数值参数列数">{{result.data_quality.numeric_parameter_columns?.length??0}}</el-descriptions-item><el-descriptions-item label="正常 / 故障采样点">{{result.data_quality.fault_label_summary?.counts?.['0']??0}} / {{result.data_quality.fault_label_summary?.counts?.['1']??0}}</el-descriptions-item><el-descriptions-item label="首次故障时间戳">{{result.data_quality.fault_label_summary?.first_fault_time??'无故障标签'}}</el-descriptions-item></el-descriptions>
       <h3>类别概率比较</h3><ReportChart :key="`probability-${activeDatasetId}`" :option="probabilityChart"/>
-      <h3>窗口置信度与时间</h3><ReportChart :key="`timeline-${activeDatasetId}`" :option="timeline"/>
-      <h3>窗口诊断明细</h3>
-      <el-table :data="pageRows" stripe><el-table-column prop="window_index" label="窗口" width="90"/><el-table-column prop="time_start" label="起始时间 (s)"/><el-table-column prop="time_end" label="结束时间 (s)"/><el-table-column prop="pred_name" label="预测类别"/><el-table-column label="最高概率"><template #default="s">{{percent(s.row.confidence)}}</template></el-table-column></el-table>
-      <el-pagination v-model:current-page="page" :page-size="10" :total="windows.length" layout="prev, pager, next"/>
       <h3 v-if="result.evidence?.length">诊断证据</h3><el-table v-if="result.evidence?.length" :data="result.evidence" size="small"><el-table-column prop="signal" label="信号"/><el-table-column prop="test" label="测点"/><el-table-column prop="baseline" label="基准"/><el-table-column prop="latest" label="当前"/><el-table-column prop="z_score" label="偏离Z值"/><el-table-column prop="pca_loading" label="PCA贡献"/></el-table>
       <h3 v-if="result.d_matrix">MSFG 依赖矩阵</h3><div v-if="result.d_matrix" class="matrix"><table><thead><tr><th>故障 / 测点</th><th v-for="t in result.d_matrix.tests" :key="t">{{t}}</th></tr></thead><tbody><tr v-for="(f,i) in result.d_matrix.faults" :key="f"><th>{{f}}</th><td v-for="(v,j) in result.d_matrix.values[i]" :key="j" :class="{hit:v}">{{v}}</td></tr></tbody></table></div>
       <h3>运行依据</h3><el-descriptions :column="2" border><el-descriptions-item label="算法">{{result.algorithm||algorithmName}}</el-descriptions-item><el-descriptions-item label="窗口长度">{{result.seq_len}} 样本</el-descriptions-item><el-descriptions-item label="滑动步长">{{result.window_stride}} 样本</el-descriptions-item><el-descriptions-item label="运行模式">{{result.model_mode}}</el-descriptions-item></el-descriptions>
@@ -53,23 +39,24 @@
 <script setup>
 import {ref,computed,onMounted} from 'vue'
 import ReportChart from '../components/ReportChart.vue'
-import {isSimulinkDerived} from '../utils/datasetVisibility.js'
-const datasets=ref([]),id=ref(),batchIds=ref([]),mode=ref('single'),activeDatasetId=ref(null),result=ref(null),batchReport=ref(null),selectedBatchError=ref(''),error=ref(''),loading=ref(false),batchLoading=ref(false),page=ref(1),algorithm=ref('hier14')
-const availableDatasets=computed(()=>algorithm.value==='hier14'?datasets.value.filter(dataset=>!isSimulinkDerived(dataset)):datasets.value)
+import {isSelectableDataset} from '../utils/datasetVisibility.js'
+const datasets=ref([]),id=ref(),batchIds=ref([]),mode=ref('single'),activeDatasetId=ref(null),result=ref(null),batchReport=ref(null),selectedBatchError=ref(''),error=ref(''),loading=ref(false),batchLoading=ref(false),algorithm=ref('hier14')
+const availableDatasets=computed(()=>datasets.value.filter(isSelectableDataset))
 const algorithmOptions=ref([{key:'hier14',name:'Hier14 层次时序诊断',source:'builtin'},{key:'msfg_teams_rt',name:'MSFG + TEAMS-RT 依赖诊断',source:'builtin'},{key:'pca_iforest',name:'PCA-iForest 偏离诊断',source:'builtin'}])
 const selectedAlgorithm=computed(()=>algorithmOptions.value.find(x=>x.key===algorithm.value)),algorithmName=computed(()=>selectedAlgorithm.value?.name||algorithm.value)
 const pluginParameters=ref({}),pluginFields=computed(()=>Object.entries(selectedAlgorithm.value?.parameters||{}).map(([name,definition])=>({name,definition})))
-const selected=computed(()=>datasets.value.find(d=>String(d.id)===String(activeDatasetId.value))),batchRows=computed(()=>batchReport.value?.results||[]),windows=computed(()=>result.value?.window_series||[]),last=computed(()=>windows.value.at(-1)),pageRows=computed(()=>windows.value.slice((page.value-1)*10,page.value*10))
+const selected=computed(()=>datasets.value.find(d=>String(d.id)===String(activeDatasetId.value))),batchRows=computed(()=>batchReport.value?.results||[]),windows=computed(()=>result.value?.window_series||[])
+const globalDiagnosis=computed(()=>result.value?.global_diagnosis||result.value?.aggregate_pred_name||result.value?.pred_name||'未提供')
+const globalConfidence=computed(()=>result.value?.global_confidence??result.value?.confidence??result.value?.aggregate_class_probs?.find(item=>item.name===globalDiagnosis.value)?.prob)
 const percent=v=>v==null?'未提供':(100*Number(v)).toFixed(1)+'%'
 const seconds=v=>v==null?'未提供':Number(v).toFixed(3)
 const datasetName=datasetId=>datasets.value.find(d=>String(d.id)===String(datasetId))?.name||`数据集 #${datasetId}`
 const failureReason=computed(()=>/repo not found|不存在|Missing.*artifact/i.test(error.value)?'诊断运行依赖缺失,模型未执行。':/columns|rows|CSV/i.test(error.value)?'输入数据不符合模型要求。':'模型执行失败,请检查技术详情。')
-const probabilityChart=computed(()=>{const p=result.value?.class_probs||[],a=result.value?.aggregate_class_probs||[];return {tooltip:{trigger:'axis'},legend:{data:['末窗口','全程平均']},grid:{bottom:100,containLabel:true},xAxis:{type:'category',data:p.map(x=>x.name),axisLabel:{rotate:30}},yAxis:{type:'value',name:'概率 (%)',min:0,max:100},series:[{name:'末窗口',type:'bar',data:p.map(x=>x.prob*100),color:'#247bba'},{name:'全程平均',type:'bar',data:p.map(x=>(a.find(y=>y.name===x.name)?.prob??0)*100),color:'#239477'}]}})
-const timeline=computed(()=>({tooltip:{trigger:'axis'},grid:{containLabel:true,left:55,right:40,bottom:70},xAxis:{type:'value',name:'窗口结束时间 (s)'},yAxis:{type:'value',name:'最高类别概率 (%)',min:0,max:100},dataZoom:[{type:'inside'},{type:'slider'}],series:[{name:'窗口置信度',type:'line',data:windows.value.map(w=>[w.time_end,w.confidence*100]),color:'#247bba'}]}))
-function clear(){result.value=null;activeDatasetId.value=null;selectedBatchError.value='';error.value='';page.value=1}
+const probabilityChart=computed(()=>{const p=result.value?.class_probs||[],a=result.value?.aggregate_class_probs||[];return {tooltip:{trigger:'axis'},legend:{data:['末窗口参考','全局诊断概率']},grid:{bottom:100,containLabel:true},xAxis:{type:'category',data:p.map(x=>x.name),axisLabel:{rotate:30}},yAxis:{type:'value',name:'概率 (%)',min:0,max:100},series:[{name:'末窗口参考',type:'bar',data:p.map(x=>x.prob*100),color:'#247bba'},{name:'全局诊断概率',type:'bar',data:p.map(x=>(a.find(y=>y.name===x.name)?.prob??0)*100),color:'#239477'}]}})
+function clear(){result.value=null;activeDatasetId.value=null;selectedBatchError.value='';error.value=''}
 function onModeChange(){clear();batchReport.value=null}
 function onAlgorithmChange(){const compatibleIds=new Set(availableDatasets.value.map(dataset=>String(dataset.id)));if(id.value!=null&&!compatibleIds.has(String(id.value)))id.value=undefined;batchIds.value=batchIds.value.filter(datasetId=>compatibleIds.has(String(datasetId)));clear();batchReport.value=null;pluginParameters.value=Object.fromEntries(pluginFields.value.map(({name,definition})=>[name,definition.default??(definition.type==='boolean'?false:definition.type==='string'?'':definition.minimum??0)]))}
-function showBatchResult(row){activeDatasetId.value=row.dataset_id;result.value=row.status==='success'?row.result:null;selectedBatchError.value=row.status==='success'?'':row.error||'诊断失败';error.value='';page.value=1}
+function showBatchResult(row){activeDatasetId.value=row.dataset_id;result.value=row.status==='success'?row.result:null;selectedBatchError.value=row.status==='success'?'':row.error||'诊断失败';error.value=''}
 const csrfHeaders=()=>{const token=document.cookie.split('; ').find(x=>x.startsWith('csrftoken='))?.slice(10);return token?{'X-CSRFToken':decodeURIComponent(token)}:{}}
 onMounted(async()=>{try{const [datasetResponse,catalogResponse]=await Promise.all([fetch('/api/v1/datasets/',{credentials:'include'}),fetch('/api/v1/integrations/algorithm-assets/algorithms/?category=diagnosis',{credentials:'include'})]);if(!datasetResponse.ok)throw Error('数据集加载失败');datasets.value=await datasetResponse.json();if(catalogResponse.ok){const catalog=await catalogResponse.json();if(catalog.ok&&catalog.results?.length)algorithmOptions.value=catalog.results}}catch(e){error.value=e.message}})
 async function run(){if(mode.value!=='single')return;clear();loading.value=true;const datasetId=id.value,algorithmKey=algorithm.value;try{const plugin=selectedAlgorithm.value?.source==='plugin';const url=plugin?`/api/v1/integrations/algorithm-assets/algorithms/${algorithmKey}/run/`:'/api/v1/fault-diagnosis/predict/';const body=plugin?{dataset_id:datasetId,parameters:pluginParameters.value}:{dataset_id:datasetId,algorithm:algorithmKey};const r=await fetch(url,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json',...csrfHeaders()},body:JSON.stringify(body)});const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'诊断失败');if(mode.value!=='single'||algorithm.value!==algorithmKey||id.value!==datasetId)return;activeDatasetId.value=datasetId;result.value=j.result}catch(e){if(mode.value==='single'&&algorithm.value===algorithmKey&&id.value===datasetId)error.value=e.message}finally{loading.value=false}}

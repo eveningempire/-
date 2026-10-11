@@ -22,7 +22,11 @@ def _quality_for_csv(csv_path):
 
 def _standardize_result(result, quality):
     label = result.get('aggregate_pred_name') or result.get('pred_name') or '未知'
-    confidence = result.get('confidence')
+    aggregate_probs = result.get('aggregate_class_probs') or result.get('class_probs') or []
+    aggregate_confidence = next((item.get('prob') for item in aggregate_probs if item.get('name') == label), None)
+    confidence = aggregate_confidence if aggregate_confidence is not None else result.get('confidence')
+    result['global_diagnosis'] = label
+    result['global_confidence'] = None if confidence is None else float(confidence)
     if label in {'正常', '正常状态'}:
         decision = 'normal'
     elif label in {'未知', '不确定', '诊断不确定'} or confidence is not None and float(confidence) < 0.55:

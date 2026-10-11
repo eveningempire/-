@@ -1,0 +1,111 @@
+{
+  "checks": [
+    {
+      "check": "fault-diagnosis status",
+      "seconds": 1.12,
+      "http": 200
+    },
+    {
+      "check": "health-assessment status",
+      "seconds": 0.03,
+      "http": 200
+    },
+    {
+      "check": "rul status",
+      "seconds": 0.0,
+      "http": 200
+    },
+    {
+      "check": "datasets list",
+      "seconds": 0.02,
+      "http": 200
+    },
+    {
+      "check": "simulation catalog",
+      "seconds": 0.01,
+      "http": 200
+    },
+    {
+      "check": "diagnosis hier14 normal",
+      "seconds": 0.86,
+      "http": 200
+    },
+    {
+      "check": "diagnosis hier14 fault",
+      "seconds": 0.83,
+      "http": 200
+    },
+    {
+      "check": "diagnosis msfg_teams_rt normal",
+      "seconds": 0.95,
+      "http": 200
+    },
+    {
+      "check": "diagnosis msfg_teams_rt fault",
+      "seconds": 0.95,
+      "http": 200
+    },
+    {
+      "check": "diagnosis pca_iforest normal",
+      "seconds": 1.64,
+      "http": 200
+    },
+    {
+      "check": "diagnosis pca_iforest fault",
+      "seconds": 1.67,
+      "http": 200
+    },
+    {
+      "check": "health cdpca_ga",
+      "seconds": 4.25,
+      "http": 200
+    },
+    {
+      "check": "health ae_gmm",
+      "seconds": 9.64,
+      "http": 200
+    },
+    {
+      "check": "health system",
+      "seconds": 9.28,
+      "http": 200
+    },
+    {
+      "check": "rul trained fault",
+      "seconds": 0.55,
+      "http": 200
+    },
+    {
+      "check": "batch trained rul",
+      "seconds": 1.06,
+      "http": 200
+    },
+    {
+      "check": "batch diagnosis",
+      "seconds": 1.64,
+      "http": 200
+    },
+    {
+      "check": "archive create",
+      "seconds": 0.0,
+      "http": 201
+    },
+    {
+      "check": "archive detail",
+      "seconds": 0.06,
+      "http": 200
+    },
+    {
+      "check": "diagnosis imported data",
+      "seconds": 0.81,
+      "http": 200
+    },
+    {
+      "check": "rul imported data",
+      "seconds": 0.52,
+      "http": 200
+    }
+  ],
+  "failures": [],
+  "dataset_count": 514
+}

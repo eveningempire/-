@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 
-// Vite configuration for the CMG health management platform frontend.
+// Vite configuration for the PHM health management platform frontend.
 // This file sets up the Vue plugin and configures a proxy for API calls to
 // the Django backend running on localhost:8000. When developing the
 // frontend, all requests beginning with `/api/v1` will be forwarded to

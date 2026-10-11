@@ -1,0 +1,247 @@
+Found 61 test(s).
+Creating test database for alias 'default'...
+
+System check identified no issues (0 silenced).
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+...E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\decomposition\_pca.py:646: RuntimeWarning: invalid value encountered in divide
+  explained_variance_ratio_ = explained_variance_ / total_var
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:52,480 log 37300 36956 Bad Request: /api/v1/health-assessment/batch-evaluate/
+WARNING 2026-10-10 23:49:52,481 log 37300 36956 Bad Request: /api/v1/health-assessment/batch-evaluate/
+WARNING 2026-10-10 23:49:52,482 log 37300 36956 Bad Request: /api/v1/health-assessment/batch-evaluate/
+WARNING 2026-10-10 23:49:52,483 log 37300 36956 Bad Request: /api/v1/health-assessment/batch-evaluate/
+WARNING 2026-10-10 23:49:52,484 log 37300 36956 Bad Request: /api/v1/health-assessment/batch-evaluate/
+WARNING 2026-10-10 23:49:52,484 log 37300 36956 Bad Request: /api/v1/health-assessment/batch-evaluate/
+WARNING 2026-10-10 23:49:52,485 log 37300 36956 Bad Request: /api/v1/health-assessment/batch-evaluate/
+WARNING 2026-10-10 23:49:52,486 log 37300 36956 Method Not Allowed: /api/v1/health-assessment/batch-evaluate/
+..E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:52,692 log 37300 36956 Bad Request: /api/v1/health-assessment/evaluate/
+WARNING 2026-10-10 23:49:52,694 log 37300 36956 Bad Request: /api/v1/health-assessment/evaluate/
+WARNING 2026-10-10 23:49:52,695 log 37300 36956 Bad Request: /api/v1/health-assessment/evaluate/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:52,784 log 37300 36956 Bad Request: /api/v1/health-assessment/evaluate/
+..E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+..E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator RandomForestRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator AdaBoostRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,369 log 37300 36956 Bad Request: /api/v1/rul/predict/
+WARNING 2026-10-10 23:49:55,369 log 37300 36956 Bad Request: /api/v1/rul/predict/
+WARNING 2026-10-10 23:49:55,371 log 37300 36956 Bad Request: /api/v1/rul/predict/
+WARNING 2026-10-10 23:49:55,371 log 37300 36956 Bad Request: /api/v1/rul/predict/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,492 log 37300 36956 Bad Request: /api/v1/rul/predict/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,516 log 37300 36956 Bad Request: /api/v1/rul/predict/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,541 log 37300 36956 Bad Request: /api/v1/rul/predict/
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,546 log 37300 36956 Bad Request: /api/v1/rul/predict/
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,553 log 37300 36956 Bad Request: /api/v1/rul/predict/
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,558 log 37300 36956 Bad Request: /api/v1/rul/predict/
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator RandomForestRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator AdaBoostRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,692 log 37300 36956 Bad Request: /api/v1/rul/predict/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+WARNING 2026-10-10 23:49:55,752 log 37300 36956 Bad Request: /api/v1/rul/predict/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator PCA from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:55,835 log 37300 36956 Bad Request: /api/v1/rul/predict/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator RandomForestRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator AdaBoostRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator RandomForestRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator AdaBoostRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator RandomForestRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator AdaBoostRegressor from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+....WARNING 2026-10-10 23:49:59,655 log 37300 36956 Bad Request: /api/v1/phm/acceptance/structure/1/
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeClassifier from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\base.py:442: InconsistentVersionWarning: Trying to unpickle estimator RandomForestClassifier from version 1.6.1 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+..E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+WARNING 2026-10-10 23:49:59,752 log 37300 36956 Bad Request: /api/v1/phm/release-assessments/
+......E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: E:\ʵ����Ŀ\���������Ŀ\phm_platform\staticfiles\
+  mw_instance = middleware(adapted_handler)
+..WARNING 2026-10-10 23:50:01,388 log 37300 36956 Forbidden: /api/v1/integrations/algorithm-assets/algorithms/fixture_pressure/run/
+.WARNING 2026-10-10 23:50:01,451 log 37300 36956 Bad Request: /api/v1/integrations/algorithm-assets/algorithms/import/
+.WARNING 2026-10-10 23:50:01,459 log 37300 36956 Forbidden: /api/v1/integrations/algorithm-assets/algorithms/import/
+WARNING 2026-10-10 23:50:01,472 log 37300 36956 Bad Request: /api/v1/integrations/algorithm-assets/algorithms/import/
+...E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\decomposition\_pca.py:646: RuntimeWarning: invalid value encountered in divide
+  explained_variance_ratio_ = explained_variance_ / total_var
+.E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:602: ConvergenceWarning: lbfgs failed to converge after 500 iteration(s) (status=1):
+STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+Increase the number of iterations to improve the convergence (max_iter=500).
+You might also want to scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+  self.n_iter_ = _check_optimize_result("lbfgs", opt_res, self.max_iter)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:602: ConvergenceWarning: lbfgs failed to converge after 500 iteration(s) (status=1):
+STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+Increase the number of iterations to improve the convergence (max_iter=500).
+You might also want to scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+  self.n_iter_ = _check_optimize_result("lbfgs", opt_res, self.max_iter)
+..E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:602: ConvergenceWarning: lbfgs failed to converge after 500 iteration(s) (status=1):
+STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+Increase the number of iterations to improve the convergence (max_iter=500).
+You might also want to scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+  self.n_iter_ = _check_optimize_result("lbfgs", opt_res, self.max_iter)
+E:\PHM offline QA 20261010\phm_platform_offline\.venv\lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:602: ConvergenceWarning: lbfgs failed to converge after 500 iteration(s) (status=1):
+STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+Increase the number of iterations to improve the convergence (max_iter=500).
+You might also want to scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+  self.n_iter_ = _check_optimize_result("lbfgs", opt_res, self.max_iter)
+.......
+----------------------------------------------------------------------
+Ran 61 tests in 13.035s
+
+OK
+Destroying test database for alias 'default'...
+

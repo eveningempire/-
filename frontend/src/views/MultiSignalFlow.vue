@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div class="head"><div><h2>多信号流图</h2><p>按数据集查看测量信号、PBS 所属单机和分析模块的接入条件。</p></div><el-button :loading="loading" @click="load">刷新数据</el-button></div>
-    <el-card shadow="never" class="selector"><el-select v-model="datasetId" filterable placeholder="选择已登记的 CSV 数据集" @change="loadSamples"><el-option v-for="item in datasets" :key="item.id" :label="`${item.name} · #${item.id}`" :value="item.id"/></el-select><el-tag v-if="selectedDataset" :type="selectedDataset.structure_node_id?'success':'warning'">{{selectedDataset.structure_node_name||'未关联 PBS'}}</el-tag><span v-if="sampleCount">已载入 {{sampleCount}} 行用于预览{{hasMore?'，仍有后续数据':''}}</span></el-card>
+    <el-card shadow="never" class="selector"><el-select v-model="datasetId" filterable placeholder="选择已登记的 CSV 数据集" @change="loadSamples"><el-option v-for="item in selectableDatasets" :key="item.id" :label="`${item.name} · #${item.id}`" :value="item.id"/></el-select><el-tag v-if="selectedDataset" :type="selectedDataset.structure_node_id?'success':'warning'">{{selectedDataset.structure_node_name||'未关联 PBS'}}</el-tag><span v-if="sampleCount">已载入 {{sampleCount}} 行用于预览{{hasMore?'，仍有后续数据':''}}</span></el-card>
     <el-alert v-if="error" :title="error" type="error" show-icon :closable="false"/>
     <el-empty v-if="!selectedDataset&&!loading" description="请选择数据集"/>
     <template v-if="selectedDataset">
@@ -20,11 +20,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ReportChart from '../components/ReportChart.vue'
+import { isSelectableDataset } from '../utils/datasetVisibility.js'
 
 const MAX_SIGNALS = 8
 const router = useRouter(), route = useRoute()
 const datasets = ref([]), datasetId = ref(null), rows = ref([]), columns = ref([]), visibleSignals = ref([]), loading = ref(false), error = ref(''), hasMore = ref(false)
-const selectedDataset = computed(() => datasets.value.find(item => item.id === datasetId.value))
+const selectableDatasets = computed(() => datasets.value.filter(isSelectableDataset))
+const selectedDataset = computed(() => selectableDatasets.value.find(item => item.id === datasetId.value))
 const sampleCount = computed(() => rows.value.length)
 const numericSignals = computed(() => columns.value.filter(name => rows.value.some(row => row[name] !== '' && row[name] != null && Number.isFinite(Number(row[name]))) && !/^(time|timestamp|index)$/i.test(name)))
 const hiColumn = computed(() => columns.value.find(name => /^(hi_norm|hi|health_index|health|健康指数)$/i.test(name)))
@@ -75,7 +77,7 @@ const trendOption = computed(() => {
 
 async function load() {
   loading.value = true; error.value = ''
-  try { const response = await fetch('/api/v1/datasets/', { credentials: 'include' }); if (!response.ok) throw Error('数据集目录加载失败'); datasets.value = await response.json(); const requested = Number(route.query.dataset_id); if (!datasetId.value && datasets.value.some(item => item.id === requested)) datasetId.value = requested; if (datasetId.value) await loadSamples() }
+  try { const response = await fetch('/api/v1/datasets/', { credentials: 'include' }); if (!response.ok) throw Error('数据集目录加载失败'); datasets.value = await response.json(); const requested = Number(route.query.dataset_id); if (!datasetId.value && selectableDatasets.value.some(item => item.id === requested)) datasetId.value = requested; if (datasetId.value) await loadSamples() }
   catch (exc) { error.value = exc.message }
   finally { loading.value = false }
 }

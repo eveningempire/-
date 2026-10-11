@@ -24,6 +24,8 @@ def _evaluate_component(dataset_id, method, algorithm_name, component_id=None):
     from datasets.services import read_rows
     from .references import assessment_reference
     dataset = Dataset.objects.select_related('structure_node').get(pk=dataset_id)
+    if dataset.component == '派生参数':
+        raise ValueError('健康评估仅支持原始状态量数据集，派生参数已隐藏')
     if not dataset.file or not dataset.file.name.lower().endswith('.csv'):
         raise ValueError('健康评估只接受 CSV 数据集')
     result = method(read_rows(dataset_id), **assessment_reference(dataset))

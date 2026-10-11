@@ -160,11 +160,23 @@ class DatasetViewSet(viewsets.ModelViewSet):
     def partial_update(self,request,*a,**k):
         dataset=self.get_object()
         try:
+            update_fields = []
+            if 'name' in request.data:
+                if not isinstance(request.data.get('name'), str):
+                    return Response({'detail':'数据集名称必须是文本'}, status=400)
+                name = request.data['name'].strip()
+                if not name:
+                    return Response({'detail':'数据集名称不能为空'}, status=400)
+                if len(name) > 200:
+                    return Response({'detail':'数据集名称最多 200 个字符'}, status=400)
+                dataset.name = name
+                update_fields.append('name')
             if 'structure_node_id' in request.data:
                 dataset.structure_node_id=_structure_node_id(request.data.get('structure_node_id'))
-                dataset.save(update_fields=['structure_node'])
-            else:
-                return Response({'detail':'只支持更新 structure_node_id'}, status=400)
+                update_fields.append('structure_node')
+            if not update_fields:
+                return Response({'detail':'只支持更新 name 或 structure_node_id'}, status=400)
+            dataset.save(update_fields=update_fields)
         except ValueError as exc:
             return Response({'detail':str(exc)},status=400)
         return Response(self.item(dataset))

@@ -16,6 +16,13 @@ def assessment_reference(dataset):
         entries = json.loads(manifest.read_text(encoding='utf-8'))['files']
         entry = next((item for item in entries if item.get('dataset_id') == dataset.pk
                       and item.get('file') == dataset.file.name), None)
+        if entry is None:
+            for task in FaultWorkflowTask.objects.filter(status='completed', simulation_backend='project_archive'):
+                export = next((item for item in task.simulation_output.get('datasets', [])
+                               if item.get('dataset_id') == dataset.pk and item.get('path') == dataset.file.name), None)
+                if export:
+                    entry = {'member': export['archive_member']}
+                    break
         if entry:
             filename = Path(entry['member']).name
             flight = filename.split('_t', 1)[0].removesuffix('_P.csv').removesuffix('.csv')

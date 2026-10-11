@@ -32,8 +32,8 @@ def enqueue_task(task):
 
 
 def execute_task(task_id):
-    claimed = FaultWorkflowTask.objects.filter(pk=task_id, status="queued", simulation_backend="simulink").update(
-        status="running", current_stage="starting_engine", updated_at=timezone.now())
+    claimed = FaultWorkflowTask.objects.filter(pk=task_id, status="queued", simulation_backend__in=["simulink", "project_archive", "python_proxy"]).update(
+        status="running", current_stage="preparing", updated_at=timezone.now())
     if not claimed:
         return False
     task = FaultWorkflowTask.objects.get(pk=task_id)
@@ -42,7 +42,14 @@ def execute_task(task_id):
         FaultWorkflowTask.objects.filter(pk=task_id).update(current_stage=name, updated_at=timezone.now())
 
     try:
-        run_task(task, on_stage=stage)
+        if task.simulation_backend == "project_archive":
+            from .project_archive import run_task as import_archive
+            import_archive(task, on_stage=stage)
+        elif task.simulation_backend == "python_proxy":
+            from .python_proxy import run_task as run_proxy
+            run_proxy(task, on_stage=stage)
+        else:
+            run_task(task, on_stage=stage)
     except Exception as exc:
         FaultWorkflowTask.objects.filter(pk=task_id).update(
             status="failed", current_stage="failed", latest_result={"error": str(exc)}, updated_at=timezone.now())

@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 setlocal EnableExtensions
 chcp 65001 >nul
 cd /d "%~dp0"
@@ -64,5 +64,5 @@ if errorlevel 1 (
 
 if not exist "db.sqlite3" "%VENV%" manage.py migrate --noinput
 if not exist "media" mkdir media
-echo Setup complete. Run start_cmg_platform.bat.
+echo Setup complete. Run start_phm_platform.bat.
 pause

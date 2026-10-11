@@ -4,7 +4,7 @@
     <el-tabs v-model="level"><el-tab-pane label="单机级" name="single" :disabled="loading"/><el-tab-pane label="系统级" name="system" :disabled="loading"/></el-tabs>
     <el-radio-group v-if="level==='single'" v-model="mode" :disabled="loading" @change="clear"><el-radio-button label="single">单个评估</el-radio-button><el-radio-button label="batch">批量评估</el-radio-button></el-radio-group>
     <div class="controls">
-      <template v-if="level==='single'"><el-select v-if="mode==='single'" v-model="id" :disabled="loading" filterable placeholder="选择数据集" @change="clear"><el-option v-for="item in datasets" :key="item.id" :label="item.name" :value="item.id"/></el-select><el-select v-else v-model="batchIds" :disabled="loading" multiple collapse-tags collapse-tags-tooltip :multiple-limit="100" filterable placeholder="选择批量评估数据集" @change="clear"><el-option v-for="item in datasets" :key="item.id" :label="item.name" :value="item.id"/></el-select></template>
+      <template v-if="level==='single'"><el-select v-if="mode==='single'" v-model="id" :disabled="loading" filterable placeholder="选择数据集" @change="clear"><el-option v-for="item in selectableDatasets" :key="item.id" :label="item.name" :value="item.id"/></el-select><el-select v-else v-model="batchIds" :disabled="loading" multiple collapse-tags collapse-tags-tooltip :multiple-limit="100" filterable placeholder="选择批量评估数据集" @change="clear"><el-option v-for="item in selectableDatasets" :key="item.id" :label="item.name" :value="item.id"/></el-select></template>
       <template v-else><el-select v-model="system" :disabled="loading" placeholder="选择系统" @change="systemDatasetIds=[];clear()"><el-option v-for="name in systems" :key="name" :label="name" :value="name"/></el-select><el-select v-model="systemDatasetIds" :disabled="loading" multiple collapse-tags filterable placeholder="选择该系统的数据集" @change="clear"><el-option v-for="item in systemDatasets" :key="item.id" :label="item.name" :value="item.id"/></el-select></template>
       <el-select v-model="algorithm" :disabled="loading" @change="clear"><template v-if="level==='single'"><el-option label="CDPCA-GA 特征融合" value="cdpca_ga"/><el-option label="AE-GMM 数据驱动" value="ae_gmm"/></template><el-option v-else label="GCN + RBD 系统健康评估" value="gcn_rbd"/></el-select>
       <el-button type="primary" :disabled="!canRun" :loading="loading" @click="run">{{isBatch?'批量评估':'运行评估'}}</el-button>
@@ -39,6 +39,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ReportChart from '../components/ReportChart.vue'
+import { isSelectableDataset } from '../utils/datasetVisibility.js'
 
 const route = useRoute()
 const levelLabels = { single:'单机级', component:'单机级', system:'系统级' }
@@ -46,7 +47,8 @@ const datasets = ref([]), level = ref('single'), mode = ref('single'), id = ref(
 const systems = ['控制', '动力']
 const isBatch = computed(() => level.value==='single'&&mode.value==='batch')
 const canRun = computed(() => level.value==='system'?systems.includes(system.value)&&systemDatasetIds.value.length>0:isBatch.value?batchIds.value.length>0:!!id.value)
-const systemDatasets = computed(() => datasets.value.filter(item => item.system === system.value))
+const selectableDatasets = computed(() => datasets.value.filter(isSelectableDataset))
+const systemDatasets = computed(() => selectableDatasets.value.filter(item => item.system === system.value))
 const activeDatasets = computed(() => datasets.value.filter(item => activeIds.value.some(value => String(value) === String(item.id))))
 const pbsNames = computed(() => [...new Set(activeDatasets.value.map(item => item.structure_node_name).filter(Boolean))].join('、'))
 const healthGrade = value => Number(value)>=.8?'健康':Number(value)>=.5?'关注':'异常'
@@ -62,7 +64,7 @@ const componentChart = computed(() => baseChart('时间 / 样本',Object.entries
 function clear(){result.value=null;error.value='';activeIds.value=[];batchReport.value=null;selectedBatchError.value=''}
 function showBatchResult(item){activeIds.value=[item.dataset_id];result.value=item.status==='success'?item.result:null;selectedBatchError.value=item.status==='success'?'':`${datasetName(item.dataset_id)}：${item.error}`;runKey.value++}
 watch(level,value=>{algorithm.value=value==='system'?'gcn_rbd':'cdpca_ga';clear()})
-onMounted(async()=>{try{const response=await fetch('/api/v1/datasets/',{credentials:'include'});if(!response.ok)throw Error('数据集加载失败');datasets.value=await response.json();const requested=Number(route.query.dataset_id);if(datasets.value.some(item=>item.id===requested))id.value=requested}catch(exc){error.value=exc.message}})
+onMounted(async()=>{try{const response=await fetch('/api/v1/datasets/',{credentials:'include'});if(!response.ok)throw Error('数据集加载失败');datasets.value=await response.json();const requested=Number(route.query.dataset_id);if(selectableDatasets.value.some(item=>item.id===requested))id.value=requested}catch(exc){error.value=exc.message}})
 async function run(){
   if(loading.value||!canRun.value)return
   const batch=isBatch.value

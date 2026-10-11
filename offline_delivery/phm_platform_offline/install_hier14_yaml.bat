@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 setlocal
 cd /d "%~dp0"
 chcp 65001 >nul
@@ -25,5 +25,5 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-echo Hier14 dependency fixed. Restart the platform with start_cmg_platform.bat.
+echo Hier14 dependency fixed. Restart the platform with start_phm_platform.bat.
 pause

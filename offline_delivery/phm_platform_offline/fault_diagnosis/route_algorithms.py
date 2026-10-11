@@ -11,6 +11,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
+from datasets.schema import column_role, timestamp_value
 
 
 SIGNAL_TESTS = {
@@ -30,6 +31,8 @@ def _read_numeric(csv_path):
         raise ValueError("诊断至少需要 8 行 CSV 数据")
     numeric = {}
     for key in rows[0]:
+        if column_role(key) != "parameter":
+            continue
         values = []
         try:
             for row in rows:
@@ -86,7 +89,7 @@ def msfg_teams_rt(csv_path):
     class_probs = [{"name": item["name"], "prob": item["probability"]} for item in candidates] or [{"name": "正常", "prob": 1.0}]
     return {"algorithm": "MSFG + TEAMS-RT", "pred_name": label, "aggregate_pred_name": label, "confidence": confidence,
             "n_windows": 1, "seq_len": len(rows), "window_stride": len(rows), "sample_dt": None,
-            "window_series": [{"window_index": 0, "time_start": rows[0].get("time", 0), "time_end": rows[-1].get("time", len(rows)-1), "pred_name": label, "confidence": confidence}],
+            "window_series": [{"window_index": 0, "time_start": timestamp_value(rows[0], 0), "time_end": timestamp_value(rows[-1], len(rows)-1), "pred_name": label, "confidence": confidence}],
             "class_probs": class_probs, "aggregate_class_probs": class_probs,
             "evidence": evidence, "diagnostic_sets": {"good": teams.get("g", []), "bad": teams.get("b", []), "suspect": teams.get("s", []), "unknown": teams.get("u", [])},
             "d_matrix": {"tests": tests, "faults": faults, "values": matrix.tolist()}, "model_mode": "operational-msfg-teams-rt"}
@@ -123,7 +126,8 @@ def pca_iforest(csv_path):
     scores = (raw_scores - raw_scores.min()) / denomin
     windows = []
     for index, start in enumerate(starts):
-        windows.append({"window_index": index, "time_start": rows[start].get("time", start), "time_end": rows[min(len(rows)-1, start+window_size-1)].get("time", min(len(rows)-1,start+window_size-1)), "pred_name": "异常" if anomaly[index] else "正常", "confidence": round(float(scores[index] if anomaly[index] else 1-scores[index]), 6), "anomaly_score": round(float(raw_scores[index]), 6)})
+        end = min(len(rows)-1, start+window_size-1)
+        windows.append({"window_index": index, "time_start": timestamp_value(rows[start], start), "time_end": timestamp_value(rows[end], end), "pred_name": "异常" if anomaly[index] else "正常", "confidence": round(float(scores[index] if anomaly[index] else 1-scores[index]), 6), "anomaly_score": round(float(raw_scores[index]), 6)})
     latest = windows[-1]; aggregate = "异常" if anomaly[max(baseline_count, len(anomaly)//2):].mean() >= .3 else "正常"
     loadings = np.abs(pca.components_[0]).reshape(len(keys), 5).mean(axis=1)
     evidence = sorted(({"signal": key, "pca_loading": round(float(loadings[i]), 6), "latest_mean": round(float(np.mean(signals[key][-window_size:])), 6)} for i, key in enumerate(keys)), key=lambda item: item["pca_loading"], reverse=True)

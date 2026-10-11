@@ -8,8 +8,59 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .service import DiagnosisService
-from .matlab_bridge import MatlabBridge
 from .route_algorithms import msfg_teams_rt, pca_iforest
+
+
+def _quality_for_csv(csv_path):
+    """Attach a bounded quality report before an algorithm is allowed to decide."""
+    from datasets.batch_processing import inspect_file
+    report = inspect_file(csv_path)
+    if report['row_count'] == 0 or not report['numeric_parameter_columns']:
+        raise ValueError('数据质量不合格:文件为空或没有可用数值信号')
+    return report
+
+
+def _standardize_result(result, quality):
+    label = result.get('aggregate_pred_name') or result.get('pred_name') or '未知'
+    aggregate_probs = result.get('aggregate_class_probs') or result.get('class_probs') or []
+    aggregate_confidence = next((item.get('prob') for item in aggregate_probs if item.get('name') == label), None)
+    confidence = aggregate_confidence if aggregate_confidence is not None else result.get('confidence')
+    result['global_diagnosis'] = label
+    result['global_confidence'] = None if confidence is None else float(confidence)
+    if label in {'正常', '正常状态'}:
+        decision = 'normal'
+    elif label in {'未知', '不确定', '诊断不确定'} or confidence is not None and float(confidence) < 0.55:
+        decision = 'uncertain'
+    else:
+        decision = 'abnormal'
+    result['decision'] = decision
+    result['decision_label'] = {'normal': '正常', 'abnormal': '异常', 'uncertain': '诊断不确定'}[decision]
+    result['decision_rule'] = '按算法输出类别与置信度判定;置信度低于 0.55 时标记为诊断不确定'
+    events = []
+    active = None
+    previous_index = None
+    for index, window in enumerate(result.get('window_series', [])):
+        name = window.get('pred_name')
+        probability = window.get('confidence')
+        alerted = name not in {None, '正常', '正常状态', '未知', '不确定', '诊断不确定'} and probability is not None and float(probability) >= .55
+        if not alerted:
+            active = None
+            continue
+        start, end = window['time_start'], window['time_end']
+        if active and active['fault'] == name and previous_index == index-1:
+            active['time_end'] = end
+            active['window_count'] += 1
+            active['max_confidence'] = max(active['max_confidence'], probability)
+        else:
+            active = {'fault': name, 'time_start': start, 'time_end': end,
+                      'window_count': 1, 'max_confidence': probability}
+            events.append(active)
+        previous_index = index
+    result['detected_events'] = events
+    result['event_summary'] = {'event_count': len(events), 'abnormal_windows': sum(event['window_count'] for event in events),
+                               'source': 'model_window_predictions', 'confidence_threshold': .55}
+    result['data_quality'] = {key: quality[key] for key in ('row_count', 'columns', 'numeric_columns', 'parameter_columns', 'numeric_parameter_columns', 'time_column', 'fault_flag_column', 'column_roles', 'time_summary', 'fault_label_summary', 'missing_value_count', 'invalid_value_count', 'quality_status', 'quality_message')}
+    return result
 
 
 def status(request):
@@ -21,6 +72,7 @@ def status(request):
 def predict(request):
     if request.method != "POST":
         return JsonResponse({"ok": False, "error": "仅支持 POST"}, status=405)
+    algorithm = "unknown"
     try:
         algorithm = request.POST.get("algorithm", "hier14") if request.FILES.get("file") else None
         if request.FILES.get("file"):
@@ -32,7 +84,8 @@ def predict(request):
                     tmp.write(chunk)
                 csv_path = Path(tmp.name)
             try:
-                result = _run_algorithm(algorithm, csv_path)
+                quality = _quality_for_csv(csv_path)
+                result = _standardize_result(_run_algorithm(algorithm, csv_path), quality)
             finally:
                 csv_path.unlink(missing_ok=True)
         else:
@@ -44,10 +97,47 @@ def predict(request):
             else: csv_path = body.get("csv_path")
             if not csv_path:
                 return JsonResponse({"ok": False, "error": "请上传 CSV 文件或提供 csv_path"}, status=400)
-            result = _run_algorithm(algorithm, csv_path)
+            quality = _quality_for_csv(csv_path)
+            result = _standardize_result(_run_algorithm(algorithm, csv_path), quality)
         return JsonResponse({"ok": True, "model": result.get("algorithm", algorithm), "result": result})
     except Exception as exc:
         return JsonResponse({"ok": False, "error": str(exc), "model": algorithm or "unknown"}, status=503)
+
+
+@csrf_exempt
+def batch_predict(request):
+    """Run one diagnosis algorithm over many stored datasets.
+
+    The endpoint is intentionally synchronous and bounded (200 datasets) so it
+    remains deployable without Redis/Celery in the offline package. Callers can
+    submit chunks for larger campaigns and receive a per-dataset error list.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': '仅支持 POST'}, status=405)
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+        ids = body.get('dataset_ids')
+        if not isinstance(ids, list) or not ids:
+            return JsonResponse({'ok': False, 'error': 'dataset_ids 必须是非空数组'}, status=400)
+        if len(ids) > 200:
+            return JsonResponse({'ok': False, 'error': '单次最多诊断 200 个数据集,请分批提交'}, status=400)
+        algorithm = body.get('algorithm', 'hier14')
+        from datasets.models import Dataset
+        output = []
+        for dataset_id in ids:
+            item = {'dataset_id': dataset_id}
+            try:
+                dataset = Dataset.objects.get(pk=dataset_id)
+                quality = _quality_for_csv(dataset.file.path)
+                item.update({'status': 'success', 'result': _standardize_result(_run_algorithm(algorithm, dataset.file.path), quality)})
+            except Dataset.DoesNotExist:
+                item.update({'status': 'failed', 'error': '数据集不存在'})
+            except Exception as exc:
+                item.update({'status': 'failed', 'error': str(exc)})
+            output.append(item)
+        return JsonResponse({'ok': True, 'algorithm': algorithm, 'total': len(output), 'success': sum(x['status'] == 'success' for x in output), 'failed': sum(x['status'] == 'failed' for x in output), 'results': output})
+    except Exception as exc:
+        return JsonResponse({'ok': False, 'error': str(exc)}, status=400)
 
 
 def _run_algorithm(algorithm, csv_path):
@@ -59,14 +149,5 @@ def _run_algorithm(algorithm, csv_path):
 
 @csrf_exempt
 def simulate_inject(request):
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': '仅支持 POST'}, status=405)
-    try:
-        body = json.loads(request.body.decode('utf-8') or '{}')
-        bridge = MatlabBridge()
-        out = Path(__file__).resolve().parent.parent / 'media' / 'matlab_runs'
-        out.mkdir(parents=True, exist_ok=True)
-        result = bridge.run(out, body.get('fault'))
-        return JsonResponse({'ok': True, 'output_dir': str(out), 'stdout': result.stdout[-4000:]})
-    except Exception as exc:
-        return JsonResponse({'ok': False, 'error': str(exc)}, status=503)
+    from simulation_demo.views import run
+    return run(request)

@@ -206,7 +206,7 @@ class SimulinkWorkflowTests(TestCase):
     @patch('simulation_demo.views.runtime_status', return_value={'available': False, 'error': 'Engine missing'})
     def test_diagnosis_injection_endpoint_uses_same_customer_parameters(self, runtime):
         response = self.client.post('/api/v1/fault-diagnosis/simulate-inject/',
-                                    data=json.dumps({'fault': {'subsystem': '控制', 'mode': 'TVC偏角不足',
+                                    data=json.dumps({'simulation_backend': 'simulink', 'fault': {'subsystem': '控制', 'mode': 'TVC偏角不足',
                                                               'start': 12, 'end': 110, 'flight_count': 2}}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 503)

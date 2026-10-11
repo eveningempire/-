@@ -1,9 +1,13 @@
 import hashlib
 import json
+import tempfile
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.core.files.base import ContentFile
+from django.test import Client, TestCase, override_settings
 
+from datasets.models import Dataset
+from .fault_replay import _ensure_asset_events
 from .models import FaultEvent, StructureNode, TelemetrySample, TelemetrySession
 
 
@@ -82,14 +86,27 @@ class FaultReplayApiTests(TestCase):
         ).json()
         self.assertEqual(paused["replay"]["state"], "paused")
 
-    def test_events_import_bundled_simulation_assets_when_database_is_empty(self):
+    def test_bundled_simulation_assets_remain_readable_but_are_hidden_from_project_sources(self):
         FaultEvent.objects.all().delete()
-        response = self.client.get("/api/v1/phm/fault-events/")
-        self.assertEqual(response.status_code, 200, response.content)
-        payload = response.json()
-        self.assertGreaterEqual(payload["count"], 9)
-        imported = next(x for x in payload["results"] if x["diagnosis"].get("asset_code") == "m1")
-        self.assertEqual(imported["diagnosis"]["sample_count"], 500)
-        detail = self.client.get(f"/api/v1/phm/fault-events/{imported['id']}/").json()
+        self.assertEqual(_ensure_asset_events(), 9)
+        self.assertEqual(_ensure_asset_events(), 0)
+        imported = FaultEvent.objects.get(diagnosis__asset_code="m1")
+        detail = self.client.get(f"/api/v1/phm/fault-events/{imported.id}/").json()
         self.assertEqual(detail["curve"]["count"], 500)
         self.assertIn("current", detail["curve"]["series"])
+        response = self.client.get("/api/v1/phm/fault-events/")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()["count"], 0)
+
+    def test_events_exclude_derived_datasets_including_existing_events(self):
+        with tempfile.TemporaryDirectory() as folder, override_settings(MEDIA_ROOT=folder):
+            raw = Dataset.objects.create(name="原始数据", component="原始状态量")
+            raw.file.save("scope.csv", ContentFile(b"Time,pressure,FaultFlag\n0,1,0\n1,.5,1\n"))
+            derived = Dataset.objects.create(name="派生数据", component="派生参数")
+            derived.file.save("P_values.csv", ContentFile(b"Time,P1,FaultFlag\n0,1,0\n1,.5,1\n"))
+            FaultEvent.objects.create(session=self.session, name=derived.name, start_time=0, end_time=1,
+                                      diagnosis={"dataset_id": derived.pk, "source_key": f"dataset:{derived.pk}"})
+            response = self.client.get("/api/v1/phm/fault-events/")
+            self.assertEqual(response.status_code, 200, response.content)
+            self.assertEqual([event["dataset_id"] for event in response.json()["results"]], [raw.pk])
+            self.assertEqual(FaultEvent.objects.filter(diagnosis__dataset_id=derived.pk).count(), 1)

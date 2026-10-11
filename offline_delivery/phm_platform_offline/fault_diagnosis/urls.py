@@ -4,5 +4,6 @@ from . import views
 urlpatterns = [
     path("status/", views.status, name="fault-diagnosis-status"),
     path("predict/", views.predict, name="fault-diagnosis-predict"),
+    path("batch-predict/", views.batch_predict, name="fault-diagnosis-batch-predict"),
     path("simulate-inject/", views.simulate_inject, name="matlab-simulate-inject"),
 ]

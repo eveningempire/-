@@ -233,6 +233,7 @@ import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Upload, DataAnalysis } from '@element-plus/icons-vue';
 import api from '../api';
+import { isSelectableDataset } from '../utils/datasetVisibility.js';
 
 // 为 keep-alive 添加组件名称
 defineOptions({
@@ -259,6 +260,7 @@ const uploadForm = ref({
 
 const trainForm = ref({
   algorithmType: 'isolation_forest',
+  dataset_ids: JSON.parse(localStorage.getItem('phm.trainingDatasetIds') || '[]'),
   cmg_model_id: null,
   name: '',
   parameters: [],
@@ -301,7 +303,11 @@ async function loadCMGModels() {
 async function loadDatasets() {
   try {
     const res = await fetch('/api/v1/datasets/', { credentials: 'include', cache: 'no-store' });
-    if (res.ok) datasets.value = await res.json();
+    if (res.ok) {
+      datasets.value = (await res.json()).filter(isSelectableDataset);
+      const allowed = new Set(datasets.value.map(item => String(item.id)));
+      trainForm.value.dataset_ids = trainForm.value.dataset_ids.filter(id => allowed.has(String(id)));
+    }
   } catch (error) {
     console.warn('训练数据集加载失败', error);
   }

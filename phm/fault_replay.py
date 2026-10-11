@@ -101,6 +101,8 @@ def _ensure_dataset_events():
     manifest = _manifest_records(str(manifest_path), manifest_path.stat().st_mtime_ns) if manifest_path.is_file() else {}
     registered = {event.diagnosis.get('source_key'): event for event in FaultEvent.objects.all()}
     for dataset in Dataset.objects.exclude(file="").order_by("id"):
+        if dataset.component == "派生参数":
+            continue
         source_key = f"dataset:{dataset.pk}"
         if source_key in registered:
             entry = manifest.get(dataset.pk)
@@ -238,7 +240,7 @@ def events(request):
         # Replay is deliberately limited to datasets registered in 数据管理.
         # This prevents bundled demo curves and realtime-only events from being
         # presented as project database replay sources.
-        dataset_ids = set(str(value) for value in Dataset.objects.values_list("id", flat=True))
+        dataset_ids = set(str(value) for value in Dataset.objects.exclude(component="派生参数").values_list("id", flat=True))
         query = FaultEvent.objects.select_related("session", "alarm").order_by("-created_at")
         query = [event for event in query if str((event.diagnosis or {}).get("dataset_id")) in dataset_ids]
         if request.GET.get("session_id"):

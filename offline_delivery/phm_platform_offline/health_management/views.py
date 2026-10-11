@@ -205,11 +205,20 @@ class IMSModelViewSet(viewsets.ModelViewSet):
             # 鑾峰彇璁粌鏁版嵁 - 浼樺厛浣跨敤CSV鏂囦欢
             training_data_path = request.data.get("training_data_path", "")
             use_csv_data = request.data.get("use_csv_data", True)
+            dataset_ids = request.data.get("dataset_ids") or []
+            if isinstance(dataset_ids, str):
+                try:
+                    dataset_ids = json.loads(dataset_ids)
+                except json.JSONDecodeError:
+                    dataset_ids = [x.strip() for x in dataset_ids.split(',') if x.strip()]
             
             if use_csv_data:
                 # 浣跨敤CSV鏂囦欢涓殑璁粌鏁版嵁
                 try:
-                    training_data_matrix, available_params = self._load_csv_training_data(training_data_path)
+                    if dataset_ids:
+                        training_data_matrix, available_params = self._load_dataset_training_data(dataset_ids)
+                    else:
+                        training_data_matrix, available_params = self._load_csv_training_data(training_data_path)
                     if len(training_data_matrix) < 100:
                         return Response(
                             {"error": f"CSV璁粌鏁版嵁涓嶈冻锛岄渶瑕佽嚦灏?00鏉¤褰曪紝褰撳墠浠呮湁{len(training_data_matrix)}鏉?}, 
@@ -433,6 +442,39 @@ class IMSModelViewSet(viewsets.ModelViewSet):
                     numeric_params.append(param)
         
         return numeric_params
+
+    def _load_dataset_training_data(self, dataset_ids):
+        """合并数据管理页选中的多个 CSV,供 IMS 训练使用。"""
+        import pandas as pd
+        import numpy as np
+        from datasets.models import Dataset
+
+        ids = [int(x) for x in dataset_ids]
+        files = list(Dataset.objects.filter(id__in=ids).exclude(file=''))
+        if not files:
+            raise FileNotFoundError("未找到可用的训练数据集")
+        frames = []
+        for dataset in files:
+            last_error = None
+            for encoding in ('utf-8-sig', 'gbk', 'utf-8'):
+                try:
+                    frames.append(pd.read_csv(dataset.file.path, encoding=encoding))
+                    break
+                except UnicodeDecodeError as exc:
+                    last_error = exc
+            else:
+                raise ValueError(f"无法读取数据集 {dataset.name}: {last_error}")
+        all_columns = sorted(set().union(*(frame.columns for frame in frames)))
+        numeric_columns = []
+        for column in all_columns:
+            values = pd.concat([frame[column] for frame in frames if column in frame], ignore_index=True)
+            converted = pd.to_numeric(values, errors='coerce')
+            if converted.notna().sum() >= 10 and converted.var() > 1e-12:
+                numeric_columns.append(column)
+        if len(numeric_columns) < 2:
+            raise ValueError("所选数据集合并后可用数值列少于 2 列")
+        matrix = pd.concat([frame.reindex(columns=numeric_columns) for frame in frames], ignore_index=True)
+        return matrix.to_numpy(dtype=np.float32), numeric_columns
     
     def _load_csv_training_data(self, data_path=""):
         """浠嶤SV鏂囦欢鍔犺浇璁粌鏁版嵁"""

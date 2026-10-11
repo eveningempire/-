@@ -1,4 +1,4 @@
-param([switch]$SkipFrontend)
+﻿param([switch]$SkipFrontend)
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $Root
@@ -53,4 +53,4 @@ if (-not $venvReady) {
 if ($LASTEXITCODE -ne 0) { throw 'Python dependency verification failed.' }
 if (-not (Test-Path -LiteralPath 'db.sqlite3')) { & $py manage.py migrate --noinput }
 if (-not (Test-Path -LiteralPath 'media')) { New-Item -ItemType Directory media | Out-Null }
-Write-Host 'Setup complete. Run start_cmg_platform.bat.' -ForegroundColor Green
+Write-Host 'Setup complete. Run start_phm_platform.bat.' -ForegroundColor Green

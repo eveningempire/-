@@ -6,7 +6,7 @@
 ## 一键启动
 
 1. 将整个 `phm_platform_offline` 文件夹解压到本地磁盘,例如 `D:\PHM\phm_platform_offline`。路径可以更换,建议路径只使用英文字母、数字和下划线。
-2. 双击 `start_cmg_platform.bat`。
+2. 双击 `start_phm_platform.bat`。
 3. 首次启动会自动完成以下工作:
    - 使用包内 Python 3.10.11 创建本地 `.venv`;
    - 从 `offline\python` 安装全部离线依赖;
@@ -28,8 +28,8 @@
 
 ## 日常启动和停止
 
-- 启动:双击 `start_cmg_platform.bat`;
-- 停止:双击 `stop_cmg_platform.bat`,或在服务器窗口按 `Ctrl+C`;
+- 启动:双击 `start_phm_platform.bat`;
+- 停止:双击 `stop_phm_platform.bat`,或在服务器窗口按 `Ctrl+C`;
 - 地址:`http://127.0.0.1:8000/`;
 - 默认使用 SQLite,数据库文件为 `db.sqlite3`;
 - 日志位于 `logs\django.log`。
@@ -89,7 +89,7 @@ http://127.0.0.1:8000
 runtime\python310\python.exe
 ```
 
-然后再次双击 `start_cmg_platform.bat`。不要把旧电脑上的 Python 3.9 `.venv` 复制进来。
+然后再次双击 `start_phm_platform.bat`。不要把旧电脑上的 Python 3.9 `.venv` 复制进来。
 
 ### 页面没有更新
 
@@ -124,3 +124,4 @@ config\
 ```
 
 请不要删除数据库或媒体目录中的现场数据。
+

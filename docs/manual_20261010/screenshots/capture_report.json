@@ -1,0 +1,92 @@
+[
+  {
+    "name": "overview",
+    "route": "/",
+    "title": "综合健康态势",
+    "ok": true
+  },
+  {
+    "name": "data",
+    "route": "/data-management",
+    "title": "数据集构建和管理",
+    "ok": true
+  },
+  {
+    "name": "models",
+    "route": "/model-registry",
+    "title": "预测与诊断模型管理",
+    "ok": true
+  },
+  {
+    "name": "structure",
+    "route": "/vehicle-structure",
+    "title": "运载器结构树管理",
+    "ok": true
+  },
+  {
+    "name": "fta",
+    "route": "/fta",
+    "title": "FTA 图形化故障树",
+    "ok": true
+  },
+  {
+    "name": "fmeca",
+    "route": "/fmeca",
+    "title": "FMECA 管理",
+    "ok": true
+  },
+  {
+    "name": "release",
+    "route": "/release-assessment",
+    "title": "再飞可行性与发射放行评估",
+    "ok": true
+  },
+  {
+    "name": "replay",
+    "route": "/fault-replay",
+    "title": "故障事件重演",
+    "ok": true
+  },
+  {
+    "name": "offline",
+    "route": "/simulation-demo",
+    "title": "注入参数",
+    "ok": true
+  },
+  {
+    "name": "realtime-task",
+    "route": "/realtime-fault-injection",
+    "title": "注入参数",
+    "ok": true
+  },
+  {
+    "name": "telemetry-source",
+    "route": "/telemetry",
+    "title": "实时状态监测",
+    "ok": true
+  },
+  {
+    "name": "alarms",
+    "route": "/alarms",
+    "title": "实时异常告警中心",
+    "ok": true
+  },
+  {
+    "name": "flow",
+    "route": "/multi-signal-flow",
+    "title": "多信号流图",
+    "ok": true
+  },
+  {
+    "name": "three-dimensional",
+    "route": "/model-3d",
+    "title": "三维可视化监控",
+    "ok": true
+  },
+  {
+    "name": "users",
+    "route": "/users",
+    "title": "用户与权限",
+    "ok": true
+  }
+]

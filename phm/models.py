@@ -13,6 +13,11 @@ class TelemetrySession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     closed_at = models.DateTimeField(null=True, blank=True)
     monitoring_enabled = models.BooleanField(default=False)
+    # ``rules`` keeps compatibility with legacy sessions. New sessions may
+    # select one of the platform algorithms and run it on rolling windows.
+    detection_algorithm = models.CharField(max_length=40, default="rules")
+    algorithm_window_size = models.PositiveIntegerField(default=30)
+    algorithm_stride = models.PositiveIntegerField(default=10)
 
 
 class TelemetrySample(models.Model):
@@ -92,6 +97,23 @@ class RealtimeAlarm(models.Model):
     class Meta:
         ordering = ["-created_at"]
         constraints = [models.UniqueConstraint(fields=["sample", "signal", "operator", "threshold"], name="unique_realtime_sample_rule_alarm")]
+
+
+class RealtimeDetectionResult(models.Model):
+    """One rolling-window result produced by a platform algorithm."""
+    session = models.ForeignKey(TelemetrySession, on_delete=models.CASCADE, related_name="detection_results")
+    sample = models.ForeignKey(TelemetrySample, null=True, blank=True, on_delete=models.CASCADE, related_name="detection_results")
+    algorithm = models.CharField(max_length=40)
+    decision = models.CharField(max_length=20, choices=[("normal", "normal"), ("abnormal", "abnormal"), ("uncertain", "uncertain"), ("error", "error")])
+    confidence = models.FloatField(null=True, blank=True)
+    fault_name = models.CharField(max_length=200, blank=True)
+    window_start = models.FloatField(null=True, blank=True)
+    window_end = models.FloatField(null=True, blank=True)
+    result = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
 
 
 class FaultEvent(models.Model):

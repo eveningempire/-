@@ -1,76 +1,163 @@
-import csv, io, json, math
-from django.core.files.base import ContentFile
+import json
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from datasets.models import Dataset
-from .models import FaultWorkflowEvent, FaultWorkflowTask
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-FAULTS={"动力":{"泄漏":"pressure","泵效率下降":"temperature"},"控制":{"传感器偏置":"attitude_error","执行器迟滞":"control_error"}}
-NOMINAL={"pressure":1.0,"temperature":.4,"bus_voltage":1.0,"battery_capacity":1.0,"attitude_error":0.0,"control_error":.02}
-THRESHOLDS={"pressure":.12,"temperature":.12,"bus_voltage":.10,"battery_capacity":.10,"attitude_error":.08,"control_error":.09}
-AMPLITUDES={"pressure":.35,"temperature":.3,"bus_voltage":.3,"battery_capacity":.25,"attitude_error":.25,"control_error":.25}
+from phm_backend.permissions import has_permission
+from .models import FaultWorkflowTask
+from .simulink import fault_catalog, runtime_status, validate_parameters
+from .worker import enqueue_task
+from .project_archive import archive_status
 
-def _series(fault=None,count=120):
- rows=[]; fault=fault or {}; start=int(fault.get("start",40)); severity=float(fault.get("severity",.6)); mode=fault.get("mode","泄漏")
- for i in range(count):
-  row={"time":i,"pressure":1+.015*math.sin(i/5),"temperature":.4+.02*math.sin(i/8),"bus_voltage":1+.008*math.sin(i/9),"battery_capacity":1-.0002*i,"attitude_error":.01*math.sin(i/6),"control_error":.02*math.cos(i/7)}
-  if fault and i>=start:
-   p=(i-start+1)/max(1,count-start)
-   if mode=="泄漏": row["pressure"]-=severity*.65*p
-   elif mode=="泵效率下降": row["temperature"]+=severity*.55*p
-   elif mode=="母线欠压": row["bus_voltage"]-=severity*.5*p
-   elif mode=="电池容量衰减": row["battery_capacity"]-=severity*.45*p
-   elif mode=="传感器偏置": row["attitude_error"]+=severity*.4
-   else: row["control_error"]+=severity*.45*p
-  d=(abs(row["pressure"]-1)/.6+abs(row["temperature"]-.4)/.6+abs(row["bus_voltage"]-1)/.5+abs(row["battery_capacity"]-1)/.5+abs(row["attitude_error"])/.45+abs(row["control_error"]-.02)/.45)/6
-  row["HI_norm"]=max(0,min(1,1-d)); rows.append({k:round(v,5) if isinstance(v,float) else v for k,v in row.items()})
- return rows
 
-def _analyse(task,row,injected):
- signal=FAULTS[task.subsystem][task.fault_mode]; deviation=abs(float(row[signal])-NOMINAL[signal]); alarm=injected and deviation>=THRESHOLDS[signal]
- isolation={"泄漏":"推进剂供给与压力链路","泵效率下降":"动力泵及温控链路","母线欠压":"主电源母线与配电链路","电池容量衰减":"蓄电池组与充放电链路","传感器偏置":"姿态传感器链路","执行器迟滞":"控制执行机构"}[task.fault_mode]
- hi=float(row["HI_norm"]); rul=round(max(0,(hi-.2)/max(.001,task.severity*.01)),2) if alarm else None
- return {"injected":injected,"alarm":{"triggered":alarm,"signal":signal,"value":row[signal],"severity":task.severity},"diagnosis":{"fault":task.fault_mode if alarm else "正常","subsystem":task.subsystem,"confidence":round(min(.99,.55+deviation),3) if alarm else 0},"isolation":{"target":isolation if alarm else None,"status":"isolated" if alarm else "normal"},"health":{"component_hi":hi,"status":"degraded" if alarm else "healthy"},"rul":{"value":rul,"unit":"sample_interval","status":"estimated" if alarm else "not_triggered"},"notification":{"published":alarm,"topic":"fault.workflow","message":f"{task.subsystem}-{task.fault_mode} 已诊断并隔离" if alarm else "运行正常"}}
+def _access(request, permission="view"):
+    if not request.user.is_authenticated:
+        return JsonResponse({"ok": False, "error": "请先登录"}, status=401)
+    if not has_permission(request.user, permission):
+        return JsonResponse({"ok": False, "error": "没有提交仿真任务的权限"}, status=403)
 
-def _task(task): return {"id":str(task.id),"name":task.name,"mode":task.mode,"subsystem":task.subsystem,"fault_mode":task.fault_mode,"severity":task.severity,"injection_time":task.injection_time,"status":task.status,"current_stage":task.current_stage,"dataset_id":task.dataset_id,"latest_result":task.latest_result}
-def sample(request): return JsonResponse({"ok":True,"subsystems":{k:list(v) for k,v in FAULTS.items()},"data":_series()})
+
+def _task(task):
+    return {"id": str(task.id), "name": task.name, "mode": task.mode,
+            "subsystem": task.subsystem, "fault_mode": task.fault_mode,
+            "injection_time": task.injection_time, "end_time": task.end_time,
+            "flight_count": task.flight_count, "simulation_backend": task.simulation_backend,
+            "status": task.status, "current_stage": task.current_stage,
+            "dataset_id": task.dataset_id, "latest_result": task.latest_result,
+            "simulation_output": task.simulation_output,
+            "created_at": task.created_at, "updated_at": task.updated_at}
+
+
+def _create(body):
+    return FaultWorkflowTask.objects.create(**validate_parameters(body), status="ready", current_stage="ready")
+
+
+@require_GET
+def sample(request):
+    denied = _access(request)
+    if denied:
+        return denied
+    return JsonResponse({"ok": True, "subsystems": fault_catalog(), "runtime": runtime_status(), "archive": archive_status(),
+                         "limits": {"duration": 480, "flight_count_min": 0, "flight_count_max": 20},
+                         "can_submit": has_permission(request.user, "submit_simulation")})
+
 
 @csrf_exempt
+@require_http_methods(["GET", "POST"])
 def workflows(request):
- if request.method=="GET": return JsonResponse({"ok":True,"results":[_task(x) for x in FaultWorkflowTask.objects.order_by("-created_at")[:100]]})
- try:
-  b=json.loads(request.body or "{}"); subsystem=b.get("subsystem","动力"); fault_mode=b.get("fault_mode","泄漏")
-  if subsystem not in FAULTS: return JsonResponse({"ok":False,"error":"子系统仅支持动力和控制"},status=400)
-  if fault_mode not in FAULTS[subsystem]: return JsonResponse({"ok":False,"error":"故障模式与所选子系统不匹配"},status=400)
-  t=FaultWorkflowTask.objects.create(name=b.get("name") or "故障注入任务",mode=b.get("mode","offline"),subsystem=subsystem,fault_mode=fault_mode,severity=float(b.get("severity",.6)),injection_time=float(b.get("injection_time",40)),status="ready",current_stage="ready"); return JsonResponse({"ok":True,"task":_task(t)},status=201)
- except Exception as e: return JsonResponse({"ok":False,"error":str(e)},status=400)
+    denied = _access(request, "view" if request.method == "GET" else "submit_simulation")
+    if denied:
+        return denied
+    if request.method == "GET":
+        tasks = FaultWorkflowTask.objects.order_by("-created_at")[:50]
+        results = []
+        for task in tasks:
+            item = _task(task)
+            item.pop("simulation_output")
+            results.append(item)
+        return JsonResponse({"ok": True, "results": results})
+    try:
+        task = _create(json.loads(request.body or "{}"))
+        return JsonResponse({"ok": True, "task": _task(task)}, status=201)
+    except (ValueError, TypeError, OverflowError) as exc:
+        return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
 
 @csrf_exempt
-def workflow_generate(request,task_id):
- try:
-  t=FaultWorkflowTask.objects.get(pk=task_id); rows=_series({"subsystem":t.subsystem,"mode":t.fault_mode,"severity":t.severity,"start":t.injection_time}); out=io.StringIO(); w=csv.DictWriter(out,fieldnames=rows[0]); w.writeheader(); w.writerows(rows)
-  d=Dataset(name=t.name,source="simulation",fault_type=t.fault_mode,injection_time=t.injection_time,degradation=t.severity,system=t.subsystem); d.file.save(f"fault-workflow-{t.id}.csv",ContentFile(out.getvalue().encode()),save=True)
-  t.dataset_id=d.id;t.status="completed";t.current_stage="published";t.latest_result=_analyse(t,rows[-1],True);t.save();return JsonResponse({"ok":True,"task":_task(t),"dataset_id":d.id,"preview":rows[-20:],"result":t.latest_result})
- except Exception as e:return JsonResponse({"ok":False,"error":str(e)},status=400)
+@require_POST
+def workflow_generate(request, task_id):
+    denied = _access(request, "submit_simulation")
+    if denied:
+        return denied
+    try:
+        task = FaultWorkflowTask.objects.get(pk=task_id)
+    except FaultWorkflowTask.DoesNotExist:
+        return JsonResponse({"ok": False, "error": "任务不存在"}, status=404)
+    if task.simulation_backend not in ("simulink", "project_archive"):
+        return JsonResponse({"ok": False, "error": "历史演示任务不能传入一院模型，请创建新任务"}, status=409)
+    if task.status in ("queued", "running", "completed"):
+        return JsonResponse({"ok": True, "task": _task(task)}, status=200 if task.status == "completed" else 202)
+    runtime = archive_status() if task.simulation_backend == "project_archive" else runtime_status()
+    if not runtime["available"]:
+        task.status = "failed"
+        task.current_stage = "runtime_unavailable"
+        task.latest_result = {"error": runtime["error"]}
+        task.save(update_fields=["status", "current_stage", "latest_result", "updated_at"])
+        return JsonResponse({"ok": False, "error": runtime["error"], "task": _task(task), "runtime": runtime}, status=503)
+    try:
+        enqueue_task(task)
+    except Exception as exc:
+        task.refresh_from_db()
+        return JsonResponse({"ok": False, "error": str(exc), "task": _task(task)}, status=503)
+    task.refresh_from_db()
+    return JsonResponse({"ok": True, "task": _task(task)}, status=202)
+
 
 @csrf_exempt
-def workflow_sample(request,task_id):
- try:
-  t=FaultWorkflowTask.objects.get(pk=task_id);b=json.loads(request.body or "{}");seq=t.events.count()+1;ts=float(b.get("timestamp",seq-1));values=dict(b.get("values") or {});cleared=bool(b.get("clear_fault",False));injected=ts>=t.injection_time and not cleared
-  if injected:
-   signal=FAULTS[t.subsystem][t.fault_mode];direction=-1 if t.fault_mode in ("泄漏","母线欠压","电池容量衰减") else 1;values[signal]=float(values.get(signal,NOMINAL[signal]))+direction*t.severity*AMPLITUDES[signal]
-  row={"time":ts,**{k:float(values.get(k,v)) for k,v in NOMINAL.items()}};d=(abs(row["pressure"]-1)/.6+abs(row["temperature"]-.4)/.6+abs(row["bus_voltage"]-1)/.5+abs(row["battery_capacity"]-1)/.5+abs(row["attitude_error"])/.45+abs(row["control_error"]-.02)/.45)/6;row["HI_norm"]=max(0,min(1,1-d));result=_analyse(t,row,injected);stage="cleared" if cleared else "published" if result["alarm"]["triggered"] else "monitoring"
-  if cleared: result["clearance"]={"cleared":True,"restored":True,"message":"故障已清除,信号恢复正常监测范围"}
-  event=FaultWorkflowEvent.objects.create(task=t,sequence=seq,timestamp=ts,stage=stage,event_type="fault_cleared" if cleared else "sample_processed",payload={"sample":row,"result":result});t.status="cleared" if cleared else "running";t.current_stage=stage;t.latest_result=result;t.save();return JsonResponse({"ok":True,"event":{"sequence":event.sequence,"timestamp":ts,"stage":stage,"sample":row,"result":result}})
- except Exception as e:return JsonResponse({"ok":False,"error":str(e)},status=400)
+@require_POST
+def workflow_sample(request, task_id):
+    denied = _access(request, "submit_simulation")
+    if denied:
+        return denied
+    return JsonResponse({"ok": False, "error": "仿真结果由 Simulink 求解生成，请使用 generate 接口启动任务"}, status=409)
 
-def workflow_detail(request,task_id):
- try:
-  t=FaultWorkflowTask.objects.get(pk=task_id);after=int(request.GET.get("after",0));events=list(t.events.filter(sequence__gt=after).values("sequence","timestamp","stage","event_type","payload","created_at")[:500]);return JsonResponse({"ok":True,"task":_task(t),"events":events})
- except FaultWorkflowTask.DoesNotExist:return JsonResponse({"ok":False,"error":"任务不存在"},status=404)
+
+@require_GET
+def workflow_detail(request, task_id):
+    denied = _access(request)
+    if denied:
+        return denied
+    try:
+        task = FaultWorkflowTask.objects.get(pk=task_id)
+        after = max(0, int(request.GET.get("after", 0)))
+    except (FaultWorkflowTask.DoesNotExist, ValueError):
+        return JsonResponse({"ok": False, "error": "任务不存在或参数无效"}, status=404)
+    events = list(task.events.filter(sequence__gt=after).values(
+        "sequence", "timestamp", "stage", "event_type", "payload", "created_at")[:500])
+    return JsonResponse({"ok": True, "task": _task(task), "events": events})
+
 
 @csrf_exempt
+@require_POST
 def run(request):
- if request.method!="POST":return JsonResponse({"ok":False,"error":"仅支持 POST"},status=405)
- b=json.loads(request.body or "{}");f=b.get("fault") or b;t=FaultWorkflowTask.objects.create(name=b.get("name") or "仿真故障数据集",mode="offline",subsystem=f.get("subsystem","动力"),fault_mode=f.get("mode","泄漏"),severity=float(f.get("severity",.6)),injection_time=float(f.get("start",40)),status="ready");return workflow_generate(request,t.id)
-def task(request,task_id):return workflow_detail(request,task_id)
+    denied = _access(request, "submit_simulation")
+    if denied:
+        return denied
+    try:
+        body = json.loads(request.body or "{}")
+        if isinstance(body, dict) and "fault" in body:
+            fault = body["fault"]
+            if not isinstance(fault, dict):
+                raise ValueError("fault 必须包含子系统、故障类型和注入时间")
+            body = {**body, **fault}
+            if "mode" in fault:
+                body["fault_mode"] = fault["mode"]
+                body["mode"] = "offline"
+            if "start" in fault:
+                body["injection_time"] = fault["start"]
+            if "end" in fault:
+                body["end_time"] = fault["end"]
+        task = _create(body)
+    except (ValueError, TypeError, OverflowError) as exc:
+        return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+    return workflow_generate(request, task.id)
+
+
+def task(request, task_id):
+    return workflow_detail(request, task_id)
+
+
+@csrf_exempt
+@require_POST
+def configure_matlab(request):
+    denied = _access(request, 'manage_structure')
+    if denied:
+        return denied
+    try:
+        from .matlab_runtime import save_root
+        body = json.loads(request.body or '{}')
+        save_root(body.get('matlab_root'))
+        return JsonResponse({'ok': True, 'runtime': runtime_status()})
+    except (ValueError, TypeError, OSError) as exc:
+        return JsonResponse({'ok': False, 'error': str(exc)}, status=400)

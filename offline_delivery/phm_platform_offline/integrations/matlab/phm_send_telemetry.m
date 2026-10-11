@@ -49,21 +49,28 @@ function response = phm_send_telemetry(ingestUrl, token, samples)
             inputStream = conn.getErrorStream();
         else
             inputStream = conn.getInputStream();
+        end
         raw = phm_read_java_stream(inputStream);
         if ~isempty(inputStream)
             inputStream.close();
+        end
         conn.disconnect();
-    catch exception
+    catch
+        % MATLAB 2012 accepts catch without an exception variable.  Read the
+        % last error explicitly for compatibility with older releases.
+        exception = lasterror;
         if ~isempty(inputStream)
             try
                 inputStream.close();
             catch
+                ignored = lasterror; %#ok<NASGU>
             end
         end
         if ~isempty(conn)
             try
                 conn.disconnect();
             catch
+                ignored = lasterror; %#ok<NASGU>
             end
         end
         error('PHM:HTTP', 'Unable to send telemetry: %s', exception.message);

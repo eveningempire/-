@@ -16,19 +16,28 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from phm_backend.permissions import has_permission
-from .models import TelemetrySample, TelemetrySession, RealtimeAlarm
+from .models import TelemetrySample, TelemetrySession, RealtimeAlarm, RealtimeDetectionResult
 from .realtime_detection import detect_sample
 
 
 def describe(session):
     last = session.samples.order_by('-id').first()
+    latest_result = session.detection_results.first()
     state = 'closed' if session.closed_at else 'waiting'
     if last and not session.closed_at:
         state = 'live' if last.received_at > timezone.now() - timedelta(seconds=5) else 'stale'
     return {'id': str(session.id), 'name': session.name, 'columns': session.columns,
             'state': state, 'sample_count': session.samples.count(),
             'monitoring_enabled': session.monitoring_enabled,
+            'detection_algorithm': session.detection_algorithm,
+            'algorithm_window_size': session.algorithm_window_size,
+            'algorithm_stride': session.algorithm_stride,
             'alarm_count': session.alarms.count(),
+            'detection_result_count': session.detection_results.count(),
+            'latest_detection': ({'algorithm': latest_result.algorithm, 'decision': latest_result.decision,
+                                  'confidence': latest_result.confidence, 'fault_name': latest_result.fault_name,
+                                  'window_start': latest_result.window_start, 'window_end': latest_result.window_end,
+                                  'created_at': latest_result.created_at} if latest_result else None),
             'created_at': session.created_at, 'closed_at': session.closed_at,
             'last_received_at': last.received_at if last else None}
 
@@ -44,8 +53,18 @@ def sessions(request):
     if not isinstance(name, str) or not 1 <= len(name.strip()) <= 200:
         return Response({'detail': '会话名称应为 1 到 200 个字符'}, status=400)
     token = secrets.token_urlsafe(32)
+    algorithm = request.data.get('detection_algorithm', 'rules')
+    if algorithm not in {'rules', 'hier14', 'msfg_teams_rt', 'pca_iforest'}:
+        return Response({'detail': '不支持的实时检测算法'}, status=400)
+    try:
+        window = max(8, min(1000, int(request.data.get('algorithm_window_size', 30))))
+        stride = max(1, min(window, int(request.data.get('algorithm_stride', 10))))
+    except (TypeError, ValueError):
+        return Response({'detail': '窗口长度和步长必须是整数'}, status=400)
     session = TelemetrySession.objects.create(name=name.strip(), created_by=request.user,
-                                            token_hash=hashlib.sha256(token.encode()).hexdigest())
+                                            token_hash=hashlib.sha256(token.encode()).hexdigest(),
+                                            detection_algorithm=algorithm, algorithm_window_size=window,
+                                            algorithm_stride=stride)
     return Response({**describe(session), 'token': token,
                      'ingest_path': f'/api/v1/phm/telemetry/sessions/{session.id}/ingest/'}, status=201)
 
@@ -156,7 +175,11 @@ def alarms(request, session_id):
         return Response({'detail': 'after 必须是非负整数'}, status=400)
     query = session.alarms.filter(id__gt=after).order_by('id')[:500]
     results = list(query.values('id', 'sample_id', 'signal', 'value', 'threshold', 'operator', 'severity', 'fault_name', 'isolation_target', 'health_index', 'acknowledged', 'created_at'))
-    return Response({'session': describe(session), 'results': results, 'next_cursor': results[-1]['id'] if results else after})
+    detection_results = list(session.detection_results.order_by('-id')[:500].values(
+        'id', 'algorithm', 'decision', 'confidence', 'fault_name', 'window_start', 'window_end', 'result', 'created_at'))
+    return Response({'session': describe(session), 'results': results,
+                     'detection_results': detection_results,
+                     'next_cursor': results[-1]['id'] if results else after})
 
 
 class Echo:
