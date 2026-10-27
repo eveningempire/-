@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
 import json
-from .batch_processing import inspect_file, SUPPORTED_SUFFIXES
+from .batch_processing import inspect_file, SUPPORTED_SUFFIXES, normalize_text_upload
 from .models import Dataset
 from phm.models import StructureNode
 
@@ -82,12 +82,15 @@ class DatasetViewSet(viewsets.ModelViewSet):
         uploaded = request.FILES.get('file')
         if not uploaded: return Response({'detail':'必须选择数据文件'}, status=400)
         if not uploaded.name.lower().endswith(tuple(SUPPORTED_SUFFIXES)):
-            return Response({'detail':'支持 CSV、JSON、JSONL、XLSX 文件'}, status=400)
+            return Response({'detail':'支持 CSV、TXT、DATA、JSON、JSONL、XLSX 文件'}, status=400)
         try:
             structure_node_id = _structure_node_id(request.data.get('structure_node_id'))
         except ValueError as exc:
             return Response({'detail': str(exc)}, status=400)
-        d=Dataset.objects.create(**{x:request.data.get(x) for x in ['name','source','fault_type','injection_time','launch_number','degradation','system','component'] if request.data.get(x) is not None},structure_node_id=structure_node_id,file=request.FILES.get('file'))
+        uploaded, normalized_name = normalize_text_upload(uploaded)
+        fields = {x: request.data.get(x) for x in ['name','source','fault_type','injection_time','launch_number','degradation','system','component'] if request.data.get(x) is not None}
+        fields.setdefault('name', normalized_name)
+        d=Dataset.objects.create(**fields, structure_node_id=structure_node_id, file=uploaded)
         return Response(self.item(d),status=201)
 
     @action(detail=False, methods=['post'], url_path='batch-import')
@@ -111,8 +114,9 @@ class DatasetViewSet(viewsets.ModelViewSet):
                 with transaction.atomic():
                     name = (metadata.get(str(index), {}) if isinstance(metadata, dict) else {}).get('name') or uploaded.name
                     entry = metadata.get(str(index), {}) if isinstance(metadata, dict) else {}
+                    uploaded, normalized_name = normalize_text_upload(uploaded)
                     dataset = Dataset.objects.create(
-                        name=name,
+                        name=name or normalized_name,
                         source=(metadata.get(str(index), {}) if isinstance(metadata, dict) else {}).get('source', 'offline'),
                         fault_type=(metadata.get(str(index), {}) if isinstance(metadata, dict) else {}).get('fault_type', ''),
                         system=(metadata.get(str(index), {}) if isinstance(metadata, dict) else {}).get('system', ''),

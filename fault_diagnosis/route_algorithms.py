@@ -109,18 +109,20 @@ def _window_matrix(signals, window_size, stride):
     return np.asarray(features, dtype=float), starts, keys
 
 
-def pca_iforest(csv_path):
+def pca_iforest(csv_path, parameters=None):
+    parameters = parameters or {}
     rows, signals = _read_numeric(csv_path)
-    window_size = max(8, min(30, len(rows) // 5)); stride = max(2, window_size // 2)
+    window_size = max(8, min(1000, int(parameters.get("window_size", max(8, min(30, len(rows) // 5))))))
+    stride = max(1, min(window_size, int(parameters.get("stride", max(2, window_size // 2)))))
     matrix, starts, keys = _window_matrix(signals, window_size, stride)
     if len(matrix) < 4: raise ValueError("PCA–iForest 至少需要形成 4 个滑动窗口")
     baseline_count = max(3, min(len(matrix) // 2, max(3, int(len(matrix) * .4))))
     scaler = StandardScaler().fit(matrix[:baseline_count]); scaled = scaler.transform(matrix)
-    components = max(1, min(3, scaled.shape[1], baseline_count - 1))
+    components = max(1, min(3, scaled.shape[1], baseline_count - 1, int(parameters.get("components", 3))))
     pca = PCA(n_components=components, random_state=42).fit(scaled[:baseline_count]); embedded = pca.transform(scaled)
     forest = IsolationForest(n_estimators=200, contamination="auto", random_state=42).fit(embedded[:baseline_count])
     raw_scores = -forest.score_samples(embedded)
-    reference = raw_scores[:baseline_count]; threshold = float(np.mean(reference) + 3 * max(np.std(reference), 1e-6))
+    reference = raw_scores[:baseline_count]; threshold = float(parameters.get("threshold", np.mean(reference) + 3 * max(np.std(reference), 1e-6)))
     anomaly = raw_scores > threshold
     denomin = max(float(raw_scores.max() - raw_scores.min()), 1e-9)
     scores = (raw_scores - raw_scores.min()) / denomin

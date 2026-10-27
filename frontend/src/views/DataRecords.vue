@@ -6,8 +6,8 @@
       <el-form-item label="故障类型"><el-input v-model="form.fault_type" /></el-form-item>
       <el-form-item label="系统"><el-input v-model="form.system" /></el-form-item>
       <el-form-item label="PBS 单机产品"><el-select v-model="form.structure_node_id" clearable filterable placeholder="选填：关联结构树节点"><el-option v-for="node in products" :key="node.id" :label="`${node.pbs_code} · ${node.name}`" :value="node.id"/></el-select></el-form-item>
-      <el-form-item><input type="file" accept=".csv,.json,.jsonl,.xlsx" @change="form.file=$event.target.files[0]" /><el-button type="primary" @click="upload">上传单个数据集</el-button></el-form-item>
-      <el-form-item><input ref="batchInput" type="file" multiple accept=".csv,.json,.jsonl,.xlsx" @change="batchFiles=$event.target.files" /><el-button type="success" :loading="batchLoading" @click="batchUpload">批量导入数据</el-button></el-form-item>
+      <el-form-item><input type="file" accept=".csv,.txt,.data,.json,.jsonl,.xlsx" @change="form.file=$event.target.files[0]" /><el-button type="primary" @click="upload">上传单个数据集</el-button></el-form-item>
+      <el-form-item><input ref="batchInput" type="file" multiple accept=".csv,.txt,.data,.json,.jsonl,.xlsx" @change="batchFiles=$event.target.files" /><el-button type="success" :loading="batchLoading" @click="batchUpload">批量导入数据</el-button></el-form-item>
     </el-form>
     <el-card shadow="never" class="filters">
       <el-form :model="filters" inline @submit.prevent="search">

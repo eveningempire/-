@@ -18,6 +18,9 @@ class TelemetrySession(models.Model):
     detection_algorithm = models.CharField(max_length=40, default="rules")
     algorithm_window_size = models.PositiveIntegerField(default=30)
     algorithm_stride = models.PositiveIntegerField(default=10)
+    algorithm_parameters = models.JSONField(default=dict, blank=True)
+    filter_method = models.CharField(max_length=30, default="none")
+    filter_window = models.PositiveIntegerField(default=5)
 
 
 class TelemetrySample(models.Model):

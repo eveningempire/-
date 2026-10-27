@@ -8,7 +8,18 @@
 # Frontend dependencies/build caches
 frontend/node_modules/
 frontend/.vite/
+frontend/dist_*/
 integrations/algorithm_assets/simulation/slprj/
+
+# Document/presentation previews and one-off validation output
+/.deck_inspect/
+/.ppt_build/
+/.ppt_output/
+/_document_work/
+/qa_*/
+/output/
+**/.venv-backup-*/
+/offline_delivery/
 
 # Runtime output and local secrets
 logs/*
@@ -27,6 +38,8 @@ integrations/**/*.pkl
 integrations/**/*.h5
 integrations/**/*.mat
 integrations/**/*.slx
+health-main/**/*.pth
+health-main/**/*.pkl
 
 # Local databases and archives
 *.sqlite3
@@ -34,4 +47,3 @@ integrations/**/*.slx
 *.zip
 # Backup archives
 *.zip.bak
-offline_delivery/phm_platform_offline/offline/python/*.whl

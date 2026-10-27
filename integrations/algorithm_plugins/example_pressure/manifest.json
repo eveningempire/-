@@ -1,0 +1,13 @@
+{
+  "key": "example_pressure",
+  "name": "示例压力阈值诊断",
+  "version": "1.0.0",
+  "category": "diagnosis",
+  "description": "用于验证算法包导入、参数展示、模型资产读取和诊断运行流程；阈值仅为演示值。",
+  "entrypoint": "algorithm.py:predict",
+  "min_rows": 8,
+  "parameters": {
+    "signal": {"type": "string", "default": "pressure"},
+    "threshold": {"type": "number", "default": 0.8, "minimum": 0, "maximum": 1000000000}
+  }
+}

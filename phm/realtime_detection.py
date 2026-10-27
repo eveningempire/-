@@ -1,4 +1,5 @@
 import csv
+import math
 import tempfile
 from pathlib import Path
 
@@ -12,7 +13,7 @@ DEFAULT_RULES = {
     "control_error": {"operator": "gt", "threshold": 0.10, "fault": "执行器迟滞", "target": "控制执行机构", "severity": "warning"},
 }
 
-ALGORITHMS = {"rules", "hier14", "msfg_teams_rt", "pca_iforest"}
+ALGORITHMS = {"rules", "hier14", "msfg_teams_rt", "pca_iforest", "ims"}
 
 
 def _hit(value, operator, threshold):
@@ -111,18 +112,23 @@ def run_window_algorithm(session, cursor_id):
     if len(samples) < window:
         raise ValueError(f"算法窗口需要至少 {window} 个采样点")
     columns = list(session.columns or samples[0].values)
+    values = [dict(sample.values) for sample in samples]
+    values = _filter_values(values, getattr(session, "filter_method", "none"), getattr(session, "filter_window", 5))
     # Telemetry uses ``time``; the trained Hier14 adapter consumes ``Time``.
     export_columns = ['Time' if key == 'time' and session.detection_algorithm == 'hier14' else key
                       for key in columns]
     with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", newline="", encoding="utf-8-sig", delete=False) as handle:
         writer = csv.DictWriter(handle, fieldnames=export_columns)
         writer.writeheader()
-        writer.writerows({export: sample.values.get(key) for key, export in zip(columns, export_columns)}
-                         for sample in samples)
+        writer.writerows({export: row.get(key) for key, export in zip(columns, export_columns)}
+                         for row in values)
         path = Path(handle.name)
     try:
         quality = _quality_for_csv(path)
-        raw = _run_algorithm(session.detection_algorithm, path)
+        if session.detection_algorithm == "ims":
+            raw = _run_ims_window(values, session.algorithm_parameters or {})
+        else:
+            raw = _run_algorithm(session.detection_algorithm, path, parameters=session.algorithm_parameters or {})
         result = _standardize_result(raw, quality)
     finally:
         path.unlink(missing_ok=True)
@@ -131,3 +137,61 @@ def run_window_algorithm(session, cursor_id):
     result["fault_name"] = result.get("aggregate_pred_name") or result.get("pred_name") or ""
     result["isolation_target"] = "算法输出对象"
     return result
+
+
+def _filter_values(rows, method, window):
+    """Apply an optional causal filter to numeric signals for model input."""
+    method = str(method or "none").lower()
+    if method == "none":
+        return rows
+    width = max(3, int(window or 5)); width = width if width % 2 else width + 1
+    result = [dict(row) for row in rows]
+    for key in rows[0] if rows else ():
+        if key.lower() in {"time", "timestamp"}: continue
+        numeric = []
+        try:
+            numeric = [float(row[key]) for row in rows]
+        except (TypeError, ValueError, KeyError):
+            continue
+        for index in range(len(rows)):
+            start = max(0, index - width + 1); segment = numeric[start:index + 1]
+            if method == "median": value = sorted(segment)[len(segment) // 2]
+            elif method == "exponential":
+                alpha = 2.0 / (width + 1); value = segment[0]
+                for item in segment[1:]: value = alpha * item + (1 - alpha) * value
+            else: value = sum(segment) / len(segment)
+            result[index][key] = value
+    return result
+
+
+def _run_ims_window(rows, parameters):
+    """Windowed IMS-compatible score for live multi-parameter telemetry.
+
+    IMS is intentionally calculated from the normal baseline in the same
+    window. It requires no separate MATLAB service and returns per-parameter
+    scores for the dashboard; a trained IMS asset can still be used by the
+    historical data-management pipeline.
+    """
+    numeric = {}
+    for key in (rows[0] if rows else {}):
+        if key.lower() in {"time", "timestamp"}: continue
+        try: numeric[key] = [float(row[key]) for row in rows]
+        except (TypeError, ValueError, KeyError): continue
+    if not numeric: raise ValueError("IMS 窗口中没有可用数值信号")
+    baseline_count = max(3, min(len(rows) // 2, int(parameters.get("baseline_windows", max(5, len(rows) // 3)))))
+    scores = {}; latest = []
+    for key, values in numeric.items():
+        baseline = values[:baseline_count]; center = sum(baseline) / len(baseline)
+        spread = math.sqrt(sum((value-center) ** 2 for value in baseline) / max(1, len(baseline)-1))
+        scale = max(spread, abs(center) * 0.01, 1e-9)
+        z = abs((sum(values[-min(3, len(values)):]) / min(3, len(values)) - center) / scale)
+        scores[key] = round(min(1.0, z / 6.0), 6); latest.append(z)
+    threshold = float(parameters.get("threshold", 0.55) or 0.55)
+    score = max(scores.values()) if scores else 0.0
+    abnormal = score >= threshold
+    top = max(scores, key=scores.get)
+    return {"algorithm": "IMS", "pred_name": "异常" if abnormal else "正常", "aggregate_pred_name": "异常" if abnormal else "正常",
+            "confidence": score if abnormal else 1-score, "parameter_scores": scores,
+            "fault_name": f"{top} 参数异常" if abnormal else "", "isolation_target": top,
+            "window_series": [{"window_index": 0, "time_start": float(rows[0].get("time", 0)), "time_end": float(rows[-1].get("time", 0)), "pred_name": "异常" if abnormal else "正常", "confidence": score if abnormal else 1-score}],
+            "model_mode": "online-ims-baseline", "threshold": threshold}

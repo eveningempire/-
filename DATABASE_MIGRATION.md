@@ -1,6 +1,6 @@
 # MySQL to SQLite data migration
 
-The bundled `db.sqlite3` now contains the converted records from the supplied DBeaver dump. The original dump is preserved at `database-source/dump-cmg_db-202601251552.sql`; a UTF-8 Django fixture is also preserved at `database-source/mysql_export_utf8.json`.
+The current `db.sqlite3` contains the converted records from the supplied DBeaver dump. The old `database-source/` SQL and JSON export copies were removed during workspace cleanup; they are not used when running the platform. Keep the current database and `media/` together when making a backup.
 
 On the computer that can reach the original MySQL server, run from this package directory:
 

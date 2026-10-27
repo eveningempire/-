@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="850" height="470" viewBox="0 0 850 470" fill="none">
+<defs>
+ <radialGradient id="planet"><stop stop-color="#224d76"/><stop offset=".65" stop-color="#0b2b4b"/><stop offset="1" stop-color="#041327"/></radialGradient>
+ <linearGradient id="body" x1="495" x2="548" gradientUnits="userSpaceOnUse"><stop stop-color="#326382"/><stop offset=".4" stop-color="#c1d8e8"/><stop offset=".6" stop-color="#e4f4ff"/><stop offset="1" stop-color="#2b5270"/></linearGradient>
+ <linearGradient id="fade"><stop stop-color="#38cbff" stop-opacity="0"/><stop offset=".5" stop-color="#38cbff" stop-opacity=".7"/><stop offset="1" stop-color="#38cbff" stop-opacity="0"/></linearGradient>
+ <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6dcfff" stop-opacity=".25"/><stop offset="1" stop-color="#1c92da" stop-opacity="0"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#2daaff" stop-opacity=".3"/><stop offset="1" stop-color="#2daaff" stop-opacity="0"/></radialGradient>
+ <clipPath id="globe"><circle cx="273" cy="263" r="155"/></clipPath>
+ <filter id="blur"><feGaussianBlur stdDeviation="4"/></filter>
+</defs>
+<ellipse cx="420" cy="276" rx="340" ry="188" fill="url(#glow)"/>
+<g opacity=".72">
+ <circle cx="273" cy="263" r="155" fill="url(#planet)"/>
+ <g clip-path="url(#globe)" stroke="#55b3d7" stroke-opacity=".2" stroke-width=".7">
+  <ellipse cx="273" cy="263" rx="56" ry="155"/><ellipse cx="273" cy="263" rx="111" ry="155"/><path d="M118 263h310M131 207h283M131 319h283M162 152h222M162 374h222"/>
+  <path d="m170 183 23-12 19 8 9 21 24 3 16-14 17 7 4 25-18 12-10 24-18 8-9 31-22 5-12-21-17-6-9-25-29-10 11-31Zm101-51 35 8 6 15 29-4 14 20 33 6 28 35-17 18-30-3-11 17-18-5-12 18-19-17-3-30-24-11-8-31-14-12Zm27 153 15-13 21 6 9 20-14 23-2 38-19 18-11-32-15-18Z" fill="#60b4d1" fill-opacity=".12" stroke-opacity=".32"/>
+ </g>
+ <circle cx="273" cy="263" r="155" stroke="#53c8f5" stroke-opacity=".6"/>
+ <path d="M118 263a155 155 0 0 1 310 0" stroke="#53c8f5" stroke-width="5" filter="url(#blur)" opacity=".6"/>
+</g>
+<g stroke="#3ca7d4" stroke-opacity=".4">
+ <ellipse cx="273" cy="263" rx="203" ry="173" transform="rotate(-22 273 263)" stroke-dasharray="2 9"/>
+ <ellipse cx="273" cy="263" rx="242" ry="60" transform="rotate(-25 273 263)"/>
+ <path d="M57 362 463 163M71 126h102l19 19M78 379h102l15-15" stroke-opacity=".6"/>
+ <circle cx="136" cy="338" r="4" fill="#5ed7ff"/><circle cx="438" cy="211" r="3" fill="#5ed7ff"/>
+</g>
+<path d="M410 391h332M438 405h278M467 417h220" stroke="url(#fade)"/>
+<ellipse cx="557" cy="386" rx="136" ry="20" stroke="#61ccff" stroke-opacity=".3"/><ellipse cx="557" cy="386" rx="90" ry="11" stroke="#61ccff" stroke-opacity=".4"/>
+<g stroke="#5c9cbf" stroke-width="1.3">
+ <path d="M584 371V111h49v260M584 111h49M584 148h49M584 186h49M584 224h49M584 262h49M584 300h49M584 338h49M584 111l49 37-49 38 49 38-49 38 49 38-49 38 49 33"/>
+ <path d="M580 111h57v-8h-57ZM580 187h57v-7h-57ZM579 262h59v-7h-59ZM579 339h59v-7h-59Z" fill="#173b58"/>
+ <path d="M608 103V68m0 13h-4m4 9h4" stroke="#92c9e1"/>
+ <path d="M547 151h37m-37 53h37m-37 59h37m-37 57h37" stroke-width="4" stroke="#2f5e7b"/>
+</g>
+<g>
+ <path d="M496 144q7-44 26-67 19 23 26 67v185h-52Z" fill="url(#body)" stroke="#afd7ed" stroke-width=".8"/>
+ <path d="M497 145h50M497 160h50M497 277h50M497 288h50" stroke="#153d5c" stroke-width="3"/>
+ <path d="m522 79 4 61v186h-8V140Z" fill="#e2f7ff" opacity=".15"/>
+ <path d="M511 330h22l6 23h-34Z" fill="#18334b" stroke="#77a7c4"/>
+ <path d="m496 295-17 45v15l17-8m52-52 17 45v15l-17-8" fill="#33617f" stroke="#7eacc7"/>
+ <path d="m501 341-14 41m56-41 14 41" stroke="#81b9d5" stroke-width="2"/>
+ <path d="m515 354-18 44h50l-18-44" fill="url(#beam)"/>
+ <path d="M519 178h6v46h-6Z" fill="#174364"/>
+ <path d="M520 233h4v17h-4Z" fill="#174364"/>
+ <path d="M487 383h-6m76 0h6" stroke="#a1d9f3" stroke-width="3"/>
+</g>
+<g stroke="#4598bc" stroke-opacity=".5">
+ <path d="M642 192h107l13-13v-41h-92M642 192l-9 9M641 284h97l17 17v37h-58"/>
+ <path d="M661 154h50m-50 8h33m-33 8h42M687 318h40m-40 8h29" stroke-width="2"/>
+ <path d="M670 111v-5h100v72h-5M107 216h-5v-40h51"/>
+</g>
+<g fill="#62c8ec"><circle cx="642" cy="192" r="3"/><circle cx="641" cy="284" r="3"/><circle cx="608" cy="68" r="2"/></g>
+</svg>

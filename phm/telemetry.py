@@ -32,6 +32,9 @@ def describe(session):
             'detection_algorithm': session.detection_algorithm,
             'algorithm_window_size': session.algorithm_window_size,
             'algorithm_stride': session.algorithm_stride,
+            'algorithm_parameters': session.algorithm_parameters or {},
+            'filter_method': session.filter_method,
+            'filter_window': session.filter_window,
             'alarm_count': session.alarms.count(),
             'detection_result_count': session.detection_results.count(),
             'latest_detection': ({'algorithm': latest_result.algorithm, 'decision': latest_result.decision,
@@ -54,7 +57,7 @@ def sessions(request):
         return Response({'detail': '会话名称应为 1 到 200 个字符'}, status=400)
     token = secrets.token_urlsafe(32)
     algorithm = request.data.get('detection_algorithm', 'rules')
-    if algorithm not in {'rules', 'hier14', 'msfg_teams_rt', 'pca_iforest'}:
+    if algorithm not in {'rules', 'hier14', 'msfg_teams_rt', 'pca_iforest', 'ims'}:
         return Response({'detail': '不支持的实时检测算法'}, status=400)
     try:
         window = max(8, min(1000, int(request.data.get('algorithm_window_size', 30))))
@@ -64,10 +67,27 @@ def sessions(request):
         stride = max(1, min(window, int(request.data.get('algorithm_stride', 10))))
     except (TypeError, ValueError):
         return Response({'detail': '窗口长度和步长必须是整数'}, status=400)
+    allowed_parameters = {'threshold', 'contamination', 'components', 'baseline_windows'}
+    raw_parameters = request.data.get('algorithm_parameters', {})
+    if isinstance(raw_parameters, str):
+        try:
+            import json
+            raw_parameters = json.loads(raw_parameters)
+        except Exception:
+            raw_parameters = {}
+    parameters = {key: raw_parameters[key] for key in allowed_parameters if isinstance(raw_parameters, dict) and key in raw_parameters}
+    filter_method = str(request.data.get('filter_method', 'none') or 'none').lower()
+    if filter_method not in {'none', 'moving_average', 'median', 'exponential'}:
+        return Response({'detail': '不支持的滤波方式'}, status=400)
+    try:
+        filter_window = max(3, min(101, int(request.data.get('filter_window', 5))))
+    except (TypeError, ValueError):
+        return Response({'detail': '滤波窗口必须是整数'}, status=400)
     session = TelemetrySession.objects.create(name=name.strip(), created_by=request.user,
                                             token_hash=hashlib.sha256(token.encode()).hexdigest(),
                                             detection_algorithm=algorithm, algorithm_window_size=window,
-                                            algorithm_stride=stride)
+                                            algorithm_stride=stride, algorithm_parameters=parameters,
+                                            filter_method=filter_method, filter_window=filter_window)
     return Response({**describe(session), 'token': token,
                      'ingest_path': f'/api/v1/phm/telemetry/sessions/{session.id}/ingest/'}, status=201)
 
@@ -161,10 +181,24 @@ def close(request, session_id):
 def monitoring(request, session_id):
     session = get_object_or_404(TelemetrySession, pk=session_id)
     enabled = request.data.get('enabled')
-    if not isinstance(enabled, bool):
+    if enabled is not None and not isinstance(enabled, bool):
         return Response({'detail': 'enabled 必须是布尔值'}, status=400)
-    session.monitoring_enabled = enabled
-    session.save(update_fields=['monitoring_enabled'])
+    update_fields = []
+    if enabled is not None:
+        session.monitoring_enabled = enabled
+        update_fields.append('monitoring_enabled')
+    if 'filter_method' in request.data:
+        method = str(request.data.get('filter_method') or 'none').lower()
+        if method not in {'none', 'moving_average', 'median', 'exponential'}:
+            return Response({'detail': '不支持的滤波方式'}, status=400)
+        session.filter_method = method; update_fields.append('filter_method')
+    if 'filter_window' in request.data:
+        try: session.filter_window = max(3, min(101, int(request.data['filter_window'])))
+        except (TypeError, ValueError): return Response({'detail': '滤波窗口必须是整数'}, status=400)
+        update_fields.append('filter_window')
+    if not update_fields:
+        return Response({'detail': '没有可更新的检测配置'}, status=400)
+    session.save(update_fields=list(dict.fromkeys(update_fields)))
     return Response(describe(session))
 
 

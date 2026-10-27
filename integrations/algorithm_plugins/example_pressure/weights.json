@@ -1,0 +1,6 @@
+{
+  "normal_label": "正常",
+  "fault_label": "压力异常",
+  "default_signal": "pressure",
+  "default_threshold": 0.8
+}

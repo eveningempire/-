@@ -8,6 +8,8 @@ report that can be consumed by the UI and by later algorithm stages.
 from __future__ import annotations
 
 import csv
+import io
+import re
 import json
 import math
 from collections import Counter
@@ -18,9 +20,55 @@ from typing import Any, Iterable, Iterator
 from .schema import column_roles
 
 
-SUPPORTED_SUFFIXES = {".csv", ".json", ".jsonl", ".ndjson", ".xlsx"}
+# Plain text telemetry files use the same header/row contract as CSV.  Keeping
+# them in the common reader lets the upload API accept files exported by field
+# equipment without requiring a manual rename first.
+SUPPORTED_SUFFIXES = {".csv", ".txt", ".data", ".json", ".jsonl", ".ndjson", ".xlsx"}
 MAX_COLUMNS = 500
 SAMPLE_ROWS = 20
+
+
+def normalize_text_upload(uploaded):
+    """Return a UTF-8 CSV ContentFile for TXT/DATA telemetry uploads.
+
+    Field exports are often comma, semicolon, tab or pipe separated.  The
+    normalized file gives downstream algorithms one stable CSV contract while
+    ordinary CSV uploads remain untouched.
+    """
+    from django.core.files.base import ContentFile
+    name = getattr(uploaded, "name", "telemetry.txt") or "telemetry.txt"
+    suffix = Path(name).suffix.lower()
+    if suffix not in {".txt", ".data"}:
+        return uploaded, name
+    csv_name = f"{Path(name).stem}.csv"
+    raw = uploaded.read()
+    if hasattr(uploaded, "seek"):
+        uploaded.seek(0)
+    text = raw.decode("utf-8-sig")
+    sample = text[:8192]
+    try:
+        dialect = csv.Sniffer().sniff(sample, delimiters=",;\t|")
+    except csv.Error:
+        # Some flight recorders export whitespace-separated text without a
+        # delimiter declaration. Convert runs of spaces to commas when the
+        # first non-empty lines have a stable field count.
+        lines = [line.strip() for line in text.splitlines() if line.strip()][:5]
+        counts = [len(re.split(r"\s+", line)) for line in lines]
+        if len(counts) >= 2 and len(set(counts)) == 1 and counts[0] > 1:
+            output = io.StringIO(newline="")
+            writer = csv.writer(output)
+            for line in text.splitlines():
+                if line.strip(): writer.writerow(re.split(r"\s+", line.strip()))
+            normalized = ContentFile(output.getvalue().encode("utf-8-sig")); normalized.name = csv_name
+            return normalized, csv_name
+        dialect = csv.excel
+    reader = csv.reader(io.StringIO(text), dialect=dialect)
+    output = io.StringIO(newline="")
+    writer = csv.writer(output)
+    writer.writerows(reader)
+    normalized = ContentFile(output.getvalue().encode("utf-8-sig"))
+    normalized.name = csv_name
+    return normalized, csv_name
 
 
 def _text(value: Any) -> str:
@@ -148,13 +196,13 @@ def _xlsx_rows(path: Path) -> tuple[list[str], Iterator[dict[str, Any]]]:
 def iter_rows(path: str | Path) -> tuple[list[str], Iterator[dict[str, Any]]]:
     file_path = Path(path)
     suffix = file_path.suffix.lower()
-    if suffix == ".csv":
+    if suffix in {".csv", ".txt", ".data"}:
         return _csv_rows(file_path)
     if suffix in {".json", ".jsonl", ".ndjson"}:
         return _json_rows(file_path)
     if suffix == ".xlsx":
         return _xlsx_rows(file_path)
-    raise ValueError(f"不支持的文件格式 {suffix or '(无扩展名)'}，支持 CSV、JSON、JSONL、XLSX")
+    raise ValueError(f"不支持的文件格式 {suffix or '(无扩展名)'}，支持 CSV、TXT、DATA、JSON、JSONL、XLSX")
 
 
 def inspect_file(path: str | Path, *, display_name: str | None = None) -> dict[str, Any]:

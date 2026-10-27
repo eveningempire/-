@@ -153,7 +153,7 @@ def batch_predict(request):
         return JsonResponse({'ok': False, 'error': str(exc)}, status=400)
 
 
-def _run_algorithm(algorithm, csv_path, dataset=None):
+def _run_algorithm(algorithm, csv_path, dataset=None, parameters=None):
     if algorithm == "hier14":
         result = DiagnosisService.instance().predict(csv_path); result.setdefault("algorithm", "Hier14"); return result
     if algorithm == "msfg_teams_rt":
@@ -162,7 +162,7 @@ def _run_algorithm(algorithm, csv_path, dataset=None):
         except ValueError as exc:
             # 保持上传旧版 scope CSV 的兼容性；有 P_values 时优先使用新算法。
             return msfg_teams_rt(csv_path)
-    if algorithm == "pca_iforest": return pca_iforest(csv_path)
+    if algorithm == "pca_iforest": return pca_iforest(csv_path, parameters=parameters or {})
     raise ValueError("未知诊断算法,可选 hier14、msfg_teams_rt、pca_iforest")
 
 @csrf_exempt

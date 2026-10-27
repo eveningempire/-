@@ -1,9 +1,0 @@
-__pycache__/
-*.py[cod]
-*.pkl
-!backend/algotest/hier14/checkpoints/scaler.pkl
-*.pth
-!backend/algotest/hier14/checkpoints/best_model.pth
-.DS_Store
-simulate/datacsv/
-*.slx
