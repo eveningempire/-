@@ -184,7 +184,7 @@ def run_task(task, on_stage=None):
         for path, component, report in reports:
             dataset = Dataset.objects.create(
                 name=(task.name if component == "原始状态量" else f"{task.name}-{component}")[:200],
-                file=path.relative_to(Path(settings.MEDIA_ROOT).resolve()).as_posix(), source="simulation",
+                file=path.resolve().relative_to(Path(settings.MEDIA_ROOT).resolve()).as_posix(), source="simulation",
                 fault_type=task.fault_mode, injection_time=task.injection_time,
                 launch_number=task.flight_count, system=task.subsystem, component=component)
             created.append({"dataset_id": dataset.pk, "path": dataset.file.name,

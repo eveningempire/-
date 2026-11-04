@@ -188,7 +188,7 @@ def run_task(task, on_stage=None):
         for path, component, report in exports:
             # Export is already in MEDIA_ROOT; register without duplicating the file.
             dataset = Dataset.objects.create(
-                name=(task.name if component == "原始状态量" else f"{task.name}-{component}")[:200], file=path.relative_to(Path(settings.MEDIA_ROOT).resolve()).as_posix(),
+                name=(task.name if component == "原始状态量" else f"{task.name}-{component}")[:200], file=path.resolve().relative_to(Path(settings.MEDIA_ROOT).resolve()).as_posix(),
                 source="simulation", fault_type=params["fault_mode"], injection_time=params["injection_time"],
                 degradation=None, launch_number=params["flight_count"], system=params["subsystem"], component=component,
             )
