@@ -6,6 +6,8 @@ $env:USE_SQLITE = 'true'
 $env:DJANGO_DEBUG = 'True'
 $env:PIP_DISABLE_PIP_VERSION_CHECK = '1'
 $env:PYTHONNOUSERSITE = '1'
+$env:PYTHONUTF8 = '1'
+$env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
 Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue

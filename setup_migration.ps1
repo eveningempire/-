@@ -4,6 +4,8 @@ $Root = $PSScriptRoot
 Set-Location -LiteralPath $Root
 $env:USE_SQLITE = 'true'
 $env:PYTHONNOUSERSITE = '1'
+$env:PYTHONUTF8 = '1'
+$env:PYTHONIOENCODING = 'utf-8'
 $env:PIP_DISABLE_PIP_VERSION_CHECK = '1'
 Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
 Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue

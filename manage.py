@@ -12,6 +12,9 @@ import sys
 
 def main() -> None:
     """Run administrative tasks."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8', errors='backslashreplace')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "phm_backend.settings")
     try:
         from django.core.management import execute_from_command_line  # type: ignore

@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import sqlite3
+import sys
 import zipfile
 from pathlib import Path
 
@@ -67,6 +68,9 @@ def verify(root, assets_only=False):
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8', errors='backslashreplace')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--assets-only', action='store_true', help='Check binaries without installing Django or creating a database')
     args = parser.parse_args()

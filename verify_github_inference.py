@@ -1,6 +1,7 @@
 """Exercise shipped trained models with unchanged real simulation samples."""
 import json
 import os
+import sys
 from pathlib import Path
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'phm_backend.settings')
@@ -18,6 +19,9 @@ from rul_service.health_main_adapter import predict
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8', errors='backslashreplace')
     torch.set_num_threads(2)
     client = Client()
     for url in ('/', '/api/v1/fault-diagnosis/status/', '/api/v1/health-assessment/status/',
