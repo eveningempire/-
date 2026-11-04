@@ -12,6 +12,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from datasets.models import Dataset
+from simulation_dataset.assets import simulation_archive
 
 
 FLIGHTS = (0, 1, 2, 3, 4, 6, 9)
@@ -47,7 +48,7 @@ class Command(BaseCommand):
     help = "将内置正常基线的 7 组原始及派生 CSV 导入当前数据库；重复执行不会重复创建。"
 
     def add_arguments(self, parser):
-        parser.add_argument("--archive", type=Path, default=settings.BASE_DIR / "integrations" / "simulation_assets" / "simulate_data_+1.zip")
+        parser.add_argument("--archive", type=Path, default=simulation_archive(settings.BASE_DIR))
         parser.add_argument("--dry-run", action="store_true")
 
     def handle(self, *args, **options):
@@ -58,7 +59,13 @@ class Command(BaseCommand):
         target_root = media_root / "datasets" / "baseline"
         imported = skipped = 0
         with zipfile.ZipFile(archive_path) as archive:
-            for flight in FLIGHTS:
+            # GitHub includes one complete flight pair per scenario; full
+            # delivery archives include all seven baseline flights.
+            available_flights = [flight for flight in FLIGHTS
+                                 if ROOT + f"fc{flight}.csv" in archive.namelist()]
+            if not available_flights:
+                raise CommandError("压缩包没有正常基线")
+            for flight in available_flights:
                 for processed in (False, True):
                     filename = f"fc{flight}{'_P' if processed else ''}.csv"
                     member = ROOT + filename

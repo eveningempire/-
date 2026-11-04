@@ -1,0 +1,30 @@
+name: Verify GitHub delivery
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  delivery:
+    runs-on: windows-latest
+    env:
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Verify actual binary assets and checksums
+        run: python verify_phm_delivery.py --assets-only
+      - name: Install from a clean GitHub checkout
+        shell: powershell
+        run: ./start_phm_platform.ps1 -CheckOnly
+      - name: Import real simulation pairs
+        run: ./.venv/Scripts/python.exe manage.py import_simulation_datasets --include-baseline
+      - name: Verify diagnosis, health and RUL inference
+        run: ./.venv/Scripts/python.exe verify_github_inference.py
+      - name: Regression checks
+        run: ./.venv/Scripts/python.exe manage.py test simulation_dataset fault_diagnosis.test_service rul_service simulation_demo --noinput

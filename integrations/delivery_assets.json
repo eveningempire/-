@@ -1,0 +1,1125 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "path": "health-main/backend/algotest/hier14/checkpoints/best_model.pth",
+      "bytes": 5637690,
+      "sha256": "5a01561d2567f0a88ca92768c2f4b758fd8018aaa70b24e4a6c225e3309a5323"
+    },
+    {
+      "path": "health-main/backend/algotest/hier14/checkpoints/scaler.pkl",
+      "bytes": 1803,
+      "sha256": "40fd714c1974870a0f2eb901290095f025a78c33b75cc2a86d30c899302cb6f0"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/decoder_best.pt",
+      "bytes": 3023,
+      "sha256": "29de35ad76dd6ef8d2381fa5477dbf52e9aff58dc5f3f7cbfb416108f40cdca3"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/discriminator_best.pt",
+      "bytes": 3019,
+      "sha256": "aca45b6174d8e68a1297a3a9fd72544958e2fbcdd417a9902725161572c25426"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/encoder_best.pt",
+      "bytes": 3857,
+      "sha256": "69e15f54c3deef253c8fe894eb02b73f8d325ec8381cc0ee767a7d67f2c250fe"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/fault_gbdt_model.pkl",
+      "bytes": 2638419,
+      "sha256": "055d59d5926038ecbf775163ae982e3f8244f52f30886f268fb3aa67338ed6d8"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/gcn_pinn_model.pkl",
+      "bytes": 3565,
+      "sha256": "10bdc6c2961c8d5c4ed426a494cc8e5bf0dfa89786b07ad1d4c5047b06659b7e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/BiGRU_best_model.pt",
+      "bytes": 231794,
+      "sha256": "7fbc3d0bc52be55fe2e832c7c4383afcd343996241c5d9dfd0ef06de636ba0e4"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "d214ab56c40762885c77b840de3ca5b205f3e75ecc146162c91c0ad91b3c91fd"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/BiLSTM_best_model.pt",
+      "bytes": 289339,
+      "sha256": "f5fa457c07e179a70b6c33b3066b425aff5f0e70a2c50adb6e6b082568336ae6"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "5038e7252eb860241d269d91b3cc82071e6fa684cdca8b94af1416ebf9c67493"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/BiRNN_best_model.pt",
+      "bytes": 44274,
+      "sha256": "92291a3151b2fceba2b9926c5ad47111fd0af31574728153665129d282a72b49"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "c39c3e54ac8977990086f6a57c1eeadc53bdb05350331e2e3459827bd378671b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/CNN_best_model.pt",
+      "bytes": 6179,
+      "sha256": "dd5aa794d91b647bc43a5c4db32d8a63658c698546cfbdc1ebb2cdd4c8e6e651"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "a4320700393eba7e52aa6c9335c97b7f0cdb1d07a40681b46bf4e53c9698ab7a"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/ensemble.pkl",
+      "bytes": 7517057,
+      "sha256": "12b725a9d0f3d42613e1f4d0404ea4b7bf167529b88b2d127aa99f3fa564eaf1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/pca.pkl",
+      "bytes": 1039,
+      "sha256": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/scaler.pkl",
+      "bytes": 711,
+      "sha256": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/SRNN_best_model.pt",
+      "bytes": 43373,
+      "sha256": "a5aad211a9418d60cb5b8df0991a83a7a49e6475aca6fb4e910aafe0ff6f3eea"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/1/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "c6336583c00de8631f09dae725d537c58c601dd32640bd98883a9909035a67ef"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/BiGRU_best_model.pt",
+      "bytes": 1279794,
+      "sha256": "a2389eea0e6233e099969b7ee5321e34a2eb3d8d702becf41ddf6cbb0d0b7d46"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "5fe840706e9a3d3356c049c0ce7c9de4d5e2adc93be98552a8d4e9d00fabda04"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/BiLSTM_best_model.pt",
+      "bytes": 445563,
+      "sha256": "ee9b53bdb79d78f528008c2874be970ae7788b21acae39c0ae10898c6646c479"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "dde12cb6cd5ae0d667497fd3c05a9175d330f0d346b3055762939231a1630544"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/BiRNN_best_model.pt",
+      "bytes": 118002,
+      "sha256": "8eabcd3ceebbb684dd8bb6d8f37fa0e54a381fbd19a364807b0a05073670dda2"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "569504d875fd7759ca32219108fc4b885785cdbf023f0c2a0f796531cbe153b4"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/CNN_best_model.pt",
+      "bytes": 5283,
+      "sha256": "f8c09221a91ef25f9e9d51909dac3a0517493d278ebb5428c1fe6c1ca837b617"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "b48cef0ef768d49718be23bc8e9c594cd82af12c0bf3974384de0f44a3caaa60"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/ensemble.pkl",
+      "bytes": 14551105,
+      "sha256": "bacee6d711f0100f7f54717b5ef9f1fd7fff1a4688dc42635b5c8596a661b020"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/pca.pkl",
+      "bytes": 1039,
+      "sha256": "27184c52e6c224e6730fd8b8d8c6f47c78aa3d3072f9700054538ff0765d52f1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/scaler.pkl",
+      "bytes": 711,
+      "sha256": "2c6bae04b8fb29509148fff4bea9e5a1f2b55321de2691436138d642cbe2aae2"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/SRNN_best_model.pt",
+      "bytes": 557741,
+      "sha256": "6169288925f940239059d7d944d6810c9b5bd3c0e69413167e3163373b4e6c97"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/10/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "6e418d602b3afb48bea3f012d7fed1a2a04a8d12c1368246791950502ed2cf60"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/BiGRU_best_model.pt",
+      "bytes": 1583922,
+      "sha256": "5706be20c6874c7c6b3c673bdcb1ad76fe928feb8c7520e94e4b24484271b424"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "2fbb6c4e33b5ed6e758608dbb588cacccf0d581530ff8f3bc6a46dc304b3b69d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/BiLSTM_best_model.pt",
+      "bytes": 1504571,
+      "sha256": "06e3ba7cecca819c29364dd1e4815a481daf9cf1334eda5a73d64dd7b5a3068f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "4bbf1c85eaa39ab26183914d19037596160350f26b4530fb372f69089d8b7a75"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/BiRNN_best_model.pt",
+      "bytes": 535410,
+      "sha256": "2c31805dd853ae9a4d5f5021a70728a1731190367b65b5332ef60b75de579e65"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/BiRNN_best_params.pkl",
+      "bytes": 91,
+      "sha256": "515d341b43868125f30a1922374039c874c27474bc93b623e833d01bc0326727"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/CNN_best_model.pt",
+      "bytes": 6435,
+      "sha256": "69a26d39a2047ee9a4a3750cea5b0ac5e5a9a9fb64aef4b2a300834fd6523e3e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "02c47c80cd656e9d22295b68da36349a802b844ce3ae51146117480d2690054b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/ensemble.pkl",
+      "bytes": 13210753,
+      "sha256": "4dd92dec5b40c9c2cf747023067621346cbbd24cbd82318e27616637d70bbace"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/pca.pkl",
+      "bytes": 1039,
+      "sha256": "ec61ee8dd1c9fb4350d3449d01de741838f235f17dedb485c7935683384522d6"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/scaler.pkl",
+      "bytes": 711,
+      "sha256": "d60097e55bb750c6ec2bb3f5bb305b35106c7633ab7d203d1dd36c5f25fd0e4a"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/SRNN_best_model.pt",
+      "bytes": 238189,
+      "sha256": "a6ea522386ea2ea28a647a6210094ccfccbf4b2229464e69d2820b1b38600f89"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/11/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "3c8c5f2ce9a50ce1c3ecf14bcddf95a9b1beaf0eb80dfba2a4e270717560a642"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/BiGRU_best_model.pt",
+      "bytes": 1583922,
+      "sha256": "8f5f06670aa311d1f0a764ae8c93d1beb7538554f3eff2bbb3a7b1ef152a31a8"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "e8b510aaec33949864ded47a4734e12e28b70fa6831fefb472524d000e1e354b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/BiLSTM_best_model.pt",
+      "bytes": 902011,
+      "sha256": "5bb2f097be4b5e300d3b6f3e4c2416d66e71871b6826e75fd27c390d8734ca7b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "c6cfbf08bd735dbc11d6e53d725612ec981f7e53e891832f8aebde1b2ab598e0"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/BiRNN_best_model.pt",
+      "bytes": 49074,
+      "sha256": "b1bd40e62111b84235d421af14bc6a1bdc9b40bb888f4864ae4eab1b7d435ac5"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "7d6d0a88fa30d1266763853dfe7aa55eba9d7c97160ebbbfb02083504608b153"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/CNN_best_model.pt",
+      "bytes": 7459,
+      "sha256": "6ad21944fc1a69752a0c4c26bb1db20697967025096b20332f78333b4b68adc8"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "f0fc4465aa53927f0eb879d5749b2f2740b01c48db996eab5b2253d88562443e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/ensemble.pkl",
+      "bytes": 25769601,
+      "sha256": "4e32f6a6981da3725adbf1ae251c77b580993ecac1ba1c148f577ade4b9fe4a2"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/pca.pkl",
+      "bytes": 1039,
+      "sha256": "3c92dc88f6c1a9b8194d0e2f8329edfdbb1fe570a3cb893cb9403ef9daf57538"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/scaler.pkl",
+      "bytes": 711,
+      "sha256": "8b05a6236e4d73fb2abb7520c4343b0ee14167ca95d8f47d18e819695ac9e18f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/SRNN_best_model.pt",
+      "bytes": 682733,
+      "sha256": "7e0fb3ee99b2d72bf13da617a7f9cc8c0f18639af3f7f902a04247cc35c04250"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/12/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "a839946b77a048834b51e690a64b1f80fd2b96955346cc86928ebef406d9beec"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/BiGRU_best_model.pt",
+      "bytes": 381810,
+      "sha256": "f61ec6de8fae151f60cc7e3615da7df467f61d56a9629ceabdff3bba05be616b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "d2f5f31e9c3515b99cac195c65f0300e690d8813d2842980fa89ee06c1fb7264"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/BiLSTM_best_model.pt",
+      "bytes": 185851,
+      "sha256": "542097fe2f6a121f2a70c17d4c593574821739d6ba35de29505b802c4407524d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "0e4c4831907020aa360e9b909df120f62a65f0d75d691b4bc91a0ea719ce0a88"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/BiRNN_best_model.pt",
+      "bytes": 153010,
+      "sha256": "6068ef0f930961e76cab9f77000cce06e12bef4dd4113fbaf0200ae24685bdfa"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "f7ee104b0e804e611f7d705dc062ae57625f4321883ae5d42ac1ccc10e0f575c"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/CNN_best_model.pt",
+      "bytes": 4515,
+      "sha256": "810120f7b528315d80ed81c035c9dca61beea05293996237364425ee6b7c2913"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "5919212bf75f174ae569140a0861924fa238ba1a7724dc58b39b58ad5783ce49"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/ensemble.pkl",
+      "bytes": 19410529,
+      "sha256": "bf588cb6daa15cb28c042f054944c66ed336f919900661672bbb436fa3e72b66"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/pca.pkl",
+      "bytes": 1039,
+      "sha256": "e90fa3416b72145ef9bf35b6bd22f0a4fa110116d7f7947926c2ed0a19bfa86b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/scaler.pkl",
+      "bytes": 711,
+      "sha256": "2dfd842d66e5512248a48afa3a76c670a527dbcc2f38101c03277bfdf06182a7"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/SRNN_best_model.pt",
+      "bytes": 637805,
+      "sha256": "22f5842b9bf331203f6bf2eeced909a8cfb16cd77e00cd881dde305836a95377"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/13/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "b2767327880cece76d08c7a59739786159eef7c11b6fb9bcc33ef24327bac44e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/BiGRU_best_model.pt",
+      "bytes": 584370,
+      "sha256": "cb2d82a1909eb4893e382e8a41255f51098576291c3a28677980526819ce7f9d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "48abb80a6e57452cd801a2c429e945627fcecd1a4f4c7ba1ea1784b9f919d75d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/BiLSTM_best_model.pt",
+      "bytes": 1646395,
+      "sha256": "5c885113134f293dbca43b91b7c4db7a34ec5ebd4a82faa818eda4362b2c958c"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "26adc68e68ea2d62a7e2b33b71fcd5846182f108e2dfe89742de82370d2a6790"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/BiRNN_best_model.pt",
+      "bytes": 372658,
+      "sha256": "d2a43f2ff6512d239a1f5e1706b899d7a41263b00fa293c5e5734f080b87b8bd"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "9af3977b28c33490a66e56dbef63a746a26afc9abcdc81fd451363ca405bd01a"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/CNN_best_model.pt",
+      "bytes": 7715,
+      "sha256": "4cac447fd69a90bd2056594d008e84e413e60a417bc7663a7e5a06e17daa4174"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/CNN_best_params.pkl",
+      "bytes": 91,
+      "sha256": "a1ed4a1f4ced5a341d81afcfdf91b8b3161a896670f2f8736953321ca5bd2c60"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/ensemble.pkl",
+      "bytes": 7580625,
+      "sha256": "bbdc98ab471dcca25c5bc2d36aaff5bd79b613d336de4c85b88acc69f734ae01"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/pca.pkl",
+      "bytes": 1039,
+      "sha256": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/scaler.pkl",
+      "bytes": 711,
+      "sha256": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/SRNN_best_model.pt",
+      "bytes": 132845,
+      "sha256": "ccf64c515d88e2f43d20497cf5b6bb6e8a006b76aa13c913a338476f5861c690"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/14/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "0df017441627156cac401f1af8e05b0a00a3f2f1f4186c349ae9147b830eccc0"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/BiGRU_best_model.pt",
+      "bytes": 893746,
+      "sha256": "d574a08d36f46444b7cb17afcced8938c2dfe43195075e626bb76f29c41e7372"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "82b916bdd95c22cd5a114c7593443784a69aa45bafcfc61ae03b34022f26ea37"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/BiLSTM_best_model.pt",
+      "bytes": 989883,
+      "sha256": "67587954b0954129691c05c6ea8a95a24ee771ff62a73d94d315298fda6ca62f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "8020dc77d50150475935bd40d86d13ce37ee604c6ae26cb7910af2dc35f51bbe"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/BiRNN_best_model.pt",
+      "bytes": 326066,
+      "sha256": "6720ae0906cca1ac724b9c2d4aba887b0daf3efe1ed3ebfe0b44e49c0fd8d068"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "e2b5c11ad3c71a32b3ca837318a2ec691982915216e291029bc396b548c9d970"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/CNN_best_model.pt",
+      "bytes": 5475,
+      "sha256": "a110c6dea00c0d84b3411b8d4057b1161f04f539e0c4b292f6f67f643c618cfe"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "e192d5f7d7d6cdb83fdbf623860d97e81a2172931037272be884b2b460029c06"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/ensemble.pkl",
+      "bytes": 12954145,
+      "sha256": "de6c33d588e42ee3e3947959973f04ea90dea9ddc00d1ee10f34b11be9dc3f6e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/pca.pkl",
+      "bytes": 1039,
+      "sha256": "f02acb0b430399bcc5fc74cff5560efb3db47d41cdc4694b4a2e72d044f39260"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/scaler.pkl",
+      "bytes": 711,
+      "sha256": "05496610bd8e6d6272da244b78d0d457233652c02da083349d1f2b4753716da4"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/SRNN_best_model.pt",
+      "bytes": 325805,
+      "sha256": "64bb3bc4067f674dd938879704777aa03251d1909cfe7dcbe98991b1df7c2c59"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/15/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "65842efa8df01254f92fa9dd231124a127381dd81d9a787e9a3e7bda229bd2ca"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/BiGRU_best_model.pt",
+      "bytes": 1596274,
+      "sha256": "7737dd147f49f10e20c6ebf42e7d9a5ae76adac3e2115919e2eb1fe40f4cb675"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/BiGRU_best_params.pkl",
+      "bytes": 91,
+      "sha256": "d8b07c41438aff83bd2bd53da1a0e4dae0fd293b1378d5f0bebe7f09dfa30bc3"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/BiLSTM_best_model.pt",
+      "bytes": 859643,
+      "sha256": "c5ec88e481d3f15b2271a69b32710906809aeb466ea98fd0008922ce906edc7f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "6cb3d243b67c2a294ce51ee5ae646208f0770ec9335174aa136c5dde7f001c2f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/BiRNN_best_model.pt",
+      "bytes": 253490,
+      "sha256": "483d714b8e8f606775973a5c05ba9ebb759c11f3eba7040bf352ed46160120c9"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "2a2ec84b1a05b2cea12158e64e5f294144c472dfc755063efbce32a4ed9e34d0"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/CNN_best_model.pt",
+      "bytes": 5923,
+      "sha256": "e45a39ce46f95b21e7b23d46f1f2f861669cdb37a2a347525b6026d39d2ae8bc"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "6352c80186da4bf80e5578dfbbff50fcab131c14fc16e92a9f97b8dd91963fab"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/ensemble.pkl",
+      "bytes": 12957457,
+      "sha256": "9d5a7c6a89faa05fd00377c8f8caabbfff2a8908836bf70bdb114347b9e744dd"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/pca.pkl",
+      "bytes": 1039,
+      "sha256": "f02acb0b430399bcc5fc74cff5560efb3db47d41cdc4694b4a2e72d044f39260"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/scaler.pkl",
+      "bytes": 711,
+      "sha256": "05496610bd8e6d6272da244b78d0d457233652c02da083349d1f2b4753716da4"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/SRNN_best_model.pt",
+      "bytes": 795693,
+      "sha256": "020722adfd975a66bc0337ac16493b14d3e3544931e9f4b8d460852a440460f8"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/2/SRNN_best_params.pkl",
+      "bytes": 91,
+      "sha256": "cfc5ef625239323ff141ce69300d57ac02b25282b05945830e0b7a9e100cd75d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/BiGRU_best_model.pt",
+      "bytes": 821298,
+      "sha256": "a25014e967464cd0bffcf941b6968145b824f40c2d38ac1353dda228d0800b8b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "3b96cc096e9791fd48a27a12d0eeb33496df76b75685463f5d791886cda9e439"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/BiLSTM_best_model.pt",
+      "bytes": 231995,
+      "sha256": "ed09bd4c2bb463129a2b222e27acf63e8157611f337646d303018f3e9ef052a1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "69bfea3c219dc27efe6a0668202d0f3b559ec30b7a015d714bf576000cc5f725"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/BiRNN_best_model.pt",
+      "bytes": 195058,
+      "sha256": "d82295901daa3d4ad719d21d3c3cadbd0a033dd7c71491922061bd9d97c34860"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "c67b706af696f5e61d2e8dcd6493057c78f05bcc3dd6dd455e10a1a1e2c73c8e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/CNN_best_model.pt",
+      "bytes": 7523,
+      "sha256": "93062fdfedc65251c119ff2267a8eacee62f4828984ec932036152f6ce7726a5"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "05472c587b316636a9d77b181191845dbaddffdd2f450c4dfff2ee99fcd3ab9e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/ensemble.pkl",
+      "bytes": 25784577,
+      "sha256": "f30ee1437c5f2d7a6660f63507306d26789a9fdb633cd830aaa09f4944d5a374"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/pca.pkl",
+      "bytes": 1039,
+      "sha256": "3c92dc88f6c1a9b8194d0e2f8329edfdbb1fe570a3cb893cb9403ef9daf57538"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/scaler.pkl",
+      "bytes": 711,
+      "sha256": "8b05a6236e4d73fb2abb7520c4343b0ee14167ca95d8f47d18e819695ac9e18f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/SRNN_best_model.pt",
+      "bytes": 705837,
+      "sha256": "93e9df131cb08eb99804cb1d4af2dd7923e8681106b7ba467f610fee017bcca1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/3/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "0292878beac3b13a4f2dd70c5f855f922ee8352759d400ad3fa98c50806c904a"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/BiGRU_best_model.pt",
+      "bytes": 1214258,
+      "sha256": "e05ae29328461595d463a92815ededb7c4c59c5eb08b952280f95bcd71d31352"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "b44de84e74b8409977e49b2c53b617c4108b5a00a1e55aa3fc5d5a51b4652950"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/BiLSTM_best_model.pt",
+      "bytes": 709755,
+      "sha256": "2850e284807e3f6d239b4c39fdea49315d417e8a528f487507aa31f02131c487"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "706ddcd8fd91e788db48ece2bb6ad220357eb4091d4a470cfe026b32515b7a6d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/BiRNN_best_model.pt",
+      "bytes": 276658,
+      "sha256": "14c36ed2e689318f69b019e2894e3a930d1d47c207e086f3affc25bddabee933"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "52112441e38da572203c34ce092c6f5677f155944a49996f4c5e81e36c3a3e8c"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/CNN_best_model.pt",
+      "bytes": 6883,
+      "sha256": "e6d6d4af8d37f0b35bf80d7ece427445a3ed1b1184e150b325db83eb70b0c862"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "866ddcab0d3ddf60ea00ccca6a897545b87b5b704a03a21153fdaf57aec1f4f0"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/ensemble.pkl",
+      "bytes": 19355025,
+      "sha256": "f53abddad5353d08417c7d164965ab86a54b0712f1ad0ceb048acc5114e9d610"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/pca.pkl",
+      "bytes": 1039,
+      "sha256": "e90fa3416b72145ef9bf35b6bd22f0a4fa110116d7f7947926c2ed0a19bfa86b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/scaler.pkl",
+      "bytes": 711,
+      "sha256": "2dfd842d66e5512248a48afa3a76c670a527dbcc2f38101c03277bfdf06182a7"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/SRNN_best_model.pt",
+      "bytes": 445421,
+      "sha256": "7e6a1c736af52d39f9f0b7a9882679e0f645df641e7e6cead127b8bc67f0694e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/4/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "9513f09759f0eb7468f663b42bfc6529052e9e8ccca7f1758e96b68c21197924"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/BiGRU_best_model.pt",
+      "bytes": 1279794,
+      "sha256": "78c99dda2a8de63e3d4d7b411d433459bc38a3e5eafc1a7623e674e799093a52"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "e5132086ab2494457416bd07d2632a7007611f2990e2884280ddbdf65b6e6849"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/BiLSTM_best_model.pt",
+      "bytes": 1316731,
+      "sha256": "8b6a24af19ca08cfb3a6d2234e4236ef88314aee55c89d2a5be13e8adca3cff1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "04532941151d43513fb50bdb55fcb45fd50ecc4ae49cce3cec17b8613055357f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/BiRNN_best_model.pt",
+      "bytes": 365810,
+      "sha256": "97fa67066c893289a5f631357c3a7eacba3ff654ee573e5af89118baf1e02fc1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "1b4475df3ce2da65db47926f9fa297417fbdbdae8b173fd9244100c90ef4f31a"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/CNN_best_model.pt",
+      "bytes": 4323,
+      "sha256": "662feba84d7635619ca31e35fb811471d7ed7a85093c5f2a490251a2818bbb40"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "1974e76a696f2c918c93488df06a17ef7e1bba5cb81e53193b2d357b1361341b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/ensemble.pkl",
+      "bytes": 11665169,
+      "sha256": "c2e6a3152ee3d61a98e4311a9e8bc5ccab34bcea36600f4c43c4d3a3c0d5e515"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/pca.pkl",
+      "bytes": 1039,
+      "sha256": "54b2339008721faa1f17c75105c4368d5a02073b9472621a73d67aa4ec4345a4"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/scaler.pkl",
+      "bytes": 711,
+      "sha256": "e4c912f6d60dc009f8abf2b8b4d51bd4a3409ff2e7e73d98fcbcd6dfd2d0e50d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/SRNN_best_model.pt",
+      "bytes": 298797,
+      "sha256": "6907c5d398801e95180d7dd877b605d5ccb83b1927ee3afc3d1560b4e525b6d4"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/5/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "86f9fe408cf60e41b1a0c8c40ea6b4ca0ae3af4daaf82497a6e0b64eb9a8b50d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/BiGRU_best_model.pt",
+      "bytes": 1203442,
+      "sha256": "3c58b053010fe7129e8428a9aa6077834075914bd5399d88e8a05aee1fa9d6fd"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "319be7c4195489903ef86f0c4a91579c262fb2cc5e9ff492899723159e6120cf"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/BiLSTM_best_model.pt",
+      "bytes": 672251,
+      "sha256": "6d1d700cf9fb62e229e1bc8186f1e4d1315aea17fbb7673ba4ff1d62787be072"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "9afb424c39b0eff022ab51eef11d7dfd10b69d3b6c576a34859d1a0a03c7ace8"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/BiRNN_best_model.pt",
+      "bytes": 400690,
+      "sha256": "da4e617d60b917a75863d9ab3f850449caa8375a99829b8ecf240b2441b86f0a"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "bd4e5ac0c72b05a9e06e7083c868b6ead990d83d2996200f9f1c80f957f3d8fd"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/CNN_best_model.pt",
+      "bytes": 3235,
+      "sha256": "113c60992a8158e3e51af0d199b567c3f255eb5459ff5f2682904a6331d27cea"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "34370067214b3dc1878a3dd1d1e26f4c56a047f325b83475100eb173e4df869e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/ensemble.pkl",
+      "bytes": 26111713,
+      "sha256": "44fbddb7f0f8bc81f3908ede96ee4cbee12b9de0179796e19bccded3dadcfe86"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/pca.pkl",
+      "bytes": 1039,
+      "sha256": "d797636f6e31bb06785ccf0c957c46cc43ab76e1156f918fac6b83d0fc96f0c8"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/scaler.pkl",
+      "bytes": 711,
+      "sha256": "7d08dd519430a317ce4f6cadade2cea602f828973c84fc829c2fe3a8ee440d18"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/SRNN_best_model.pt",
+      "bytes": 159021,
+      "sha256": "70b1468910af77c07c42b705c1747145664c65111ffea732f47464b77c8d08b9"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/6/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "3bf64b528024956ab4ae33dc8c30f1e99b6ce958b33c3e2f6fdaa476ad139110"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/BiGRU_best_model.pt",
+      "bytes": 547634,
+      "sha256": "50437892b815eb5cf534e27bb9f835ef8ed4b6e6e3dd4e89ab0305011f371f2c"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "bdc49edcc58a1a5306bcd7131ae756153d55e84c7656f3e06b2abb311ba5ced7"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/BiLSTM_best_model.pt",
+      "bytes": 101819,
+      "sha256": "81e522d7fae96c621d25456b985fdab5f6bc1f5acd918b0b03e65f5cec7cae1d"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "07fbb701b29098a32db16dce4031632abbb568bd67ee5f29f2718315da4f0453"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/BiRNN_best_model.pt",
+      "bytes": 245042,
+      "sha256": "d01c34a43dc50bb41d9169650e5453ab82e0ae04543868faea526af84d11f13e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "c3bb8de9454a7d610f19f7c78995fb6b0f50c013fcd90d84368609fc77881336"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/CNN_best_model.pt",
+      "bytes": 6435,
+      "sha256": "3a80d4a96d1e5208deb65bf4b787f394c8b83632600b953fa56c4f352ab3445c"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "e5dde733b0d7216e1b674b0b0699a35fecf703e71c64f63011e687a622be5817"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/ensemble.pkl",
+      "bytes": 13190753,
+      "sha256": "9f4f11a9ea7e7220558527bc847f54fd9cb7f1c4d1c915cc9e1bfa2a25469380"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/pca.pkl",
+      "bytes": 1039,
+      "sha256": "013a54faa0d34e152cdc7bae253977e7fd0638b2b69ea45b42d1e33c6c8a1899"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/scaler.pkl",
+      "bytes": 711,
+      "sha256": "48f54041e572c4b0a9bda68e156a37ed7255fb7bcfc2ac3f75747bf1756c0d4b"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/SRNN_best_model.pt",
+      "bytes": 450093,
+      "sha256": "2ed0906903247834d736eb4e5dea50461eaf1f2e6ac6f5bcce8316da5d38c893"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/7/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "a11aea4a5711427bc90f8825539f1247956fcda5c95e4cc3136f80fc29b8b613"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/BiGRU_best_model.pt",
+      "bytes": 286194,
+      "sha256": "6059934611c425f453e4a0f506a3e8f3b3b94d0ff7d515c697deb4bf5801bcde"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "54f6b83e9b2d037708c41acf2c225bca1de7c5acb32fde57a584bc16b949de71"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/BiLSTM_best_model.pt",
+      "bytes": 277371,
+      "sha256": "b4c760cf925973af59f04afa7f288f3b39a25f37b2c2a35aa241566a3565c827"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "e6b837cdf0147ec48da0bd7c477f33c064a1ddb528ae0f3b1cd61445f3bd31d6"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/BiRNN_best_model.pt",
+      "bytes": 535410,
+      "sha256": "0be685b86a8bd226f2d1559f9a8ea1bef3067c50e23d936cf4f0e18dad8c7e7e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/BiRNN_best_params.pkl",
+      "bytes": 91,
+      "sha256": "cda3d9d903797d4c279ecf511136c4f41d76083b56147d4a501ddfeaf52a52c6"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/CNN_best_model.pt",
+      "bytes": 4323,
+      "sha256": "0bc6e6ec50268548321a8b8f86000714eccb3b3059b86d1e08995ca701f8d214"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "4e8cd0d2610f4b97ab34b4e3e888d7d7f777424cb415045da98ceb12f82482de"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/ensemble.pkl",
+      "bytes": 14570113,
+      "sha256": "0c6080d79785e1666280c228332dc311d5fc5c2254523d2e116a28da549e0542"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/pca.pkl",
+      "bytes": 1039,
+      "sha256": "27184c52e6c224e6730fd8b8d8c6f47c78aa3d3072f9700054538ff0765d52f1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/scaler.pkl",
+      "bytes": 711,
+      "sha256": "2c6bae04b8fb29509148fff4bea9e5a1f2b55321de2691436138d642cbe2aae2"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/SRNN_best_model.pt",
+      "bytes": 431661,
+      "sha256": "5032def9959f5e67954acdae56da6ef825afa086cb41a672d78a82fadb54e832"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/8/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "08ca2fc0088201cebbeeb3d0ff82367d93a497e95b8787015925f5cc225bd2a2"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/BiGRU_best_model.pt",
+      "bytes": 195826,
+      "sha256": "4a2bc854d8d445e058502ba9db216f0f2150e4bf717ac2bbc7c0a910a418f4d1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "7b62c914bee7d43a70b0efd6eaac537ba13c0c2d8ea18223e75a004344549c21"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/BiLSTM_best_model.pt",
+      "bytes": 1675515,
+      "sha256": "941d6a7725bb16382e1ce01f302297991eba005b268d49fa2c1bc6f98c66d38a"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "914efd32cd78d6f268776981b0a58569d51cb4a6a604c5d1ebfc7d2565c78237"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/BiRNN_best_model.pt",
+      "bytes": 66226,
+      "sha256": "35ded5f9d1a3614f54906ec0c4e7f86aaab05f062ee936d69c9df9212942d871"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "f0a290b23ceb592ef2adec3e29b68f6e16f78d1979434e2b2c5f9a905a524adf"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/CNN_best_model.pt",
+      "bytes": 6115,
+      "sha256": "e74c2ed277fd3a65f32192ef31ed91e7394693b2015926a59162e8fbfecf577e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/CNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "39c2752b1c81603de7144da4651f9d86f735f55a7422538a15811d279fb67fb3"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/ensemble.pkl",
+      "bytes": 14589697,
+      "sha256": "4061a918eb9df04af9b11ec4e21490b6425a4e5000e10a52128e71b1ebd33a3f"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/pca.pkl",
+      "bytes": 1039,
+      "sha256": "27184c52e6c224e6730fd8b8d8c6f47c78aa3d3072f9700054538ff0765d52f1"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/scaler.pkl",
+      "bytes": 711,
+      "sha256": "2c6bae04b8fb29509148fff4bea9e5a1f2b55321de2691436138d642cbe2aae2"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/SRNN_best_model.pt",
+      "bytes": 583789,
+      "sha256": "0bde2adb714dad4c7d59f2329bef9f84a0d54432b0ed04b83131d0f3c88b754e"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/life/9/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "e61b5737ae2d59a162717ea8cd2ad166abe3cf7dbed5b4e4772185984e0b4e06"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/q_table_double.pkl",
+      "bytes": 119214,
+      "sha256": "a94d99e034cbd304adfa506e0ef784c0ac402076c02d08793965da0136ac94f3"
+    },
+    {
+      "path": "integrations/algorithm_assets/models/rf_health_model.pkl",
+      "bytes": 63929,
+      "sha256": "9bdc06455fafb5a0633be5696674ce1db93b16a131215067f3f62aec0cba0ed5"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/BiGRU_best_model.pt",
+      "bytes": 584370,
+      "sha256": "cb2d82a1909eb4893e382e8a41255f51098576291c3a28677980526819ce7f9d"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/BiGRU_best_params.pkl",
+      "bytes": 90,
+      "sha256": "48abb80a6e57452cd801a2c429e945627fcecd1a4f4c7ba1ea1784b9f919d75d"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/BiLSTM_best_model.pt",
+      "bytes": 1646395,
+      "sha256": "5c885113134f293dbca43b91b7c4db7a34ec5ebd4a82faa818eda4362b2c958c"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/BiLSTM_best_params.pkl",
+      "bytes": 90,
+      "sha256": "26adc68e68ea2d62a7e2b33b71fcd5846182f108e2dfe89742de82370d2a6790"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/BiRNN_best_model.pt",
+      "bytes": 372658,
+      "sha256": "d2a43f2ff6512d239a1f5e1706b899d7a41263b00fa293c5e5734f080b87b8bd"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/BiRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "9af3977b28c33490a66e56dbef63a746a26afc9abcdc81fd451363ca405bd01a"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/CNN_best_model.pt",
+      "bytes": 7715,
+      "sha256": "4cac447fd69a90bd2056594d008e84e413e60a417bc7663a7e5a06e17daa4174"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/CNN_best_params.pkl",
+      "bytes": 91,
+      "sha256": "a1ed4a1f4ced5a341d81afcfdf91b8b3161a896670f2f8736953321ca5bd2c60"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/ensemble.pkl",
+      "bytes": 7580625,
+      "sha256": "bbdc98ab471dcca25c5bc2d36aaff5bd79b613d336de4c85b88acc69f734ae01"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/pca.pkl",
+      "bytes": 1039,
+      "sha256": "25956bcdb42be51473b9d41f3cc262ab8f86b207ee193fe00030e2eb130aa677"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/scaler.pkl",
+      "bytes": 711,
+      "sha256": "84486a67527c2fda3ed4b8b5f712ed25bbfe08d77a1861bdcd9acc5ce27430b1"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/SRNN_best_model.pt",
+      "bytes": 132845,
+      "sha256": "ccf64c515d88e2f43d20497cf5b6bb6e8a006b76aa13c913a338476f5861c690"
+    },
+    {
+      "path": "integrations/algorithm_assets/rul/life/14/SRNN_best_params.pkl",
+      "bytes": 90,
+      "sha256": "0df017441627156cac401f1af8e05b0a00a3f2f1f4186c349ae9147b830eccc0"
+    },
+    {
+      "path": "integrations/algorithm_assets/simulation/fault_TVCKZ.mat",
+      "bytes": 25583,
+      "sha256": "cb43b2f0ec59b6d856ff230f2ce15ad032aa43d0a48d6dc8b44621cf00cb9c8b"
+    },
+    {
+      "path": "integrations/algorithm_assets/simulation/fault_TVCTL.mat",
+      "bytes": 25587,
+      "sha256": "8ee0f116d1b70eca01389e1b180c6451905eaedbad45dd5220700a37c127fc70"
+    },
+    {
+      "path": "integrations/algorithm_assets/simulation/rocket_aero.slx",
+      "bytes": 638038,
+      "sha256": "a7fcee09124de3bcb24bcc91e323bd15f47be9c5ed8f74909010fdf71efa4908"
+    },
+    {
+      "path": "integrations/algorithm_assets/simulation/rocket_launch.slx",
+      "bytes": 596611,
+      "sha256": "e5072a791d49c8c632664a2905a17058a3ccb98b1715a15915729a0d528882ee"
+    },
+    {
+      "path": "integrations/algorithm_assets/simulation/rocket_rcs.slx",
+      "bytes": 622895,
+      "sha256": "7157bbceae0c7c23c1f5554d22dd63f9f0423334f85cedef402a9bbb860675e0"
+    },
+    {
+      "path": "integrations/algorithm_assets/simulation/rocket_sim.slx",
+      "bytes": 297308,
+      "sha256": "2fa9a6644a1f45fbe6a6a198037f0771ccfcc8860220984f17c442e3ad05f85a"
+    },
+    {
+      "path": "integrations/simulation_assets/simulation_samples.zip",
+      "bytes": 75663400,
+      "sha256": "3da45ab729b20fdaf2710eef2cecf73feafbba1edfda88b7ed24745a6c761abe"
+    }
+  ]
+}

@@ -19,6 +19,7 @@ from datasets.models import Dataset
 from datasets.batch_processing import inspect_file
 from datasets.management.commands.import_baseline_datasets import _sha256
 from simulation_dataset.services import ROOT, NAME_RE, CATEGORY_NAMES
+from simulation_dataset.assets import simulation_archive
 
 
 def _inspect(path: Path, category: str) -> dict:
@@ -42,7 +43,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--archive",
             type=Path,
-            default=settings.BASE_DIR / "integrations" / "simulation_assets" / "simulate_data_+1.zip",
+            default=simulation_archive(settings.BASE_DIR),
         )
         parser.add_argument("--dry-run", action="store_true")
         parser.add_argument("--include-baseline", action="store_true", help="校验并复用已登记的正常基线")

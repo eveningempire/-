@@ -4,7 +4,6 @@ $Root = $PSScriptRoot
 Set-Location -LiteralPath $Root
 $env:USE_SQLITE = 'true'
 $env:DJANGO_DEBUG = 'True'
-$env:PIP_NO_INDEX = '1'
 $env:PIP_DISABLE_PIP_VERSION_CHECK = '1'
 $env:PYTHONNOUSERSITE = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
@@ -19,7 +18,7 @@ if (Test-Path -LiteralPath $PortablePy -PathType Leaf) {
 try {
     Write-Host 'PHM - 重复使用运载器健康管理原型系统' -ForegroundColor Cyan
     if (-not (Test-Path -LiteralPath (Join-Path $Root 'manage.py'))) {
-        throw '未找到 manage.py，请将补丁覆盖到原项目根目录。'
+        throw '未找到 manage.py，请完整解压项目后再启动。'
     }
     # Deployment consumes prebuilt assets and never runs npm.
     $dist = Join-Path $Root 'frontend\dist'
@@ -44,9 +43,10 @@ try {
         } catch { $ready = $false }
     }
     if (-not $ready) {
-        Write-Host '正在从包内离线依赖初始化 Python 环境，首次运行请耐心等待。' -ForegroundColor Yellow
+        Write-Host '正在初始化 Python 环境；有离线依赖时离线安装，否则联网安装。' -ForegroundColor Yellow
         & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Root 'setup_migration.ps1') -SkipFrontend
-        if ($LASTEXITCODE -ne 0) { throw '离线环境初始化失败，请查看上方错误。' }
+        if ($LASTEXITCODE -ne 0) { throw '环境初始化失败，请查看上方错误。' }
+        $Py = Join-Path $Root '.venv\Scripts\python.exe'
         & $Py (Join-Path $Root 'verify_phm_runtime.py')
         if ($LASTEXITCODE -ne 0) { throw 'Python 运行环境检查未通过。' }
     }
@@ -55,18 +55,12 @@ try {
     & $Py manage.py migrate --noinput
     if ($LASTEXITCODE -ne 0) { throw '数据库迁移失败。' }
     & $Py (Join-Path $Root 'verify_phm_delivery.py')
-    if ($LASTEXITCODE -ne 0) { throw '项目数据或算法模型不完整，请完整解压新版离线包。' }
+    if ($LASTEXITCODE -ne 0) { throw '项目数据或算法模型不完整，请查看缺失清单并重新下载 main 分支。' }
     if ($CheckOnly) {
         Write-Host 'PHM 启动检查通过。' -ForegroundColor Green
         exit 0
     }
-    $engineSetup = Join-Path $Root 'configure_matlab_engine.py'
-    if (Test-Path -LiteralPath $engineSetup) {
-        & $Py $engineSetup
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host 'MATLAB Engine 配置未通过；请在实时故障注入页面查看环境状态。' -ForegroundColor Yellow
-        }
-    }
+    Write-Host '首次安装请双击 create_superuser.bat 创建管理员；实时仿真请在页面配置本机 MATLAB。'
     $url = "http://127.0.0.1:$Port/"
     $listeners = @(Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue)
     foreach ($processId in ($listeners | Select-Object -ExpandProperty OwningProcess -Unique)) {

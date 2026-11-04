@@ -2,8 +2,8 @@
 setlocal
 chcp 65001 >nul
 cd /d "%~dp0"
-set "PHM_PYTHON=%~dp0runtime\python310\python.exe"
-if not exist "%PHM_PYTHON%" set "PHM_PYTHON=%~dp0.venv\Scripts\python.exe"
+set "PHM_PYTHON=%~dp0.venv\Scripts\python.exe"
+if not exist "%PHM_PYTHON%" set "PHM_PYTHON=%~dp0runtime\python310\python.exe"
 REM 基于模型的寿命预测系统 - 管理员创建工具 (Windows批处理版本)
 
 echo ======================================================================

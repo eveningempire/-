@@ -1,5 +1,8 @@
 # Local Python environments and generated files
 .venv/
+runtime/
+runtime-installers/
+offline/
 **/__pycache__/
 *.py[cod]
 *.pyd
@@ -47,3 +50,14 @@ health-main/**/*.pkl
 *.zip
 # Backup archives
 *.zip.bak
+
+# Runtime assets required by GitHub downloads (keep these real binaries in Git).
+!health-main/backend/algotest/hier14/checkpoints/*.pth
+!health-main/backend/algotest/hier14/checkpoints/*.pkl
+!integrations/algorithm_assets/models/**/*.pt
+!integrations/algorithm_assets/models/**/*.pkl
+!integrations/algorithm_assets/rul/**/*.pt
+!integrations/algorithm_assets/rul/**/*.pkl
+!integrations/algorithm_assets/simulation/*.slx
+!integrations/algorithm_assets/simulation/*.mat
+!integrations/simulation_assets/simulation_samples.zip

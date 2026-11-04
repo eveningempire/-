@@ -59,10 +59,9 @@ def project_status(request):
     if not simulation_loaded:
         # Delivery bundles keep the large simulation set compressed and expose
         # it through simulation_dataset's ZIP-stream API.
-        archive = __import__('pathlib').Path(os.environ.get(
-            "HEALTH_SIMULATION_ARCHIVE",
-            str(__import__('pathlib').Path(__file__).resolve().parent.parent / "integrations" / "simulation_assets" / "simulate_data_+1.zip"),
-        ))
+        from django.conf import settings
+        from simulation_dataset.assets import simulation_archive
+        archive = simulation_archive(settings.BASE_DIR)
         simulation_loaded = archive.is_file()
     return JsonResponse({"project": "reusable-spacecraft-phm", "stage": "integration", "algorithms_loaded": health_loaded or diagnosis_loaded, "health_assessment_loaded": health_loaded, "fault_diagnosis_loaded": diagnosis_loaded, "simulation_data_loaded": simulation_loaded})
 

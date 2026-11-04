@@ -9,14 +9,12 @@ from functools import lru_cache
 from pathlib import Path
 from django.conf import settings
 from datasets.schema import column_roles
+from .assets import simulation_archive
 
 # The delivery bundle keeps the 3.45 GB source archive compressed under
 # ``integrations/simulation_assets``.  Keep an environment override for sites
 # that store the archive elsewhere.
-ARCHIVE = Path(os.environ.get(
-    "HEALTH_SIMULATION_ARCHIVE",
-    str(settings.BASE_DIR / "integrations" / "simulation_assets" / "simulate_data_+1.zip"),
-))
+ARCHIVE = simulation_archive(settings.BASE_DIR)
 ROOT = "simulate_data_+1/"
 CATEGORY_NAMES = {
     "baseline": "正常基线", "bengqixi": "泵气蚀", "wolun": "涡轮退化", "guanlu": "管路故障",
@@ -49,7 +47,7 @@ def catalog():
         categories = []
         for key, value in sorted(groups.items()):
             categories.append({"key": key, "name": CATEGORY_NAMES.get(key, key), "kind": "baseline" if key == "baseline" else "fault_degradation", "files": value["files"], "raw_files": value["raw"], "processed_files": value["processed"], "size_mb": round(value["bytes"] / 1048576, 2), "flight_counts": sorted(value["flights"]), "injection_times": sorted(value["times"])})
-    return {"dataset": "simulate_data_+1", "source": "钱泽_SY2424114/一院项目/仿真数据", "storage": "zip_stream", "archive_size_mb": round(ARCHIVE.stat().st_size / 1048576, 2), "csv_files": sum(x["files"] for x in categories), "sample_pairs": sum(x["raw_files"] for x in categories), "categories": categories}
+    return {"dataset": "simulate_data_+1", "source": "钱泽_SY2424114/一院项目/仿真数据", "storage": "zip_stream", "sample_subset": ARCHIVE.name == "simulation_samples.zip", "archive_size_mb": round(ARCHIVE.stat().st_size / 1048576, 2), "csv_files": sum(x["files"] for x in categories), "sample_pairs": sum(x["raw_files"] for x in categories), "categories": categories}
 
 def files(category: str):
     if category not in CATEGORY_NAMES: raise ValueError("unknown category")

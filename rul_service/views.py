@@ -111,13 +111,20 @@ def predict(request):
 
 def status(request):
     root = Path(__file__).resolve().parent.parent / "integrations" / "algorithm_assets" / "models" / "life"
-    models = sorted(p.name for p in root.glob("*/ensemble.pkl"))
+    required = ('ensemble.pkl', 'scaler.pkl', 'pca.pkl') + tuple(
+        name + suffix for name in ('CNN', 'BiRNN', 'BiLSTM', 'BiGRU', 'SRNN')
+        for suffix in ('_best_model.pt', '_best_params.pkl'))
+    components = [str(index) for index in range(1, 16)
+                  if all((root / str(index) / filename).is_file() for filename in required)]
+    missing = [f'{index}/{filename}' for index in range(1, 16) for filename in required
+               if not (root / str(index) / filename).is_file()]
+    models = [str(root / component / 'ensemble.pkl') for component in components]
     try:
         import torch
         runtime={"available":True,"torch":torch.__version__}
     except Exception as exc:
         runtime={"available":False,"error":str(exc)}
-    return JsonResponse({"available":bool(models),"algorithm":"多模型集成","models":models,"asset_root":str(root),"runtime":runtime})
+    return JsonResponse({"available":bool(components) and runtime['available'],"algorithm":"多模型集成","models":models,"components":components,"missing_assets":missing,"asset_root":str(root),"runtime":runtime})
 
 @csrf_exempt
 def demo(request):

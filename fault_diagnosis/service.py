@@ -64,6 +64,9 @@ class DiagnosisService:
             if hasattr(module, "_load_runtime"):
                 module._load_runtime()
             self.predictor = module
+        except FileNotFoundError as exc:
+            self.error = (f"{exc}。请重新下载 GitHub main 分支完整项目，"
+                          "并运行 python verify_phm_delivery.py --assets-only 检查模型资产。")
         except Exception as exc:
             self.error = f"{type(exc).__name__}: {exc}"
 

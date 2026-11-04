@@ -1,105 +1,108 @@
-﻿param([switch]$SkipFrontend)
+param([switch]$SkipFrontend, [switch]$Offline)
 $ErrorActionPreference = 'Stop'
-$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
-Set-Location $Root
+$Root = $PSScriptRoot
+Set-Location -LiteralPath $Root
+$env:USE_SQLITE = 'true'
+$env:PYTHONNOUSERSITE = '1'
+$env:PIP_DISABLE_PIP_VERSION_CHECK = '1'
+Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
+Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
 
-Write-Host 'PHM migration setup (offline)' -ForegroundColor Cyan
-function Find-Python310 {
-  $candidates = @()
-  $bundledRuntime = Join-Path $Root 'runtime\python310\python.exe'
-  if (Test-Path -LiteralPath $bundledRuntime -PathType Leaf) { $candidates += $bundledRuntime }
-  $launcher = Get-Command py -ErrorAction SilentlyContinue
-  if ($launcher) {
+function Test-CompatiblePython([string]$Candidate) {
+    if (-not $Candidate -or -not (Test-Path -LiteralPath $Candidate -PathType Leaf)) { return $false }
     try {
-      $launcherPath = & $launcher.Source -3.10 -c 'import sys; print(sys.executable)' 2>$null | Select-Object -Last 1
-      if ($LASTEXITCODE -eq 0 -and $launcherPath) { $candidates += [string]$launcherPath }
-    } catch { }
-  }
-  $python = Get-Command python -ErrorAction SilentlyContinue
-  if ($python -and $python.Source) { $candidates += $python.Source }
-  if ($env:LOCALAPPDATA) { $candidates += (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python310\python.exe') }
-  if ($env:LOCALAPPDATA) { $candidates += (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python310-64\python.exe') }
-  if ($env:ProgramFiles) { $candidates += (Join-Path $env:ProgramFiles 'Python310\python.exe') }
-  if (${env:ProgramFiles(x86)}) { $candidates += (Join-Path ${env:ProgramFiles(x86)} 'Python310\python.exe') }
-  foreach ($key in @('HKCU:\Software\Python\PythonCore\3.10\InstallPath', 'HKLM:\Software\Python\PythonCore\3.10\InstallPath', 'HKLM:\Software\WOW6432Node\Python\PythonCore\3.10\InstallPath')) {
-    try {
-      $installPath = (Get-ItemProperty -LiteralPath $key -ErrorAction Stop).'(default)'
-      if ($installPath) { $candidates += (Join-Path ([string]$installPath) 'python.exe') }
-    } catch { }
-  }
-  if ($env:LOCALAPPDATA) {
-    try { $candidates += Get-ChildItem -LiteralPath (Join-Path $env:LOCALAPPDATA 'Programs\Python') -Filter 'python.exe' -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'Python310' } | Select-Object -ExpandProperty FullName } catch { }
-  }
-  foreach ($candidate in $candidates) {
-    if (-not $candidate -or -not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
-    try {
-      $version = & $candidate -c 'import sys; print("{}.{}".format(*sys.version_info[:2]))' 2>$null | Select-Object -Last 1
-      if (([string]$version).Trim() -eq '3.10') { return ([string]$candidate) }
-    } catch { }
-  }
-  return $null
+        & $Candidate -c 'import sys,struct; sys.exit(0 if (3,10) <= sys.version_info[:2] < (3,13) and struct.calcsize(chr(80))==8 else 1)' *> $null
+        return ($LASTEXITCODE -eq 0)
+    } catch { return $false }
 }
-$Py = Join-Path $Root '.venv\Scripts\python.exe'
-$venvReady = $false
-$venvVersion = $null
-if (Test-Path -LiteralPath $Py -PathType Leaf) {
-  try {
-    & $Py (Join-Path $Root 'verify_phm_runtime.py') *> $null
-    $venvReady = ($LASTEXITCODE -eq 0)
-  } catch { }
-}
-if (-not $venvReady -and (Test-Path -LiteralPath (Join-Path $Root '.venv'))) {
-  $backup = Join-Path $Root ('.venv-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-  Move-Item -LiteralPath (Join-Path $Root '.venv') -Destination $backup
-  Write-Host "Bundled .venv is not usable here; preserved at $backup" -ForegroundColor Yellow
-}
-if (-not (Test-Path -LiteralPath $Py -PathType Leaf)) {
-  # Prefer the package-local interpreter explicitly. This avoids PowerShell
-  # pipeline/launcher quirks on destination machines with a broken `py` shim.
-  $python310 = Join-Path $Root 'runtime\python310\python.exe'
-  if (-not (Test-Path -LiteralPath $python310 -PathType Leaf)) { $python310 = Find-Python310 }
-  if (-not $python310) {
-    $installer = Join-Path $Root 'runtime-installers\python-3.10.11-amd64.exe'
-    if (Test-Path -LiteralPath $installer -PathType Leaf) {
-      Write-Host 'Python 3.10 not found. Installing the bundled runtime locally...' -ForegroundColor Yellow
-      # Use a package-local target so the next step does not depend on PATH,
-      # the Python launcher, or registry entries on the destination VM.
-      $runtimeDir = Join-Path $Root 'runtime\python310'
-      New-Item -ItemType Directory -Force -Path $runtimeDir | Out-Null
-      # The project invokes python.exe directly; installing the optional
-      # Python Launcher can fail with MSI 1603 when another launcher exists.
-      $arguments = @('/quiet', 'InstallAllUsers=0', "TargetDir=`"$runtimeDir`"", 'PrependPath=0', 'Include_launcher=0', 'Include_test=0')
-      $install = Start-Process $installer -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
-      if ($install.ExitCode -ne 0) { throw "Python 3.10 installer failed with exit code $($install.ExitCode)." }
-      $python310 = Find-Python310
+
+function Find-CompatiblePython {
+    $candidates = @($env:PHM_PYTHON, (Join-Path $Root 'runtime\python310\python.exe'))
+    $launcher = Get-Command py -ErrorAction SilentlyContinue
+    if ($launcher) {
+        foreach ($version in @('-3.10', '-3.11', '-3.12')) {
+            try {
+                $candidate = & $launcher.Source $version -c 'import sys; print(sys.executable)' 2>$null | Select-Object -Last 1
+                if ($LASTEXITCODE -eq 0) { $candidates += [string]$candidate }
+            } catch { }
+        }
     }
-    if (-not $python310) { throw "Python installer finished, but no usable Python 3.10 was found. Check $runtimeDir or %LOCALAPPDATA%\Programs\Python\Python310\python.exe, then rerun this script." }
-  }
-  Write-Host 'Creating Python 3.10 virtual environment...' -ForegroundColor Cyan
-  & $python310 -m venv (Join-Path $Root '.venv')
-  if ($LASTEXITCODE -ne 0) { throw 'Failed to create .venv. Verify that the Python 3.10 installation includes the standard library and venv module.' }
+    $command = Get-Command python -ErrorAction SilentlyContinue
+    if ($command) { $candidates += $command.Source }
+    foreach ($version in @('310', '311', '312')) {
+        if ($env:LOCALAPPDATA) { $candidates += (Join-Path $env:LOCALAPPDATA "Programs\Python\Python$version\python.exe") }
+        if ($env:ProgramFiles) { $candidates += (Join-Path $env:ProgramFiles "Python$version\python.exe") }
+    }
+    foreach ($candidate in $candidates) {
+        if (Test-CompatiblePython $candidate) { return $candidate }
+    }
+    return $null
 }
-if (-not (Test-Path $Py)) { throw "Virtual environment was not created at $Py. Run install_runtime_offline.bat, reopen PowerShell, and retry." }
-if ($venvReady) {
-  Write-Host 'Bundled Python environment is available; skipping package download.' -ForegroundColor Green
-  if (-not (Test-Path 'db.sqlite3')) { & $Py manage.py migrate }
-  if (-not (Test-Path 'media')) { New-Item -ItemType Directory media | Out-Null }
-  Write-Host 'Setup complete. Run start_phm_platform.bat.' -ForegroundColor Green
-  exit 0
-}
-if (-not (Get-ChildItem -LiteralPath 'offline\python' -Filter '*.whl' -File -ErrorAction SilentlyContinue | Select-Object -First 1)) { throw 'Offline Python wheels are missing from offline\python. Use the corrected delivery package.' }
-$pipAvailable = $true
-try { & $Py -m pip --version *> $null } catch { $pipAvailable = $false }
-if (-not $pipAvailable -or $LASTEXITCODE -ne 0) {
-  Write-Host 'pip is missing in .venv; bootstrapping pip from Python ensurepip...' -ForegroundColor Yellow
-  & $Py -m ensurepip --upgrade --default-pip
-  if ($LASTEXITCODE -ne 0) { throw 'Python ensurepip is unavailable. Reinstall Python 3.10.11 with the standard library and pip components.' }
-}
-& $Py -m pip install --no-index --find-links (Join-Path $Root 'offline\python') -r requirements-migration.txt
-if ($LASTEXITCODE -ne 0) { throw 'Offline Python dependency installation failed. The system was not started; review the pip error above.' }
-& $Py (Join-Path $Root 'verify_phm_runtime.py')
-if ($LASTEXITCODE -ne 0) { throw 'Python dependency verification failed. The system was not started.' }
-if (-not (Test-Path 'db.sqlite3')) { & $Py manage.py migrate }
-if (-not (Test-Path 'media')) { New-Item -ItemType Directory media | Out-Null }
-Write-Host 'Setup complete. Run start_phm_platform.bat.' -ForegroundColor Green
 
+try {
+    Write-Host 'PHM - GitHub / offline environment setup' -ForegroundColor Cyan
+    $Py = Join-Path $Root '.venv\Scripts\python.exe'
+    if (-not (Test-CompatiblePython $Py)) {
+        $basePython = Find-CompatiblePython
+        if (-not $basePython) {
+            throw 'Install 64-bit Python 3.10, 3.11 or 3.12, or set PHM_PYTHON to its python.exe. Download: https://www.python.org/downloads/windows/'
+        }
+        $venv = Join-Path $Root '.venv'
+        if (Test-Path -LiteralPath $venv) {
+            $resolved = (Resolve-Path -LiteralPath $venv).Path
+            $expected = [IO.Path]::GetFullPath((Join-Path $Root '.venv'))
+            if ($resolved -ne $expected) { throw 'Unexpected virtual environment path; setup stopped.' }
+            $backup = Join-Path $Root ('.venv-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
+            Move-Item -LiteralPath $resolved -Destination $backup
+            Write-Host "Preserved incompatible environment: $backup" -ForegroundColor Yellow
+        }
+        & $basePython -m venv $venv
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to create .venv.' }
+    }
+    $ready = $false
+    try {
+        & $Py (Join-Path $Root 'verify_phm_runtime.py') *> $null
+        $ready = ($LASTEXITCODE -eq 0)
+    } catch { }
+    if (-not $ready) {
+        & $Py -m ensurepip --upgrade
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to initialize pip.' }
+        $wheels = Join-Path $Root 'offline\python'
+        $hasWheels = @(Get-ChildItem -LiteralPath $wheels -Filter '*.whl' -File -ErrorAction SilentlyContinue).Count -gt 0
+        if ($hasWheels -or $Offline) {
+            if (-not $hasWheels) { throw 'Offline wheels are missing from offline\python.' }
+            & $Py -m pip install --no-index --find-links $wheels -r (Join-Path $Root 'requirements-migration.txt')
+            if ($LASTEXITCODE -ne 0) { throw 'Offline dependency installation failed.' }
+        } else {
+            Remove-Item Env:PIP_NO_INDEX -ErrorAction SilentlyContinue
+            Write-Host 'Installing GitHub runtime dependencies from the network...' -ForegroundColor Yellow
+            # Python 3.10.11 ships an older pip. Bootstrap a pinned wheel using
+            # Windows TLS trust, then let modern pip use the OS certificate store.
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $bootstrap = Join-Path $Root 'output\bootstrap'
+            New-Item -ItemType Directory -Path $bootstrap -Force | Out-Null
+            $pipWheel = Join-Path $bootstrap 'pip-26.0.1-py3-none-any.whl'
+            if (-not (Test-Path -LiteralPath $pipWheel)) {
+                Invoke-WebRequest -UseBasicParsing -Uri 'https://files.pythonhosted.org/packages/de/f0/c81e05b613866b76d2d1066490adf1a3dbc4ee9d9c839961c3fc8a6997af/pip-26.0.1-py3-none-any.whl' -OutFile $pipWheel
+            }
+            if ((Get-FileHash -LiteralPath $pipWheel -Algorithm SHA256).Hash -ne 'BDB1B08F4274833D62C1AA29E20907365A2CEB950410DF15FC9521BAD440122B') {
+                throw 'pip bootstrap checksum mismatch. Remove output\bootstrap and retry.'
+            }
+            & $Py -m pip install --no-index $pipWheel
+            if ($LASTEXITCODE -ne 0) { throw 'Failed to upgrade pip.' }
+            & $Py -m pip install -r (Join-Path $Root 'requirements.txt')
+            if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed. Check network access and rerun.' }
+            & $Py -m pip install 'torch==2.5.1' --index-url https://download.pytorch.org/whl/cpu
+            if ($LASTEXITCODE -ne 0) { throw 'CPU PyTorch installation failed. Check download.pytorch.org access and rerun.' }
+        }
+    }
+    & $Py (Join-Path $Root 'verify_phm_runtime.py')
+    if ($LASTEXITCODE -ne 0) { throw 'Python runtime verification failed.' }
+    & $Py manage.py migrate --noinput
+    if ($LASTEXITCODE -ne 0) { throw 'Database migration failed.' }
+    Write-Host 'Setup complete. Run create_superuser.bat, then start_phm_platform.bat.' -ForegroundColor Green
+    exit 0
+} catch {
+    Write-Host $_.Exception.Message -ForegroundColor Red
+    exit 1
+}

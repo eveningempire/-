@@ -1,44 +1,29 @@
-# PHM 平台客户交付版
+# PHM 平台启动说明
 
-## 快速启动
+## GitHub 下载版
 
-1. 将整个 `phm_platform_offline` 文件夹解压到本地磁盘任意位置。
-2. 双击根目录的 `start_phm_platform.bat`。
-3. 浏览器访问 `http://127.0.0.1:8000/`。
-4. 停止系统时双击 `stop_phm_platform.bat`。
+下载 **main 分支**并完整解压。安装 64 位 Python 3.10、3.11 或 3.12 后，双击 `start_phm_platform.bat`；首次运行会联网安装依赖并创建数据库。双击 `create_superuser.bat` 设置自己的管理员账号，访问 <http://127.0.0.1:8000/>。随后双击 `import_sample_data.bat` 导入真实仿真数据。
 
-交付包已经包含 Python 3.10.11、离线依赖、前端成品、SQLite 数据库、Hier14、health-main、健康评估适配器和 MATLAB 接口。正常启动不需要连接互联网，不需要另外安装 Python、Node.js、Redis 或 MySQL，也不需要执行 `npm install`。
+本版已包含 Hier14 的 `best_model.pth`、`scaler.pkl` 和部署元数据，15 个部件的完整寿命模型、健康评估模型、Simulink 源模型以及前端成品。无需安装 Node.js、Redis、MySQL；GitHub 版不包含 Python 本体、离线 wheel、个人数据库或账号。
 
-首次启动时，脚本会使用 `runtime\python310\python.exe` 在本地创建 `.venv`，再从 `offline\python` 安装依赖。请保持压缩包完整解压，不要单独复制启动脚本。
+默认自带正常及 13 类故障各一组真实仿真数据，共 28 个完整 CSV。需要完整 492 个 CSV 时执行 `python download_simulation_data.py`，或从 [Release](https://github.com/eveningempire/-/releases/tag/phm-github-20261104) 下载 `simulate_data_+1.zip` 放进 `integrations/simulation_assets/`。不要解压该数据包；重启平台后自动使用完整包，再运行 `import_sample_data.bat`。
 
-## 创建管理员
+可通过 `powershell -NoProfile -ExecutionPolicy Bypass -File .\start_phm_platform.ps1 -CheckOnly` 检查依赖、数据库和模型实际加载。若提示缺少模型，请重新下载 main 完整项目，不要只复制 Python 文件。
 
-首次需要管理员账号时，在包根目录打开 PowerShell，执行：
+## 完整离线交付包
 
-```powershell
-.\.venv\Scripts\python.exe manage.py createsuperuser
-```
+只有单独制作的离线交付包才携带 `runtime/python310` 或 Python 安装包、`offline/python` 和现场数据库；不要将 GitHub 的“Download ZIP”视为完整离线包。已有包内 Python 和依赖时仍支持离线安装，`setup_migration.ps1 -Offline` 会强制禁用联网安装。
 
-如果 `.venv` 尚未创建，先双击 `start_phm_platform.bat`，等待启动完成后再执行上面的命令。
+## MATLAB
 
-## 目录约定
+离线回放、故障诊断、健康评估、寿命预测不要求 MATLAB。实时 Simulink 仿真需要当前电脑安装 MATLAB/Simulink（随附源模型 R2023a）与匹配的 Engine，安装目录需在页面设置。MATLAB 2012 可通过 `integrations/matlab/` 的 Java HTTP 接口发送真实遥测，但不能据此保证运行 R2023a 源模型。
 
-- `runtime\python310`：包内 Python 3.10.11 运行时
-- `offline\python`：离线 Python wheel 依赖
-- `frontend\dist`：已经构建好的前端页面
-- `health-main`：Hier14 预测器、配置和模型权重
-- `platform_handoff_20260911_v1`：健康评估适配器和模型资产
-- `integrations\matlab`：MATLAB 2012 兼容的 HTTP 上报接口
-- `db.sqlite3`：SQLite 数据库
+## 后续使用
 
-文件夹名称和解压位置可以更改；启动脚本按自身所在目录定位资源，不依赖固定盘符。不要删除上述运行目录。`delete\legacy_archive`、`delete\rule_detetion`、`gengxin`、`new`、`qcy` 和 `json_backups` 等历史/临时目录已从交付包移除。
+- 启动：`start_phm_platform.bat`。
+- 停止：`stop_phm_platform.bat`。
+- 创建管理员：`create_superuser.bat`。
+- 导入样例/完整数据：`import_sample_data.bat`，重复执行会复用已有记录。
+- 验证真实模型推理：导入后执行 `.\.venv\Scripts\python.exe verify_github_inference.py`。
 
-## MATLAB 2012
-
-平台创建采集会话后，在“实时状态监测 → MATLAB 实时采集”复制代码。MATLAB 2012 先确认：
-
-```matlab
-usejava('jvm')
-```
-
-返回 `1` 后再发送数据。接口使用 MATLAB 自带 Java HTTP 客户端，不需要联网安装工具箱。
+项目可放在含中文或空格的路径中；迁移到另一台电脑时重新创建 `.venv`，不要复制旧电脑的虚拟环境。
